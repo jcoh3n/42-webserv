@@ -33,13 +33,17 @@ void Server::signalHandler(int signal) {
 }
 
 void Server::cleanupResources() {
-	// Les sockets sont fermés automatiquement par le destructeur de Socket
+	// Fermer tous les sockets clients
 	for (int i = 1; i < nfds; i++) {
 		if (fds[i].fd >= 0) {
 			::close(fds[i].fd);
 			fds[i].fd = -1;
 		}
 	}
+	// Réinitialiser le nombre de descripteurs
+	nfds = 1;
+	
+	std::cout << "✓ All client connections closed cleanly" << std::endl;
 }
 
 void Server::start() {
@@ -60,7 +64,7 @@ void Server::start() {
 		// Configuration des gestionnaires de signaux
 		setupSignalHandlers();
 		
-		std::cout << "Server started on port " << port << std::endl;
+		std::cout << "✅ Server started successfully on port " << port << std::endl;
 		
 		running = true;
 		
@@ -87,7 +91,7 @@ void Server::start() {
 			}
 		}
 	} catch (const std::exception& e) {
-		std::cerr << "Server error: " << e.what() << std::endl;
+		std::cerr << "❌ Server error: " << e.what() << std::endl;
 		cleanupResources();
 		throw;
 	}
@@ -108,8 +112,9 @@ bool Server::handleEvent(int index) {
 	if (fds[index].revents & (POLLERR | POLLHUP | POLLNVAL)) {
 		// Erreur ou connexion fermée
 		if (index > 0) { // Ne pas fermer le socket serveur
+			// Fermer le socket client
 			::close(fds[index].fd);
-			fds[index].fd = -1;
+			std::cout << "➖ Client socket closed due to error/hangup, fd: " << fds[index].fd << std::endl;
 			
 			// Compacter le tableau
 			for (int j = index; j < nfds - 1; j++) {
@@ -129,64 +134,117 @@ void Server::stop() {
 
 void Server::acceptNewConnection() {
 	try {
-		Socket client_socket = server_socket.accept();
+		// Accepter directement la connexion avec l'appel système accept()
+		struct sockaddr_in client_addr;
+		socklen_t client_len = sizeof(client_addr);
 		
-		// Ignorer les accept qui ont échoué en mode non-bloquant
-		if (client_socket.getFd() < 0) {
+		int client_fd = ::accept(server_socket.getFd(), (struct sockaddr*)&client_addr, &client_len);
+		
+		if (client_fd < 0) {
+			if (errno != EAGAIN && errno != EWOULDBLOCK) {
+				throw std::runtime_error("Accept failed: " + std::string(strerror(errno)));
+			}
 			return;
 		}
 		
 		// Configuration non-bloquante pour le client
-		client_socket.setNonBlocking(true);
+		int flags = fcntl(client_fd, F_GETFL, 0);
+		if (flags < 0) {
+			::close(client_fd);
+			throw std::runtime_error("Failed to get socket flags: " + std::string(strerror(errno)));
+		}
+		
+		flags |= O_NONBLOCK;
+		if (fcntl(client_fd, F_SETFL, flags) < 0) {
+			::close(client_fd);
+			throw std::runtime_error("Failed to set socket flags: " + std::string(strerror(errno)));
+		}
 		
 		// Vérifier si on a atteint le nombre maximum de clients
 		if (nfds >= MAX_CLIENTS) {
-			std::cerr << "Too many clients!" << std::endl;
+			std::cerr << "⚠️ Maximum client limit reached, rejecting connection" << std::endl;
+			::close(client_fd);
 			return;
 		}
 		
 		// Ajouter le client au tableau poll
-		fds[nfds].fd = client_socket.getFd();
+		fds[nfds].fd = client_fd;
 		fds[nfds].events = POLLIN;
 		fds[nfds].revents = 0;
 		nfds++;
 		
-		std::cout << "New client connected, fd: " << client_socket.getFd() << std::endl;
+		// Obtenir l'adresse IP du client pour les logs
+		char client_ip[INET_ADDRSTRLEN];
+		inet_ntop(AF_INET, &(client_addr.sin_addr), client_ip, INET_ADDRSTRLEN);
+		
+		std::cout << "➕ New client connected from " << client_ip << ", fd: " << client_fd 
+				  << ", total clients: " << (nfds-1) << std::endl;
 	} catch (const std::exception& e) {
-		std::cerr << "Error accepting connection: " << e.what() << std::endl;
+		std::cerr << "❌ Error accepting connection: " << e.what() << std::endl;
 	}
 }
 
 void Server::handleClientData(int client_index) {
 	char buffer[BUFFER_SIZE];
+	int client_fd = fds[client_index].fd;
 	
-	int nbytes = recv(fds[client_index].fd, buffer, sizeof(buffer) - 1, 0);
+	// Recevoir les données
+	int nbytes = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
 	
+	// Traiter le cas d'erreur ou de déconnexion
 	if (nbytes <= 0) {
 		if (nbytes < 0) {
-			std::cerr << "Error reading from client: " << strerror(errno) << std::endl;
+			std::cerr << "❌ Error reading from client: " << strerror(errno) << std::endl;
 		}
 		
-		// Fermer la connexion
-		::close(fds[client_index].fd);
-		fds[client_index].fd = -1;
+		// Fermer le socket client
+		::close(client_fd);
 		
-		// Compacter le tableau
+		// Compacter le tableau fds
 		for (int j = client_index; j < nfds - 1; j++) {
 			fds[j] = fds[j + 1];
 		}
 		nfds--;
 		
-		std::cout << "Client disconnected" << std::endl;
+		std::cout << "➖ Client disconnected, fd: " << client_fd 
+				 << ", remaining clients: " << (nfds-1) << std::endl;
 		return;
 	}
 	
 	// Null-terminer le buffer pour le traiter comme une chaîne
 	buffer[nbytes] = '\0';
 	
-	// Pour l'instant, juste écho des données reçues (sera remplacé par le parsing HTTP)
-	std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 13\r\n\r\nHello, World!";
-	send(fds[client_index].fd, response.c_str(), response.length(), 0);
+	// Envoyer une réponse HTTP
+	sendHttpResponse(client_fd);
 	
-	std::cout << "Received data from client: " << buffer << std::endl;
+	// Log des données reçues (en version abrégée pour plus de lisibilité)
+	std::string request_line = buffer;
+	size_t end_of_line = request_line.find("\r\n");
+	if (end_of_line != std::string::npos) {
+		request_line = request_line.substr(0, end_of_line);
+	}
+	std::cout << "📩 Received request: " << request_line << std::endl;
+}
+
+// Remplacer la fonction globale par une méthode de classe
+void Server::sendHttpResponse(int client_fd) {
+	
+	// Amélioration de la réponse HTTP avec un contenu HTML de base
+	std::string html_content = "<!DOCTYPE html>\n<html>\n<head>\n    <title>Webserv</title>\n</head>\n"
+							  "<body>\n    <h1>Hello from Webserv!</h1>\n    <p>Your server is working correctly.</p>\n"
+							  "</body>\n</html>";
+	
+	// Conversion de int à string en C++98
+	std::stringstream ss;
+	ss << html_content.length();
+	std::string content_length = ss.str();
+	
+	std::string response = "HTTP/1.1 200 OK\r\n"
+						  "Content-Type: text/html\r\n"
+						  "Content-Length: " + content_length + "\r\n"
+						  "Connection: close\r\n"
+						  "\r\n" + 
+						  html_content;
+	
+	send(client_fd, response.c_str(), response.length(), 0);
 }

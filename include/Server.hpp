@@ -9,32 +9,32 @@
 class Server
 {
   private:
-	Socket server_socket;
-	int port;
-	struct pollfd fds[MAX_CLIENTS];
-	int nfds;
-	bool running;
+	Socket server_socket;      // Socket principal du serveur
+	int port;                  // Port d'écoute
+	struct pollfd fds[MAX_CLIENTS]; // Tableau des descripteurs pour poll()
+	int nfds;                  // Nombre de descripteurs actifs
+	bool running;              // État d'exécution du serveur
 
 	// Méthodes privées
-	void setupSignalHandlers();
-	void cleanupResources();
-	bool handleEvent(int index);
+	void setupSignalHandlers();  // Configuration des gestionnaires de signal
+	void cleanupResources();     // Libération des ressources
+	bool handleEvent(int index); // Gestion des événements poll
+	void sendHttpResponse(int client_fd); // Envoi d'une réponse HTTP
 
   public:
 	Server(int port);
 	~Server();
 
-	void start();
-	void stop();
+	void start();  // Démarrage du serveur
+	void stop();   // Arrêt du serveur
 
 	// Méthodes pour gérer les connections
-	void acceptNewConnection();
-	void handleClientData(int client_index);
+	void acceptNewConnection();        // Accepter une nouvelle connexion client
+	void handleClientData(int client_index); // Traiter les données reçues d'un client
 
 	// Gestionnaire de signal statique
 	static void signalHandler(int signal);
-	static Server *instance;
-	// Pour accéder à l'instance depuis le gestionnaire de signal
+	static Server *instance;  // Instance unique pour le gestionnaire de signal
 };
 
 #endif

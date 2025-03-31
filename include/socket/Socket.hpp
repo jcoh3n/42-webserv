@@ -30,7 +30,7 @@ public:
     // Opérations de fermeture
     void close();
 
-    // Accesseurs
+    // Getters
     int getFd() const;
     bool isNonBlocking() const;
 };
