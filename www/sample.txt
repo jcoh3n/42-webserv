@@ -1,0 +1,9 @@
+Ceci est un fichier texte de test pour le serveur 42 Webserv.
+Il permet de tester la détection du type MIME text/plain.
+
+Test de différents caractères :
+- Accents : é è à ù
+- Symboles : @ # $ % &
+- Chiffres : 1234567890
+
+Fin du fichier de test. 

@@ -1,4 +1,17 @@
+# Build artifacts
+obj/
+webserv
 test_parser
 test_form
+test_response
+test_integration
+
+# IDE files
 .vscode/
+.idea/
+
+# OS files
+.DS_Store
+*.swp
+*~
 

@@ -1,0 +1,31 @@
+{
+    "name": "42 Webserv",
+    "version": "1.0.0",
+    "description": "Un serveur HTTP en C++98",
+    "features": {
+        "static_files": true,
+        "error_pages": true,
+        "directory_listing": true,
+        "caching": true,
+        "methods": ["GET"]
+    },
+    "tests": {
+        "GET": {
+            "status": "implemented",
+            "supported_types": [
+                "text/html",
+                "text/css",
+                "text/plain",
+                "application/json"
+            ]
+        },
+        "POST": {
+            "status": "pending",
+            "description": "En cours d'implémentation"
+        },
+        "DELETE": {
+            "status": "pending",
+            "description": "En cours d'implémentation"
+        }
+    }
+} 

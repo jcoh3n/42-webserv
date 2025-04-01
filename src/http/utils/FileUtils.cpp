@@ -7,6 +7,7 @@
 #include <vector>
 #include <ctime>
 #include <iomanip>
+#include <cstring>
 
 // Vérifier si un fichier existe
 bool FileUtils::fileExists(const std::string& path) {
@@ -44,17 +45,35 @@ std::string FileUtils::normalizePath(const std::string& base_path, const std::st
         return "";
     }
     
+    // Nettoyer le chemin de base
     std::string path = base_path;
     if (!path.empty() && path[path.size() - 1] == '/') {
         path.erase(path.size() - 1);
     }
     
+    // Nettoyer l'URI
     std::string uri = uri_path;
     if (uri.empty() || uri[0] != '/') {
         uri = '/' + uri;
     }
     
-    return path + uri;
+    // Vérifier si le chemin de base est absolu
+    if (path[0] != '/') {
+        char cwd[1024];
+        if (getcwd(cwd, sizeof(cwd)) != NULL) {
+            path = std::string(cwd) + "/" + path;
+        }
+    }
+    
+    // Construire le chemin final
+    std::string final_path = path + uri;
+    
+    // Vérifier que le chemin final est bien dans le répertoire de base
+    if (final_path.substr(0, path.length()) != path) {
+        return "";
+    }
+    
+    return final_path;
 }
 
 // Lister les fichiers d'un répertoire

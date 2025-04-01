@@ -1,40 +1,169 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webserv</title>
+    <title>42 Webserv</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             line-height: 1.6;
+            color: #333;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
         }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        .container {
-            border: 1px solid #ddd;
+        header {
+            background-color: #00babc;
+            color: white;
             padding: 20px;
             border-radius: 5px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            margin: 0;
+        }
+        .card {
             background-color: #f9f9f9;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .test-button {
+            background-color: #00babc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .test-button:hover {
+            background-color: #008f91;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+            white-space: pre-wrap;
+            font-family: monospace;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+        }
+        .success {
+            border-left: 4px solid #00875a;
+        }
+        .error {
+            border-left: 4px solid #de350b;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #777;
+        }
+        code {
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to Webserv!</h1>
-    <div class="container">
-        <p>This is a simple HTTP server implemented in C++ for the 42 school curriculum.</p>
-        <p>Features:</p>
+    <header>
+        <h1>42 Webserv</h1>
+        <p>Un serveur HTTP en C++98</p>
+    </header>
+
+    <div class="card">
+        <h2>Tests du Serveur</h2>
+        <div class="test-grid">
+            <button class="test-button" onclick="testFile('/test.html')">Fichier HTML</button>
+            <button class="test-button" onclick="testFile('/test.css')">Fichier CSS</button>
+            <button class="test-button" onclick="testFile('/sample.txt')">Fichier TXT</button>
+            <button class="test-button" onclick="testFile('/test.json')">Fichier JSON</button>
+            <button class="test-button" onclick="testFile('/nonexistent')">Erreur 404</button>
+            <button class="test-button" onclick="testFile('/403.html')">Erreur 403</button>
+            <button class="test-button" onclick="testFile('/500.html')">Erreur 500</button>
+        </div>
+        <div id="test-result" class="result"></div>
+    </div>
+
+    <div class="card">
+        <h2>Informations</h2>
+        <p>✅ <strong>Statut :</strong> Le serveur est opérationnel</p>
+        <p>📂 <strong>Racine :</strong> <code>./www</code></p>
+        <p>🌐 <strong>Port :</strong> <code>8080</code></p>
+        <p>📝 <strong>Méthodes supportées :</strong> <code>GET</code></p>
+    </div>
+
+    <div class="card">
+        <h2>Progression</h2>
         <ul>
-            <li>HTTP/1.1 compliant</li>
-            <li>Supports GET, POST, and DELETE methods</li>
-            <li>File uploads</li>
-            <li>CGI execution</li>
+            <li>✅ Serveur HTTP basique</li>
+            <li>✅ Fichiers statiques</li>
+            <li>✅ Gestion des erreurs</li>
+            <li>⏳ Configuration</li>
+            <li>⏳ POST/DELETE</li>
+            <li>⏳ CGI</li>
         </ul>
     </div>
+
+    <footer>
+        <p>42 Webserv © 2024</p>
+    </footer>
+
+    <script>
+        async function testFile(path) {
+            const resultDiv = document.getElementById('test-result');
+            try {
+                const startTime = performance.now();
+                const response = await fetch(path);
+                const endTime = performance.now();
+                const duration = (endTime - startTime).toFixed(2);
+                
+                const contentType = response.headers.get('Content-Type');
+                const status = response.status;
+                
+                let result = `📡 Test : ${path}\n`;
+                result += `⏱️ Temps : ${duration}ms\n`;
+                result += `📥 Status : ${status} ${response.statusText}\n`;
+                result += `📎 Type : ${contentType || 'non spécifié'}\n`;
+                
+                if (contentType && contentType.includes('text')) {
+                    const text = await response.text();
+                    result += `\n📄 Aperçu :\n${text.substring(0, 150)}...`;
+                }
+                
+                resultDiv.textContent = result;
+                resultDiv.className = 'result ' + (response.ok ? 'success' : 'error');
+                resultDiv.style.display = 'block';
+                
+                // Ouvrir les fichiers HTML dans un nouvel onglet
+                if (response.ok && contentType && contentType.includes('html')) {
+                    window.open(path, '_blank');
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ Erreur : ${error.message}`;
+                resultDiv.className = 'result error';
+                resultDiv.style.display = 'block';
+            }
+        }
+    </script>
 </body>
 </html> 

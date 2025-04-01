@@ -3,7 +3,7 @@
 // Initialisation de la variable statique
 Server* Server::instance = NULL;
 
-Server::Server(int port) : port(port), nfds(1), running(false) {
+Server::Server(int port) : port(port), nfds(1), running(false), route_handler("www") {
 	// Initialiser le tableau fds
 	memset(fds, 0, sizeof(fds));
 	
@@ -214,37 +214,34 @@ void Server::handleClientData(int client_index) {
 	// Null-terminer le buffer pour le traiter comme une chaîne
 	buffer[nbytes] = '\0';
 	
-	// Envoyer une réponse HTTP
-	sendHttpResponse(client_fd);
+	// Créer et parser la requête HTTP
+	HttpRequest request;
+	std::string raw_request(buffer, nbytes);
 	
-	// Log des données reçues (en version abrégée pour plus de lisibilité)
-	std::string request_line = buffer;
-	size_t end_of_line = request_line.find("\r\n");
-	if (end_of_line != std::string::npos) {
-		request_line = request_line.substr(0, end_of_line);
+	if (!request.parse(raw_request)) {
+		// Requête malformée
+		std::cerr << "❌ Malformed HTTP request" << std::endl;
+		HttpResponse error_response = createErrorResponse(400, "Bad Request");
+		ResponseHandler::sendResponse(client_fd, error_response, request);
+		return;
 	}
-	std::cout << "📩 Received request: " << request_line << std::endl;
+	
+	// Envoyer une réponse HTTP
+	sendHttpResponse(client_fd, request);
+	
+	// Log des données reçues (la première ligne de la requête)
+	std::cout << "📩 Received " << request.getMethod() << " request for: " << request.getUri() << std::endl;
 }
 
-// Remplacer la fonction globale par une méthode de classe
-void Server::sendHttpResponse(int client_fd) {
+// Mise à jour de la méthode d'envoi de réponse HTTP
+void Server::sendHttpResponse(int client_fd, const HttpRequest& request) {
+	// Utiliser le gestionnaire de routes pour traiter la requête
+	HttpResponse response = route_handler.processRequest(request);
 	
-	// Amélioration de la réponse HTTP avec un contenu HTML de base
-	std::string html_content = "<!DOCTYPE html>\n<html>\n<head>\n    <title>Webserv</title>\n</head>\n"
-							  "<body>\n    <h1>Hello from Webserv!</h1>\n    <p>Your server is working correctly.</p>\n"
-							  "</body>\n</html>";
+	// Envoyer la réponse au client
+	ssize_t bytes_sent = ResponseHandler::sendResponse(client_fd, response, request);
 	
-	// Conversion de int à string en C++98
-	std::stringstream ss;
-	ss << html_content.length();
-	std::string content_length = ss.str();
-	
-	std::string response = "HTTP/1.1 200 OK\r\n"
-						  "Content-Type: text/html\r\n"
-						  "Content-Length: " + content_length + "\r\n"
-						  "Connection: close\r\n"
-						  "\r\n" + 
-						  html_content;
-	
-	send(client_fd, response.c_str(), response.length(), 0);
+	// Log de la réponse envoyée
+	std::cout << "📤 Sent HTTP " << response.getStatusCode() << " response: " 
+			  << bytes_sent << " bytes" << std::endl;
 }
