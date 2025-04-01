@@ -7,7 +7,7 @@
 #include <string>
 
 /**
- * @brief Classe pour gérer les routes et traiter les requêtes HTTP
+ * @brief Classe pour traiter les requêtes HTTP et générer les réponses appropriées
  */
 class RouteHandler {
 public:

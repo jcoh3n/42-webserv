@@ -6,7 +6,7 @@
 #include <map>
 
 /**
- * @brief Classe représentant une requête HTTP
+ * @brief Classe représentant une requête HTTP | But: parser la requête HTTP et stocker les données dans les variables membres
  */
 class HttpRequest {
 public:
