@@ -46,9 +46,9 @@ HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
  */
 HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
     HttpResponse response;
-    std::string file_path = getFilePath(request.getUri());
+    std::string file_path = getFilePath(request.getUri()); 
     
-    // Vérifier d'abord si le fichier existe
+    // Vérifier d'abord si le fichier existe | Cas: 404
     if (!FileUtils::fileExists(file_path)) {
         std::string error_404_path = root_directory + "/404.html";
         if (FileUtils::fileExists(error_404_path)) {
@@ -60,7 +60,7 @@ HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
         return createErrorResponse(404, "Not Found");
     }
 
-    // Ensuite vérifier les permissions de lecture
+    // Ensuite vérifier les permissions de lecture | Cas: 403
     if (!FileUtils::hasReadPermission(file_path)) {
         std::string error_403_path = root_directory + "/403.html";
         if (FileUtils::fileExists(error_403_path)) {
@@ -72,7 +72,7 @@ HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
         return createErrorResponse(403, "Forbidden");
     }
 
-    // Traitement des répertoires
+    // Traitement des répertoires | Cas: 301 -> Rediriger vers le répertoire
     if (FileUtils::isDirectory(file_path)) {
         std::string uri = request.getUri();
         // Rediriger si l'URI ne se termine pas par '/'
@@ -94,7 +94,7 @@ HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
         return response;
     }
 
-    // Servir le fichier statique
+    // Servir le fichier statique | Cas: 500 -> Erreur interne du serveur
     if (!serveStaticFile(file_path, response)) {
         std::string error_500_path = root_directory + "/500.html";
         if (FileUtils::fileExists(error_500_path)) {
@@ -155,7 +155,7 @@ std::string RouteHandler::getFilePath(const std::string& uri) {
  */
 bool RouteHandler::serveStaticFile(const std::string& file_path, HttpResponse& response) {
     // Ouvrir le fichier
-    std::ifstream file(file_path.c_str(), std::ios::binary);
+    std::ifstream file(file_path.c_str(), std::ios::binary); 
     if (!file) {
         return false;
     }
@@ -165,7 +165,7 @@ bool RouteHandler::serveStaticFile(const std::string& file_path, HttpResponse& r
     buffer << file.rdbuf();
     std::string content = buffer.str();
 
-    // Définir le type MIME
+    // Définir le type MIME | MIME correspondant au type de fichier (image, texte, etc.)
     std::string mime_type = getMimeType(file_path);
 
     // Définir le corps de la réponse avec le bon type MIME

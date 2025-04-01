@@ -218,14 +218,15 @@ std::string getMimeType(const std::string& file_path) {
         mime_types[".php"] = "text/html"; // PHP sera traité par CGI
     }
 
+    // Trouver la position du '.' dans le chemin du fichier
     size_t dot_pos = file_path.find_last_of('.');
     if (dot_pos == std::string::npos) {
         return "application/octet-stream"; // Type par défaut
     }
 
-    std::string extension = file_path.substr(dot_pos);
-    std::map<std::string, std::string>::const_iterator it = mime_types.find(extension);
-    return it != mime_types.end() ? it->second : "application/octet-stream";
+    std::string extension = file_path.substr(dot_pos); // Extraire l'extension du fichier
+    std::map<std::string, std::string>::const_iterator it = mime_types.find(extension); // Parcourir map pour trouver le type MIM
+    return it != mime_types.end() ? it->second : "application/octet-stream"; // Retourner le type MIME correspondant
 }
 
 // Fonction utilitaire pour calculer l'ETag d'un fichier

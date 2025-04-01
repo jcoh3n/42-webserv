@@ -148,14 +148,15 @@ void Server::acceptNewConnection() {
 		}
 		
 		// Configuration non-bloquante pour le client
-		int flags = fcntl(client_fd, F_GETFL, 0);
+		int flags = fcntl(client_fd, F_GETFL, 0); // Récupérer les options existantes F_GETFL
 		if (flags < 0) {
 			::close(client_fd);
 			throw std::runtime_error("Failed to get socket flags: " + std::string(strerror(errno)));
 		}
 		
+		// Ajouter l'option non-bloquante
 		flags |= O_NONBLOCK;
-		if (fcntl(client_fd, F_SETFL, flags) < 0) {
+		if (fcntl(client_fd, F_SETFL, flags) < 0) { // Appliquer les nouvelles options F_SETFL
 			::close(client_fd);
 			throw std::runtime_error("Failed to set socket flags: " + std::string(strerror(errno)));
 		}
@@ -184,6 +185,7 @@ void Server::acceptNewConnection() {
 	}
 }
 
+
 void Server::handleClientData(int client_index) {
 	char buffer[BUFFER_SIZE];
 	int client_fd = fds[client_index].fd;
@@ -193,10 +195,11 @@ void Server::handleClientData(int client_index) {
 	
 	// Traiter le cas d'erreur ou de déconnexion
 	if (nbytes <= 0) {
+		// Cas: nbytes < 0: une erreur est survenue
 		if (nbytes < 0) {
 			std::cerr << "❌ Error reading from client: " << strerror(errno) << std::endl;
 		}
-		
+		// Cas: nbytes = 0: le client a fermé la connexion
 		// Fermer le socket client
 		::close(client_fd);
 		
@@ -211,12 +214,12 @@ void Server::handleClientData(int client_index) {
 		return;
 	}
 	
-	// Null-terminer le buffer pour le traiter comme une chaîne
+	// '\0' -> le buffer pour le traiter comme une chaîne
 	buffer[nbytes] = '\0';
 	
 	// Créer et parser la requête HTTP
 	HttpRequest request;
-	std::string raw_request(buffer, nbytes);
+	std::string raw_request(buffer, nbytes); // Convertir le buffer en chaîne de caractères
 	
 	if (!request.parse(raw_request)) {
 		// Requête malformée
