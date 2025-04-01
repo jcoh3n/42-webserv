@@ -48,47 +48,65 @@ HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
     HttpResponse response;
     std::string file_path = getFilePath(request.getUri());
     
-    // Vérifier si le fichier existe
+    // Vérifier d'abord si le fichier existe
     if (!FileUtils::fileExists(file_path)) {
+        std::string error_404_path = root_directory + "/404.html";
+        if (FileUtils::fileExists(error_404_path)) {
+            response.setStatus(404);
+            if (serveStaticFile(error_404_path, response)) {
+                return response;
+            }
+        }
         return createErrorResponse(404, "Not Found");
     }
 
-    // Vérifier si c'est un répertoire
-    if (FileUtils::isDirectory(file_path)) {
-        // Vérifier si un fichier index.html existe dans le répertoire
-        std::string index_path = file_path;
-        if (index_path[index_path.length() - 1] != '/') {
-            index_path += '/';
-        }
-        index_path += "index.html";
-
-        if (FileUtils::fileExists(index_path)) {
-            // Servir le fichier index.html
-            return serveStaticFile(index_path, response) ? 
-                response : createErrorResponse(500, "Internal Server Error");
-        } else {
-            // Générer une liste du répertoire
-            std::string uri = request.getUri();
-            if (uri[uri.length() - 1] != '/') {
-                // Rediriger pour ajouter un '/' à la fin de l'URI
-                response.setRedirect(uri + "/", 301);
+    // Ensuite vérifier les permissions de lecture
+    if (!FileUtils::hasReadPermission(file_path)) {
+        std::string error_403_path = root_directory + "/403.html";
+        if (FileUtils::fileExists(error_403_path)) {
+            response.setStatus(403);
+            if (serveStaticFile(error_403_path, response)) {
                 return response;
             }
-            
-            std::string listing = FileUtils::generateDirectoryListing(file_path, request.getUri());
-            response.setBody(listing, "text/html");
-            return response;
         }
-    }
-
-    // Vérifier les permissions de lecture
-    if (!FileUtils::hasReadPermission(file_path)) {
         return createErrorResponse(403, "Forbidden");
     }
 
-    // Servir le fichier
-    return serveStaticFile(file_path, response) ? 
-        response : createErrorResponse(500, "Internal Server Error");
+    // Traitement des répertoires
+    if (FileUtils::isDirectory(file_path)) {
+        std::string uri = request.getUri();
+        // Rediriger si l'URI ne se termine pas par '/'
+        if (uri[uri.length() - 1] != '/') {
+            response.setRedirect(uri + "/", 301);
+            return response;
+        }
+
+        // Chercher index.html
+        std::string index_path = file_path + "/index.html";
+        if (FileUtils::fileExists(index_path)) {
+            return serveStaticFile(index_path, response) ? 
+                response : createErrorResponse(500, "Internal Server Error");
+        }
+        
+        // Générer la liste du répertoire
+        std::string listing = FileUtils::generateDirectoryListing(file_path, uri);
+        response.setBody(listing, "text/html");
+        return response;
+    }
+
+    // Servir le fichier statique
+    if (!serveStaticFile(file_path, response)) {
+        std::string error_500_path = root_directory + "/500.html";
+        if (FileUtils::fileExists(error_500_path)) {
+            response.setStatus(500);
+            if (serveStaticFile(error_500_path, response)) {
+                return response;
+            }
+        }
+        return createErrorResponse(500, "Internal Server Error");
+    }
+
+    return response;
 }
 
 /**

@@ -13,6 +13,7 @@
             max-width: 800px;
             margin: 50px auto;
             padding: 20px;
+            background-color: #f9f9f9;
         }
         h1 {
             font-size: 120px;
@@ -24,23 +25,22 @@
             color: #555;
         }
         .error-container {
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            padding: 30px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 40px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
-        a {
+        .back-button {
             display: inline-block;
             margin-top: 20px;
             background-color: #00babc;
             color: white;
             text-decoration: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 4px;
             font-weight: bold;
-            transition: background-color 0.3s;
         }
-        a:hover {
+        .back-button:hover {
             background-color: #008f91;
         }
     </style>
@@ -50,7 +50,7 @@
         <h1>404</h1>
         <h2>Page Non Trouvée</h2>
         <p>La page que vous avez demandée n'existe pas ou a été déplacée.</p>
-        <a href="/">Retour à l'accueil</a>
+        <a href="/" class="back-button">Retour à l'accueil</a>
     </div>
 </body>
 </html> 

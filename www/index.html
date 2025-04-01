@@ -82,6 +82,14 @@
             border-radius: 3px;
             font-size: 0.9em;
         }
+        .preview-frame {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -93,15 +101,16 @@
     <div class="card">
         <h2>Tests du Serveur</h2>
         <div class="test-grid">
-            <button class="test-button" onclick="testFile('/test.html')">Fichier HTML</button>
-            <button class="test-button" onclick="testFile('/test.css')">Fichier CSS</button>
-            <button class="test-button" onclick="testFile('/sample.txt')">Fichier TXT</button>
-            <button class="test-button" onclick="testFile('/test.json')">Fichier JSON</button>
-            <button class="test-button" onclick="testFile('/nonexistent')">Erreur 404</button>
-            <button class="test-button" onclick="testFile('/403.html')">Erreur 403</button>
-            <button class="test-button" onclick="testFile('/500.html')">Erreur 500</button>
+            <a href="/test.html" target="_blank" class="test-button" onclick="return testFile('/test.html', event)">Fichier HTML</a>
+            <a href="/test.css" target="_blank" class="test-button" onclick="return testFile('/test.css', event)">Fichier CSS</a>
+            <a href="/sample.txt" target="_blank" class="test-button" onclick="return testFile('/sample.txt', event)">Fichier TXT</a>
+            <a href="/test.json" target="_blank" class="test-button" onclick="return testFile('/test.json', event)">Fichier JSON</a>
+            <a href="/404.html" target="_blank" class="test-button" onclick="return testFile('/this_file_does_not_exist', event)">Erreur 404</a>
+            <a href="/403.html" target="_blank" class="test-button" onclick="return testFile('/403.html', event)">Erreur 403</a>
+            <a href="/500.html" target="_blank" class="test-button" onclick="return testFile('/500.html', event)">Erreur 500</a>
         </div>
         <div id="test-result" class="result"></div>
+        <iframe id="preview-frame" class="preview-frame"></iframe>
     </div>
 
     <div class="card">
@@ -125,12 +134,14 @@
     </div>
 
     <footer>
-        <p>42 Webserv © 2024</p>
+        <p>42 Webserv © 2025</p>
     </footer>
 
     <script>
-        async function testFile(path) {
+        async function testFile(path, event) {
+            event.preventDefault();
             const resultDiv = document.getElementById('test-result');
+            
             try {
                 const startTime = performance.now();
                 const response = await fetch(path);
@@ -153,16 +164,24 @@
                 resultDiv.textContent = result;
                 resultDiv.className = 'result ' + (response.ok ? 'success' : 'error');
                 resultDiv.style.display = 'block';
+
+                // Pour les tests d'erreur, on veut voir la page d'erreur
+                if (path === '/this_file_does_not_exist') {
+                    window.location.href = path;
+                    return false;
+                }
                 
-                // Ouvrir les fichiers HTML dans un nouvel onglet
-                if (response.ok && contentType && contentType.includes('html')) {
+                // Pour les fichiers normaux, ouvrir dans un nouvel onglet si la réponse est OK
+                if (response.ok) {
                     window.open(path, '_blank');
                 }
+                
             } catch (error) {
                 resultDiv.textContent = `❌ Erreur : ${error.message}`;
                 resultDiv.className = 'result error';
                 resultDiv.style.display = 'block';
             }
+            return false;
         }
     </script>
 </body>
