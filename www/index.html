@@ -108,13 +108,13 @@
     <div class="card">
         <h2>Tests du Serveur</h2>
         <div class="test-grid">
-            <a href="/test.html" target="_blank" class="test-button" onclick="return testFile('/test.html', event)">Fichier HTML</a>
-            <a href="/test.css" target="_blank" class="test-button" onclick="return testFile('/test.css', event)">Fichier CSS</a>
-            <a href="/sample.txt" target="_blank" class="test-button" onclick="return testFile('/sample.txt', event)">Fichier TXT</a>
-            <a href="/test.json" target="_blank" class="test-button" onclick="return testFile('/test.json', event)">Fichier JSON</a>
-            <a href="/404.html" target="_blank" class="test-button" onclick="return testFile('/this_file_does_not_exist', event)">Erreur 404</a>
-            <a href="/403.html" target="_blank" class="test-button" onclick="return testFile('/403.html', event)">Erreur 403</a>
-            <a href="/500.html" target="_blank" class="test-button" onclick="return testFile('/500.html', event)">Erreur 500</a>
+            <a href="/test.html" class="test-button" onclick="return testFile('/test.html', event)">Fichier HTML</a>
+            <a href="/test.css" class="test-button" onclick="return testFile('/test.css', event)">Fichier CSS</a>
+            <a href="/sample.txt" class="test-button" onclick="return testFile('/sample.txt', event)">Fichier TXT</a>
+            <a href="/test.json" class="test-button" onclick="return testFile('/test.json', event)">Fichier JSON</a>
+            <a href="/404.html" class="test-button" onclick="return testFile('/this_file_does_not_exist', event)">Erreur 404</a>
+            <a href="/403.html" class="test-button" onclick="return testFile('/403.html', event)">Erreur 403</a>
+            <a href="/500.html" class="test-button" onclick="return testFile('/500.html', event)">Erreur 500</a>
             <a href="/cache-test.html" class="test-button special-test">Test Cache & ETags</a>
         </div>
         <div id="test-result" class="result"></div>
@@ -168,14 +168,9 @@
                     return false;
                 }
                 
-                // Pour les fichiers normaux, ouvrir dans un nouvel onglet si la réponse est OK
+                // Pour les fichiers normaux, rediriger vers la page plutôt que d'ouvrir un nouvel onglet
                 if (response.ok) {
-                    // Ne pas ouvrir dans un nouvel onglet pour le test de cache
-                    if (path !== '/cache-test.html') {
-                        window.open(path, '_blank');
-                    } else {
-                        window.location.href = path;
-                    }
+                    window.location.href = path;
                 }
                 
             } catch (error) {
