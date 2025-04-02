@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualiseur JSON - 42 Webserv</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #00babc;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-top: 1rem;
+            background: linear-gradient(135deg, #00babc 0%, #6200ea 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+        .json-container {
+            background-color: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 188, 188, 0.1);
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .decoration {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0, 186, 188, 0.1) 0%, rgba(98, 0, 234, 0.1) 100%);
+            z-index: 0;
+        }
+        .decoration-1 {
+            top: -75px;
+            right: -75px;
+        }
+        .decoration-2 {
+            bottom: -75px;
+            left: -75px;
+        }
+        .json-container > * {
+            position: relative;
+            z-index: 1;
+        }
+        #json-tree {
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            overflow: auto;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-top: 20px;
+            max-height: 500px;
+        }
+        .json-key {
+            color: #0366d6;
+            font-weight: bold;
+        }
+        .json-string {
+            color: #28a745;
+        }
+        .json-number, .json-boolean {
+            color: #d73a49;
+        }
+        .json-null {
+            color: #6f42c1;
+        }
+        .json-item {
+            padding-left: 20px;
+            position: relative;
+        }
+        .json-toggle {
+            cursor: pointer;
+            color: #666;
+            margin-right: 5px;
+        }
+        .json-toggle::before {
+            content: '▶';
+            font-size: 10px;
+            position: relative;
+            top: -1px;
+        }
+        .json-toggle.open::before {
+            content: '▼';
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #00babc;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        .back-link:hover {
+            transform: translateX(-5px);
+        }
+        .back-link::before {
+            content: "←";
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        .control-panel {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .action-button {
+            background: linear-gradient(135deg, #00babc 0%, #008f91 100%);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 186, 188, 0.15);
+            margin: 5px;
+        }
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 186, 188, 0.25);
+        }
+        .json-info {
+            display: flex;
+            justify-content: space-between;
+            background-color: #e3fcef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #00875a;
+            font-weight: 500;
+        }
+        .json-info-item {
+            display: flex;
+            align-items: center;
+        }
+        .json-info-icon {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-link">Retour à l'accueil</a>
+    
+    <h1>Visualiseur JSON</h1>
+    
+    <div class="json-container">
+        <div class="decoration decoration-1"></div>
+        <div class="decoration decoration-2"></div>
+
+        <div class="control-panel">
+            <div>
+                <button id="expand-all" class="action-button">Tout déplier</button>
+                <button id="collapse-all" class="action-button">Tout replier</button>
+            </div>
+            <div>
+                <button id="raw-json" class="action-button">Voir JSON brut</button>
+            </div>
+        </div>
+        
+        <div id="json-tree">Chargement...</div>
+        
+        <div class="json-info">
+            <div class="json-info-item">
+                <div class="json-info-icon">📊</div>
+                <span>Taille: <span id="json-size">-</span></span>
+            </div>
+            <div class="json-info-item">
+                <div class="json-info-icon">📝</div>
+                <span>Type: <span id="json-content-type">-</span></span>
+            </div>
+            <div class="json-info-item">
+                <div class="json-info-icon">🔄</div>
+                <span>ETag: <span id="json-etag">-</span></span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Fonctions utilitaires
+            function formatSize(bytes) {
+                const units = ['B', 'KB', 'MB', 'GB'];
+                let size = bytes;
+                let unitIndex = 0;
+                
+                while (size >= 1024 && unitIndex < units.length - 1) {
+                    size /= 1024;
+                    unitIndex++;
+                }
+                
+                return `${size.toFixed(unitIndex === 0 ? 0 : 2)} ${units[unitIndex]}`;
+            }
+            
+            // Chargement du JSON
+            try {
+                const response = await fetch('/test.json');
+                const contentType = response.headers.get('Content-Type');
+                const etag = response.headers.get('ETag');
+                const jsonData = await response.json();
+                
+                // Mise à jour des infos
+                document.getElementById('json-content-type').textContent = contentType || 'application/json';
+                document.getElementById('json-etag').textContent = etag || 'Non disponible';
+                document.getElementById('json-size').textContent = formatSize(JSON.stringify(jsonData).length);
+                
+                // Affichage du JSON
+                renderJsonTree(jsonData);
+                
+                // Gestion des boutons
+                document.getElementById('expand-all').addEventListener('click', () => {
+                    document.querySelectorAll('.json-toggle').forEach(el => {
+                        el.classList.add('open');
+                        el.nextElementSibling.style.display = 'block';
+                    });
+                });
+                
+                document.getElementById('collapse-all').addEventListener('click', () => {
+                    document.querySelectorAll('.json-toggle').forEach(el => {
+                        el.classList.remove('open');
+                        el.nextElementSibling.style.display = 'none';
+                    });
+                });
+                
+                document.getElementById('raw-json').addEventListener('click', () => {
+                    const win = window.open('', '_blank');
+                    win.document.write('<pre>' + JSON.stringify(jsonData, null, 2) + '</pre>');
+                    win.document.title = 'JSON brut - 42 Webserv';
+                });
+            } catch (error) {
+                document.getElementById('json-tree').innerHTML = `<div style="color: #de350b;">Erreur: ${error.message}</div>`;
+            }
+            
+            // Fonction pour rendre l'arbre JSON interactif
+            function renderJsonTree(data) {
+                const container = document.getElementById('json-tree');
+                container.innerHTML = '';
+                
+                function createJsonItem(key, value, isRoot = false) {
+                    const item = document.createElement('div');
+                    
+                    if (typeof value === 'object' && value !== null) {
+                        const isArray = Array.isArray(value);
+                        const itemsCount = isArray ? value.length : Object.keys(value).length;
+                        
+                        // Créer le conteneur
+                        if (!isRoot) {
+                            item.className = 'json-item';
+                            const toggle = document.createElement('span');
+                            toggle.className = 'json-toggle';
+                            toggle.addEventListener('click', () => {
+                                toggle.classList.toggle('open');
+                                content.style.display = toggle.classList.contains('open') ? 'block' : 'none';
+                            });
+                            
+                            item.appendChild(toggle);
+                            
+                            const keySpan = document.createElement('span');
+                            keySpan.className = 'json-key';
+                            keySpan.textContent = `${key}: `;
+                            item.appendChild(keySpan);
+                            
+                            item.appendChild(document.createTextNode(`${isArray ? '[' : '{'} ${itemsCount} items`));
+                        }
+                        
+                        // Contenu (enfants)
+                        const content = document.createElement('div');
+                        content.style.display = isRoot ? 'block' : 'none';
+                        content.className = 'json-content';
+                        
+                        if (isArray) {
+                            value.forEach((item, index) => {
+                                content.appendChild(createJsonItem(index, item));
+                            });
+                        } else {
+                            Object.keys(value).forEach(key => {
+                                content.appendChild(createJsonItem(key, value[key]));
+                            });
+                        }
+                        
+                        if (!isRoot) {
+                            item.appendChild(content);
+                            item.appendChild(document.createTextNode(isArray ? ']' : '}'));
+                        } else {
+                            item.appendChild(content);
+                        }
+                    } else {
+                        // Valeur simple
+                        item.className = 'json-item';
+                        
+                        if (key !== undefined) {
+                            const keySpan = document.createElement('span');
+                            keySpan.className = 'json-key';
+                            keySpan.textContent = `${key}: `;
+                            item.appendChild(keySpan);
+                        }
+                        
+                        const valueSpan = document.createElement('span');
+                        if (typeof value === 'string') {
+                            valueSpan.className = 'json-string';
+                            valueSpan.textContent = `"${value}"`;
+                        } else if (typeof value === 'number') {
+                            valueSpan.className = 'json-number';
+                            valueSpan.textContent = value;
+                        } else if (typeof value === 'boolean') {
+                            valueSpan.className = 'json-boolean';
+                            valueSpan.textContent = value;
+                        } else {
+                            valueSpan.className = 'json-null';
+                            valueSpan.textContent = 'null';
+                        }
+                        
+                        item.appendChild(valueSpan);
+                    }
+                    
+                    return item;
+                }
+                
+                container.appendChild(createJsonItem(undefined, data, true));
+            }
+        });
+    </script>
+</body>
+</html> 
