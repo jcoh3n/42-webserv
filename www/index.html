@@ -55,6 +55,13 @@
         .test-button:hover {
             background-color: #008f91;
         }
+        .special-test {
+            background-color: #6200ea;
+            grid-column: 1 / -1;
+        }
+        .special-test:hover {
+            background-color: #4a00b0;
+        }
         .result {
             margin-top: 10px;
             padding: 10px;
@@ -108,6 +115,7 @@
             <a href="/404.html" target="_blank" class="test-button" onclick="return testFile('/this_file_does_not_exist', event)">Erreur 404</a>
             <a href="/403.html" target="_blank" class="test-button" onclick="return testFile('/403.html', event)">Erreur 403</a>
             <a href="/500.html" target="_blank" class="test-button" onclick="return testFile('/500.html', event)">Erreur 500</a>
+            <a href="/cache-test.html" class="test-button special-test">Test Cache & ETags</a>
         </div>
         <div id="test-result" class="result"></div>
         <iframe id="preview-frame" class="preview-frame"></iframe>
@@ -119,6 +127,7 @@
         <p>📂 <strong>Racine :</strong> <code>./www</code></p>
         <p>🌐 <strong>Port :</strong> <code>8080</code></p>
         <p>📝 <strong>Méthodes supportées :</strong> <code>GET</code></p>
+        <p>🔄 <strong>Cache HTTP :</strong> Support des <code>ETags</code> et validation conditionnelle</p>
     </div>
 
     <footer>
@@ -161,7 +170,12 @@
                 
                 // Pour les fichiers normaux, ouvrir dans un nouvel onglet si la réponse est OK
                 if (response.ok) {
-                    window.open(path, '_blank');
+                    // Ne pas ouvrir dans un nouvel onglet pour le test de cache
+                    if (path !== '/cache-test.html') {
+                        window.open(path, '_blank');
+                    } else {
+                        window.location.href = path;
+                    }
                 }
                 
             } catch (error) {

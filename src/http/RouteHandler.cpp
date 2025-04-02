@@ -3,6 +3,9 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <sys/stat.h>
+#include <ctime>
+#include <algorithm>
 
 /**
  * @brief Constructeur
@@ -84,6 +87,10 @@ HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
         // Chercher index.html
         std::string index_path = file_path + "/index.html";
         if (FileUtils::fileExists(index_path)) {
+            // Vérifier la validation du cache pour index.html
+            if (checkNotModified(request, index_path, response)) {
+                return response;
+            }
             return serveStaticFile(index_path, response) ? 
                 response : createErrorResponse(500, "Internal Server Error");
         }
@@ -91,6 +98,11 @@ HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
         // Générer la liste du répertoire
         std::string listing = FileUtils::generateDirectoryListing(file_path, uri);
         response.setBody(listing, "text/html");
+        return response;
+    }
+
+    // Vérifier la validation du cache avant de servir le fichier
+    if (checkNotModified(request, file_path, response)) {
         return response;
     }
 
@@ -165,15 +177,27 @@ bool RouteHandler::serveStaticFile(const std::string& file_path, HttpResponse& r
     buffer << file.rdbuf();
     std::string content = buffer.str();
 
-    // Définir le type MIME | MIME correspondant au type de fichier (image, texte, etc.)
+    // Définir le type MIME
     std::string mime_type = getMimeType(file_path);
 
-    // Définir le corps de la réponse avec le bon type MIME
+    // Définir le body de la réponse avec le bon type MIME
     response.setBody(content, mime_type);
 
-    // Ajouter des headers pour le cache
+    // Ajouter l'ETag pour la validation du cache
     response.setHeader("ETag", calculateETag(file_path));
-    response.setHeader("Cache-Control", "max-age=3600"); // Cache d'une heure
+    
+    // Configuration simple du Cache-Control
+    // Les fichiers statiques sont mis en cache pendant 1 heure par défaut
+    response.setHeader("Cache-Control", "public, max-age=3600");
+    
+    // Ajouter la date de dernière modification
+    struct stat file_stat;
+    if (stat(file_path.c_str(), &file_stat) == 0) {
+        char last_modified[100];
+        struct tm* tm_info = gmtime(&file_stat.st_mtime);
+        strftime(last_modified, sizeof(last_modified), "%a, %d %b %Y %H:%M:%S GMT", tm_info);
+        response.setHeader("Last-Modified", last_modified);
+    }
 
     return true;
 } 

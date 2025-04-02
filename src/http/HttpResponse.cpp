@@ -325,7 +325,8 @@ std::string calculateETag(const std::string& file_path) {
         return "";
     }
     
-    // Calculer un ETag basé sur la taille du fichier et la date de dernière modification
+    // Calculer un ETag simple basé sur la taille et la date de modification
+    // Ce format est suffisant pour la plupart des cas d'utilisation
     std::stringstream etag;
     etag << "\"" << file_info.st_size << "-" << file_info.st_mtime << "\"";
     return etag.str();
@@ -360,5 +361,15 @@ bool checkNotModified(const HttpRequest& request, const std::string& file_path, 
     
     // Sinon, ajouter l'ETag à la réponse et continuer normalement
     response.setHeader("ETag", etag);
+    
+    // Ajouter aussi Last-Modified pour compatibilité
+    struct stat file_stat;
+    if (stat(file_path.c_str(), &file_stat) == 0) {
+        char last_modified[100];
+        struct tm* tm_info = gmtime(&file_stat.st_mtime);
+        strftime(last_modified, sizeof(last_modified), "%a, %d %b %Y %H:%M:%S GMT", tm_info);
+        response.setHeader("Last-Modified", last_modified);
+    }
+    
     return false;
 } 

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test du Cache et ETags</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .test-button {
+            background-color: #00babc;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin: 5px;
+            font-size: 16px;
+        }
+        .test-button:hover {
+            background-color: #008f91;
+        }
+        h1, h2, h3 {
+            color: #00babc;
+        }
+        .status-indicator {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .status-pending {
+            background-color: #f0f0f0;
+            color: #666;
+        }
+        .status-success {
+            background-color: #e3fcef;
+            color: #00875a;
+            border: 2px solid #00875a;
+        }
+        .status-error {
+            background-color: #ffebe6;
+            color: #de350b;
+            border: 2px solid #de350b;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #00babc;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .steps {
+            display: flex;
+            margin: 30px 0;
+            position: relative;
+        }
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            padding-top: 40px;
+        }
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background-color: #ddd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 0;
+            left: calc(50% - 18px);
+            font-weight: bold;
+            color: white;
+        }
+        .step-active .step-number {
+            background-color: #00babc;
+        }
+        .step-completed .step-number {
+            background-color: #00875a;
+        }
+        .step-line {
+            position: absolute;
+            top: 18px;
+            height: 2px;
+            background-color: #ddd;
+            left: 0;
+            right: 0;
+            z-index: -1;
+        }
+        .request-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            background-color: #fff;
+        }
+        .request-card h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+        .metrics {
+            display: flex;
+            margin: 20px 0;
+            justify-content: space-around;
+        }
+        .metric {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            flex: 1;
+            margin: 0 10px;
+            background-color: #f5f5f5;
+        }
+        .metric .value {
+            font-size: 24px;
+            font-weight: bold;
+            display: block;
+            margin: 5px 0;
+        }
+        .comparison {
+            text-align: center;
+            margin: 30px 0;
+            padding: 15px;
+            background-color: #e3fcef;
+            border-radius: 8px;
+            border: 1px solid #00875a;
+        }
+        .comparison .savings {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00875a;
+            margin: 10px 0;
+        }
+        .code {
+            font-family: monospace;
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        .headers {
+            font-family: monospace;
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            max-height: 150px;
+            overflow-y: auto;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .header-name {
+            color: #007acc;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-link">← Retour à l'accueil</a>
+    
+    <h1>Test du Cache HTTP et des ETags</h1>
+    
+    <div class="status-indicator status-pending" id="status">
+        Exécutez le test pour vérifier si les ETags fonctionnent...
+    </div>
+    
+    <div class="card">
+        <div class="steps">
+            <div class="step-line"></div>
+            <div class="step" id="step1">
+                <div class="step-number">1</div>
+                <p>Première requête<br><small>Téléchargement complet</small></p>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-number">2</div>
+                <p>Requête avec ETag<br><small>Validation du cache</small></p>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <button id="runTest" class="test-button">Exécuter la 1ère requête</button>
+            <button id="runTest2" class="test-button" style="display: none; background-color: #6200ea;">Exécuter la 2ème requête</button>
+            <button id="clearTest" class="test-button" style="background-color: #666;">Réinitialiser</button>
+        </div>
+        
+        <div id="results-container" style="display: none;">
+            <div id="request1" class="request-card">
+                <h3>Première requête</h3>
+                <div id="request1-details"></div>
+                <div class="headers" id="request1-headers"></div>
+            </div>
+            
+            <div id="request2" class="request-card">
+                <h3>Deuxième requête (avec If-None-Match)</h3>
+                <div id="request2-details"></div>
+                <div class="headers" id="request2-headers"></div>
+            </div>
+            
+            <div id="comparison" class="comparison" style="display: none;">
+                <h3>Comparaison des deux requêtes</h3>
+                <div id="comparison-text"></div>
+                <div class="savings" id="savings"></div>
+                <p>Les ETags permettent d'économiser considérablement de bande passante pour les fichiers volumineux!</p>
+            </div>
+            
+            <div class="metrics">
+                <div class="metric">
+                    <span>1ère requête</span>
+                    <span class="value" id="size1">-</span>
+                    <span>octets reçus</span>
+                </div>
+                <div class="metric">
+                    <span>2ème requête</span>
+                    <span class="value" id="size2">-</span>
+                    <span>octets reçus</span>
+                </div>
+                <div class="metric">
+                    <span>Temps 1ère</span>
+                    <span class="value" id="time1">-</span>
+                    <span>ms</span>
+                </div>
+                <div class="metric">
+                    <span>Temps 2ème</span>
+                    <span class="value" id="time2">-</span>
+                    <span>ms</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>Pourquoi les ETags sont importants?</h2>
+        <p>Les ETags permettent d'optimiser le chargement des pages en évitant de retransmettre des données que le navigateur possède déjà:</p>
+        
+        <h3>Sans ETags</h3>
+        <p>Chaque fois que vous visitez une page, le serveur envoie la totalité du contenu, même si celui-ci n'a pas changé.</p>
+        
+        <h3>Avec ETags</h3>
+        <p>Le navigateur envoie un identifiant unique (ETag) au serveur qui peut répondre:</p>
+        <ul>
+            <li><strong>304 Not Modified:</strong> "Utilise ta version en cache, elle est toujours valide."</li>
+            <li><strong>200 OK + nouveau contenu:</strong> "Voici une nouvelle version, car le contenu a changé."</li>
+        </ul>
+        
+        <h3>Bénéfices concrets</h3>
+        <p>Imaginez un site avec des images, CSS et JS totalisant 5 Mo. Avec les ETags:</p>
+        <ul>
+            <li>Premier chargement: 5 Mo transférés</li>
+            <li>Visites suivantes: quelques octets seulement si rien n'a changé!</li>
+        </ul>
+        
+        <p>Cela améliore considérablement la vitesse de chargement et réduit la consommation de données pour les utilisateurs.</p>
+    </div>
+
+    <script>
+        const statusIndicator = document.getElementById('status');
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const resultsContainer = document.getElementById('results-container');
+        const runTestButton = document.getElementById('runTest');
+        const runTest2Button = document.getElementById('runTest2');
+        
+        // Métriques
+        const size1Element = document.getElementById('size1');
+        const size2Element = document.getElementById('size2');
+        const time1Element = document.getElementById('time1');
+        const time2Element = document.getElementById('time2');
+        
+        // Détails des requêtes
+        const request1Details = document.getElementById('request1-details');
+        const request2Details = document.getElementById('request2-details');
+        const request1Headers = document.getElementById('request1-headers');
+        const request2Headers = document.getElementById('request2-headers');
+        
+        // Comparaison
+        const comparisonDiv = document.getElementById('comparison');
+        const comparisonText = document.getElementById('comparison-text');
+        const savingsElement = document.getElementById('savings');
+        
+        let savedEtag = '';
+        let fileSize = 0;
+        
+        function resetTest() {
+            statusIndicator.className = 'status-indicator status-pending';
+            statusIndicator.textContent = 'Exécutez le test pour vérifier si les ETags fonctionnent...';
+            step1.className = 'step';
+            step2.className = 'step';
+            resultsContainer.style.display = 'none';
+            comparisonDiv.style.display = 'none';
+            runTestButton.style.display = 'inline-block';
+            runTest2Button.style.display = 'none';
+        }
+        
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+        
+        function displayHeaders(headerMap, element) {
+            let html = '';
+            for (const [key, value] of headerMap.entries()) {
+                html += `<div><span class="header-name">${key}:</span> ${value}</div>`;
+            }
+            element.innerHTML = html;
+        }
+        
+        document.getElementById('clearTest').addEventListener('click', resetTest);
+        
+        document.getElementById('runTest').addEventListener('click', async () => {
+            statusIndicator.textContent = 'Première requête en cours...';
+            step1.className = 'step step-active';
+            resultsContainer.style.display = 'block';
+            
+            try {
+                // Mesurer le temps de la première requête
+                const startTime1 = performance.now();
+                
+                // Utiliser un fichier plus grand pour mieux montrer l'avantage
+                const response1 = await fetch('test.json');
+                const content1 = await response1.text();
+                fileSize = content1.length;
+                
+                const endTime1 = performance.now();
+                const duration1 = (endTime1 - startTime1).toFixed(2);
+                
+                // Afficher les métriques de la première requête
+                time1Element.textContent = duration1;
+                size1Element.textContent = formatBytes(content1.length);
+                
+                // Récupérer et afficher l'ETag
+                savedEtag = response1.headers.get('ETag') || '';
+                
+                // Afficher les détails de la première requête
+                request1Details.innerHTML = `
+                    <p>Code de statut: <strong>${response1.status} ${response1.statusText}</strong></p>
+                    <p>Taille téléchargée: <strong>${formatBytes(content1.length)}</strong></p>
+                    <p>Temps: <strong>${duration1} ms</strong></p>
+                    <p>ETag reçu: <span class="code">${savedEtag}</span></p>
+                `;
+                
+                // Afficher les headers
+                displayHeaders(response1.headers, request1Headers);
+                
+                step1.className = 'step step-completed';
+                
+                if (savedEtag) {
+                    // Activation du bouton pour la seconde requête
+                    statusIndicator.className = 'status-indicator status-success';
+                    statusIndicator.textContent = '✅ ETag reçu! Cliquez sur "Exécuter la 2ème requête" pour vérifier le cache';
+                    runTestButton.style.display = 'none';
+                    runTest2Button.style.display = 'inline-block';
+                } else {
+                    // Pas d'ETag reçu
+                    statusIndicator.className = 'status-indicator status-error';
+                    statusIndicator.textContent = '❌ Aucun ETag reçu du serveur';
+                    
+                    request1Details.innerHTML += `
+                        <p style="color: #de350b; font-weight: bold;">
+                            Le serveur n'a pas envoyé d'ETag dans sa réponse.
+                            Vérifiez que la fonction calculateETag est correctement implémentée.
+                        </p>
+                    `;
+                }
+            } catch (error) {
+                // Erreur lors du test
+                statusIndicator.className = 'status-indicator status-error';
+                statusIndicator.textContent = '❌ Erreur lors du test';
+                
+                request1Details.innerHTML = `
+                    <p style="color: #de350b; font-weight: bold;">
+                        Une erreur s'est produite: ${error.message}
+                        Vérifiez que le serveur fonctionne correctement.
+                    </p>
+                `;
+            }
+        });
+        
+        document.getElementById('runTest2').addEventListener('click', async () => {
+            statusIndicator.textContent = 'Deuxième requête en cours (avec If-None-Match)...';
+            step2.className = 'step step-active';
+            
+            try {
+                // Mesurer le temps de la deuxième requête
+                const startTime2 = performance.now();
+                
+                // Deuxième requête avec If-None-Match
+                const headers = new Headers();
+                headers.append('If-None-Match', savedEtag);
+                const response2 = await fetch('test.json', { headers });
+                
+                // Tenter de récupérer le contenu (sera vide pour 304)
+                let content2 = '';
+                try {
+                    content2 = await response2.text();
+                } catch (e) {
+                    // Erreur attendue pour 304 (pas de corps)
+                }
+                
+                const endTime2 = performance.now();
+                const duration2 = (endTime2 - startTime2).toFixed(2);
+                
+                // Afficher les métriques de la deuxième requête
+                time2Element.textContent = duration2;
+                size2Element.textContent = formatBytes(content2.length);
+                
+                // Afficher les détails de la deuxième requête
+                request2Details.innerHTML = `
+                    <p>Code de statut: <strong>${response2.status} ${response2.statusText}</strong></p>
+                    <p>Taille téléchargée: <strong>${formatBytes(content2.length)}</strong></p>
+                    <p>Temps: <strong>${duration2} ms</strong></p>
+                    <p>En-tête envoyé: <span class="code">If-None-Match: ${savedEtag}</span></p>
+                `;
+                
+                // Afficher les headers
+                displayHeaders(response2.headers, request2Headers);
+                
+                // Vérifier si le serveur a répondu avec 304
+                if (response2.status === 304) {
+                    // Test réussi
+                    statusIndicator.className = 'status-indicator status-success';
+                    statusIndicator.textContent = '✅ Cache validé! Le serveur a répondu 304 Not Modified';
+                    
+                    // Afficher la comparaison
+                    comparisonDiv.style.display = 'block';
+                    
+                    // Calculer l'économie en pourcentage
+                    const savedBytes = fileSize - content2.length;
+                    const savingPercentage = ((savedBytes / fileSize) * 100).toFixed(1);
+                    
+                    comparisonText.innerHTML = `
+                        <p>La première requête a téléchargé <strong>${formatBytes(fileSize)}</strong> de données.</p>
+                        <p>La deuxième requête avec validation ETag a téléchargé seulement <strong>${formatBytes(content2.length)}</strong>.</p>
+                    `;
+                    
+                    savingsElement.textContent = `Économie: ${savingPercentage}% (${formatBytes(savedBytes)})`;
+                    
+                    step2.className = 'step step-completed';
+                } else {
+                    // Test échoué
+                    statusIndicator.className = 'status-indicator status-error';
+                    statusIndicator.textContent = '❌ Les ETags ne fonctionnent pas correctement';
+                    
+                    request2Details.innerHTML += `
+                        <p style="color: #de350b; font-weight: bold;">
+                            Le serveur aurait dû répondre avec 304 (Not Modified)!
+                        </p>
+                    `;
+                }
+            } catch (error) {
+                // Erreur lors du test
+                statusIndicator.className = 'status-indicator status-error';
+                statusIndicator.textContent = '❌ Erreur lors de la deuxième requête';
+                
+                request2Details.innerHTML = `
+                    <p style="color: #de350b; font-weight: bold;">
+                        Une erreur s'est produite: ${error.message}
+                    </p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html> 

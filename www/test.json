@@ -7,7 +7,14 @@
         "error_pages": true,
         "directory_listing": true,
         "caching": true,
-        "methods": ["GET"]
+        "etags": true,
+        "methods": ["GET", "POST", "DELETE"]
+    },
+    "performance": {
+        "requests_per_second": 1500,
+        "memory_usage": "low",
+        "cpu_usage": "efficient",
+        "scalability": "high"
     },
     "tests": {
         "GET": {
@@ -16,16 +23,69 @@
                 "text/html",
                 "text/css",
                 "text/plain",
-                "application/json"
+                "application/json",
+                "image/jpeg",
+                "image/png",
+                "image/gif",
+                "image/svg+xml",
+                "application/javascript",
+                "application/pdf",
+                "audio/mpeg",
+                "video/mp4"
             ]
         },
         "POST": {
             "status": "pending",
-            "description": "En cours d'implémentation"
+            "description": "En cours d'implémentation",
+            "features": [
+                "form-data",
+                "multipart/form-data",
+                "file uploads"
+            ]
         },
         "DELETE": {
             "status": "pending",
             "description": "En cours d'implémentation"
         }
-    }
+    },
+    "large_data": [
+        {"id": 1, "data": "Lore ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nunc nisl aliquam nisl, eget aliquam nisl nisl eget nisl."},
+        {"id": 2, "data": "Fusce euismod, nisl eget ultricies tincidunt, nunc nisl aliquam nisl, eget aliquam nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nunc nisl aliquam nisl, eget aliquam nisl nisl eget nisl."},
+        {"id": 3, "data": "Nullam auctor, nisl eget ultricies tincidunt, nunc nisl aliquam nisl, eget aliquam nisl nisl eget nisl. Fusce euismod, nisl eget ultricies tincidunt, nunc nisl aliquam nisl, eget aliquam nisl nisl eget nisl."},
+        {"id": 4, "data": "Curabitur in nulla ut magna vestibulum euismod. Sed nec malesuada justo. Nunc ac metus vel nulla consectetur dignissim non non nibh. Duis nisi leo, hendrerit vitae elementum eu, placerat quis ex. Donec suscipit venenatis justo, id viverra orci dictum nec."},
+        {"id": 5, "data": "Etiam auctor auctor magna, non malesuada odio malesuada eu. Vestibulum sit amet turpis eget nibh elementum pellentesque. Praesent ac malesuada nunc. Nulla velit mi, tincidunt in lacinia sit amet, varius vel magna."},
+        {"id": 6, "data": "Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Suspendisse potenti. Sed pulvinar magna ac ligula vulputate, in lobortis tellus tincidunt. Maecenas sed lorem consequat, viverra nulla eu, viverra ipsum."},
+        {"id": 7, "data": "Morbi id sem eu elit ullamcorper suscipit. Nulla facilisi. Nullam et elit sem. Sed gravida vestibulum ligula, non elementum sem molestie ac. Mauris et lacus id nisl tincidunt malesuada. Suspendisse sit amet nulla nec tellus mattis ultrices."},
+        {"id": 8, "data": "Integer lacinia ipsum non metus mattis, in tincidunt quam tincidunt. Vestibulum porttitor mi ac nisi posuere semper. Aenean posuere justo a augue feugiat, at aliquet risus molestie. Nullam sapien orci, placerat a volutpat non, fermentum id purus."},
+        {"id": 9, "data": "Donec scelerisque mauris quis sapien lacinia faucibus. Suspendisse euismod neque vitae imperdiet dapibus. Aliquam erat volutpat. Integer at velit vitae metus ullamcorper semper. Nullam cursus magna quis pretium molestie."},
+        {"id": 10, "data": "Vestibulum dignissim sapien ut odio fermentum, a tincidunt risus feugiat. Nullam varius nulla a sapien ultrices, eu lobortis tortor pellentesque. Pellentesque mattis ipsum ut enim accumsan, eu rhoncus ex vestibulum."}
+    ],
+    "configuration": {
+        "port": 8080,
+        "host": "localhost",
+        "max_clients": 1000,
+        "timeout": 60,
+        "max_body_size": 1024000,
+        "root_directory": "./www",
+        "error_pages": {
+            "404": "/404.html",
+            "403": "/403.html",
+            "500": "/500.html"
+        },
+        "directory_listing": true,
+        "default_file": "index.html",
+        "client_max_body_size": "10M"
+    },
+    "extra_large_data": [
+        {"id": 101, "value": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sit amet magna vel odio consequat tincidunt. Proin facilisis, turpis eget aliquam tincidunt, dui sem fringilla purus, nec porta lectus nibh ut sem. Donec vel ipsum eget metus commodo tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Donec euismod, nisl eget ultricies tincidunt, nunc nisl aliquam nisl, eget aliquam nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nunc nisl aliquam nisl, eget aliquam nisl nisl eget nisl."},
+        {"id": 102, "value": "Fusce euismod, nisl eget ultricies tincidunt, nunc nisl aliquam nisl, eget aliquam nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nunc nisl aliquam nisl, eget aliquam nisl nisl eget nisl. Donec vel ipsum eget metus commodo tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nullam sit amet magna vel odio consequat tincidunt. Proin facilisis, turpis eget aliquam tincidunt, dui sem fringilla purus, nec porta lectus nibh ut sem."},
+        {"id": 103, "value": "Aenean auctor mauris nec odio placerat, a sollicitudin nisl volutpat. Nullam non dui ultricies, sollicitudin sapien a, tristique arcu. Phasellus et diam nec ipsum consectetur pharetra. Morbi vulputate sapien sit amet tortor finibus, eget imperdiet ipsum gravida. Nulla lobortis erat in nisi sodales, vel tempus nibh elementum. Duis sit amet augue ultrices, volutpat orci vel, mattis lectus. Nulla et diam libero. Morbi consequat enim ut auctor interdum. Morbi interdum purus in nunc ultricies porttitor."},
+        {"id": 104, "value": "Nulla facilisi. Nullam eget enim vel felis tempor mollis. Phasellus vitae luctus nisi. Vivamus sed vulputate magna. Suspendisse potenti. Integer nec aliquam mauris. Nullam ac tellus a enim tristique ultrices. Sed ac bibendum nulla. Maecenas molestie, lectus a laoreet vestibulum, magna felis sodales eros, a iaculis felis odio eu ex. Quisque varius, purus ac iaculis tincidunt, mi tellus aliquam nibh, in porttitor urna sapien vel enim. In hac habitasse platea dictumst."},
+        {"id": 105, "value": "Etiam nec lobortis nulla. Aliquam erat volutpat. Quisque lobortis, augue sit amet egestas feugiat, nisl velit consectetur enim, vel blandit dui ex sit amet lacus. Aliquam eros diam, tempus eu convallis eget, imperdiet eget tortor. Integer consequat ante eget nisl efficitur, at tincidunt augue dignissim. In pulvinar tincidunt eleifend. Duis efficitur consequat diam. Nullam faucibus metus at sapien elementum sollicitudin. Sed lacinia nisl a nibh viverra, at luctus sapien pellentesque."},
+        {"id": 106, "value": "Etiam nec lobortis nulla. Aliquam erat volutpat. Quisque lobortis, augue sit amet egestas feugiat, nisl velit consectetur enim, vel blandit dui ex sit amet lacus. Aliquam eros diam, tempus eu convallis eget, imperdiet eget tortor. Integer consequat ante eget nisl efficitur, at tincidunt augue dignissim. In pulvinar tincidunt eleifend. Duis efficitur consequat diam. Nullam faucibus metus at sapien elementum sollicitudin. Sed lacinia nisl a nibh viverra, at luctus sapien pellentesque."},
+        {"id": 107, "value": "Etiam nec lobortis nulla. Aliquam erat volutpat. Quisque lobortis, augue sit amet egestas feugiat, nisl velit consectetur enim, vel blandit dui ex sit amet lacus. Aliquam eros diam, tempus eu convallis eget, imperdiet eget tortor. Integer consequat ante eget nisl efficitur, at tincidunt augue dignissim. In pulvinar tincidunt eleifend. Duis efficitur consequat diam. Nullam faucibus metus at sapien elementum sollicitudin. Sed lacinia nisl a nibh viverra, at luctus sapien pellentesque."},
+        {"id": 108, "value": "Etiam nec lobortis nulla. Aliquam erat volutpat. Quisque lobortis, augue sit amet egestas feugiat, nisl velit consectetur enim, vel blandit dui ex sit amet lacus. Aliquam eros diam, tempus eu convallis eget, imperdiet eget tortor. Integer consequat ante eget nisl efficitur, at tincidunt augue dignissim. In pulvinar tincidunt eleifend. Duis efficitur consequat diam. Nullam faucibus metus at sapien elementum sollicitudin. Sed lacinia nisl a nibh viverra, at luctus sapien pellentesque."},
+        {"id": 109, "value": "Etiam nec lobortis nulla. Aliquam erat volutpat. Quisque lobortis, augue sit amet egestas feugiat, nisl velit consectetur enim, vel blandit dui ex sit amet lacus. Aliquam eros diam, tempus eu convallis eget, imperdiet eget tortor. Integer consequat ante eget nisl efficitur, at tincidunt augue dignissim. In pulvinar tincidunt eleifend. Duis efficitur consequat diam. Nullam faucibus metus at sapien elementum sollicitudin. Sed lacinia nisl a nibh viverra, at luctus sapien pellentesque."},
+        {"id": 110, "value": "Etiam nec lobortis nulla. Aliquam erat volutpat. Quisque lobortis, augue sit amet egestas feugiat, nisl velit consectetur enim, vel blandit dui ex sit amet lacus. Aliquam eros diam, tempus eu convallis eget, imperdiet eget tortor. Integer consequat ante eget nisl efficitur, at tincidunt augue dignissim. In pulvinar tincidunt eleifend. Duis efficitur consequat diam. Nullam faucibus metus at sapien elementum sollicitudin. Sed lacinia nisl a nibh viverra, at luctus sapien pellentesque."}
+    ]
 } 
