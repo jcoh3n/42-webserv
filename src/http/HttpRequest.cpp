@@ -4,10 +4,21 @@
 #include <sstream>
 #include <algorithm>
 
+/**
+ * @brief Constructeur par défaut
+ */
 HttpRequest::HttpRequest() {}
 
+/**
+ * @brief Destructeur
+ */
 HttpRequest::~HttpRequest() {}
 
+/**
+ * @brief Réinitialise toutes les propriétés de la requête
+ * 
+ * Vide toutes les variables membres pour permettre la réutilisation de l'objet.
+ */
 void HttpRequest::clear() {
     method.clear();
     uri.clear();
@@ -18,6 +29,17 @@ void HttpRequest::clear() {
     form_data.clear();
 }
 
+/**
+ * @brief Parse une requête HTTP à partir d'une chaîne brute
+ * @param raw_request La chaîne contenant la requête HTTP complète
+ * @return true si le parsing a réussi, false sinon
+ * 
+ * Procède en plusieurs étapes :
+ * 1. Parse la ligne de requête (méthode, URI, version)
+ * 2. Parse les en-têtes
+ * 3. Extrait le body
+ * 4. Parse les paramètres d'URL et le body selon le Content-Type
+ */
 bool HttpRequest::parse(const std::string& raw_request) {
     clear();
 
@@ -54,6 +76,14 @@ bool HttpRequest::parse(const std::string& raw_request) {
     return validateRequest();
 }
 
+/**
+ * @brief Parse la première ligne de la requête HTTP
+ * @param line La ligne contenant la méthode, l'URI et la version
+ * @return true si le parsing a réussi, false sinon
+ * 
+ * Extrait la méthode HTTP, l'URI et la version du protocole.
+ * Convertit également la méthode en majuscules.
+ */
 bool HttpRequest::parseRequestLine(const std::string& line) {
     std::istringstream iss(line);
     if (!(iss >> method >> uri >> version))
@@ -64,6 +94,14 @@ bool HttpRequest::parseRequestLine(const std::string& line) {
     return true;
 }
 
+/**
+ * @brief Parse les en-têtes HTTP
+ * @param headers_section La section de la requête contenant les en-têtes
+ * @return true si le parsing a réussi, false sinon
+ * 
+ * Extrait toutes les paires clé-valeur des en-têtes HTTP
+ * et les stocke dans la map des headers.
+ */
 bool HttpRequest::parseHeaders(const std::string& headers_section) {
     std::istringstream iss(headers_section);
     std::string line;
@@ -97,6 +135,12 @@ bool HttpRequest::parseHeaders(const std::string& headers_section) {
     return true;
 }
 
+/**
+ * @brief Extrait et parse les paramètres d'URL
+ * 
+ * Sépare l'URI de la query string (tout ce qui suit '?')
+ * et stocke la query string séparément.
+ */
 void HttpRequest::parseQueryString() {
     size_t query_pos = uri.find('?');
     if (query_pos != std::string::npos) {
@@ -105,6 +149,12 @@ void HttpRequest::parseQueryString() {
     }
 }
 
+/**
+ * @brief Parse le body de la requête selon son Content-Type
+ * 
+ * Traite le body différemment selon qu'il s'agit d'un formulaire
+ * application/x-www-form-urlencoded ou multipart/form-data.
+ */
 void HttpRequest::parseFormBody() {
     std::map<std::string, std::string>::const_iterator it = headers.find("content-type");
     if (it == headers.end())
@@ -125,6 +175,13 @@ void HttpRequest::parseFormBody() {
     }
 }
 
+/**
+ * @brief Valide la requête HTTP
+ * @return true si la requête est valide, false sinon
+ * 
+ * Vérifie que la méthode, l'URI et la version HTTP sont valides.
+ * Vérifie également que la taille du contenu est acceptable.
+ */
 bool HttpRequest::validateRequest() const {
     // Vérifier la méthode HTTP
     if (!HttpUtils::isMethodSupported(method))

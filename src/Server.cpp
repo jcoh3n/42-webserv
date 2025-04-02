@@ -3,6 +3,13 @@
 // Initialisation de la variable statique
 Server* Server::instance = NULL;
 
+/**
+ * @brief Constructeur de la classe Server
+ * @param port Le port sur lequel le serveur va écouter
+ * 
+ * Initialise le serveur avec un port spécifique, prépare les descripteurs
+ * de fichier pour poll() et initialise l'instance statique pour le gestionnaire de signal.
+ */
 Server::Server(int port) : port(port), nfds(1), running(false), route_handler("www") {
 	// Initialiser le tableau fds
 	memset(fds, 0, sizeof(fds));
@@ -11,10 +18,21 @@ Server::Server(int port) : port(port), nfds(1), running(false), route_handler("w
 	instance = this;
 }
 
+/**
+ * @brief Destructeur de la classe Server
+ * 
+ * Nettoie les ressources avant de détruire l'objet.
+ */
 Server::~Server() {
 	cleanupResources();
 }
 
+/**
+ * @brief Configure les gestionnaires de signaux
+ * 
+ * Met en place les handlers pour SIGINT et SIGTERM pour permettre
+ * un arrêt propre du serveur lorsqu'il reçoit un de ces signaux.
+ */
 void Server::setupSignalHandlers() {
 	struct sigaction sa;
 	sa.sa_handler = signalHandler;
@@ -25,6 +43,13 @@ void Server::setupSignalHandlers() {
 	sigaction(SIGTERM, &sa, NULL); // Signal de terminaison
 }
 
+/**
+ * @brief Gestionnaire statique des signaux
+ * @param signal Le numéro du signal reçu
+ * 
+ * Appelé lorsqu'un signal est reçu par le processus,
+ * cette fonction arrête proprement le serveur.
+ */
 void Server::signalHandler(int signal) {
 	std::cout << "Received signal " << signal << ", shutting down gracefully..." << std::endl;
 	if (instance) {
@@ -32,6 +57,12 @@ void Server::signalHandler(int signal) {
 	}
 }
 
+/**
+ * @brief Nettoie les ressources utilisées par le serveur
+ * 
+ * Ferme tous les descripteurs de fichiers des clients
+ * et réinitialise le compteur de descripteurs.
+ */
 void Server::cleanupResources() {
 	// Fermer tous les sockets clients
 	for (int i = 1; i < nfds; i++) {
@@ -46,6 +77,13 @@ void Server::cleanupResources() {
 	std::cout << "✓ All client connections closed cleanly" << std::endl;
 }
 
+/**
+ * @brief Démarre le serveur
+ * 
+ * Initialise le socket serveur, configure poll(), et entre dans
+ * la boucle principale d'événements. Cette méthode est bloquante
+ * jusqu'à ce que le serveur soit arrêté.
+ */
 void Server::start() {
 	try {
 		// Création et configuration du socket serveur
@@ -97,6 +135,15 @@ void Server::start() {
 	}
 }
 
+/**
+ * @brief Gère un événement détecté par poll()
+ * @param index L'index du descripteur de fichier dans le tableau fds
+ * @return true si le descripteur est toujours valide, false s'il a été supprimé
+ * 
+ * Traite les événements de lecture (POLLIN) et d'erreur sur les sockets.
+ * Pour le socket serveur (index 0), accepte de nouvelles connexions.
+ * Pour les sockets clients, lit et traite les données reçues.
+ */
 bool Server::handleEvent(int index) {
 	// Traiter les différents événements possibles
 	if (fds[index].revents & POLLIN) {
@@ -128,10 +175,22 @@ bool Server::handleEvent(int index) {
 	return true;
 }
 
+/**
+ * @brief Arrête le serveur
+ * 
+ * Marque le serveur comme non-exécutable, ce qui entraînera
+ * la sortie de la boucle principale dans start().
+ */
 void Server::stop() {
 	running = false;
 }
 
+/**
+ * @brief Accepte une nouvelle connexion client
+ * 
+ * Utilise l'appel système accept() pour établir une nouvelle connexion.
+ * Configure le socket client en mode non-bloquant et l'ajoute au tableau poll.
+ */
 void Server::acceptNewConnection() {
 	try {
 		// Accepter directement la connexion avec l'appel système accept()
@@ -185,7 +244,13 @@ void Server::acceptNewConnection() {
 	}
 }
 
-
+/**
+ * @brief Traite les données reçues d'un client
+ * @param client_index L'index du descripteur de fichier client dans le tableau fds
+ * 
+ * Lit les données du socket client, parse la requête HTTP,
+ * et envoie une réponse appropriée.
+ */
 void Server::handleClientData(int client_index) {
 	char buffer[BUFFER_SIZE];
 	int client_fd = fds[client_index].fd;
@@ -236,7 +301,14 @@ void Server::handleClientData(int client_index) {
 	std::cout << "📩 Received " << request.getMethod() << " request for: " << request.getUri() << std::endl;
 }
 
-// Mise à jour de la méthode d'envoi de réponse HTTP
+/**
+ * @brief Envoie une réponse HTTP au client
+ * @param client_fd Le descripteur de fichier du client
+ * @param request La requête HTTP reçue
+ * 
+ * Utilise le gestionnaire de routes pour traiter la requête,
+ * puis envoie la réponse générée au client.
+ */
 void Server::sendHttpResponse(int client_fd, const HttpRequest& request) {
 	// Utiliser le gestionnaire de routes pour traiter la requête
 	HttpResponse response = route_handler.processRequest(request);

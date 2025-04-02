@@ -9,7 +9,12 @@
 #include <algorithm>
 #include <cctype>
 
-// Template pour convertir n'importe quel type numérique en string
+/**
+ * @brief Convertit une valeur numérique en chaîne de caractères
+ * @tparam T Type de la valeur numérique
+ * @param value La valeur à convertir
+ * @return La chaîne de caractères correspondante
+ */
 template<typename T>
 static std::string numberToString(T value) {
     std::ostringstream oss;
@@ -17,17 +22,31 @@ static std::string numberToString(T value) {
     return oss.str();
 }
 
-// Constructeur
+/**
+ * @brief Constructeur par défaut
+ * 
+ * Initialise une réponse HTTP avec un code 200 (OK)
+ * et définit les en-têtes de base.
+ */
 HttpResponse::HttpResponse() : status_code(200), status_message("OK") {
     setHeader("Server", "webserv/1.0");
     setHeader("Connection", "keep-alive");
 }
 
-// Destructeur
+/**
+ * @brief Destructeur
+ */
 HttpResponse::~HttpResponse() {
 }
 
-// Définir le code de statut et le message
+/**
+ * @brief Définit le code de statut et le message de la réponse
+ * @param code Le code de statut HTTP (ex: 200, 404, 500)
+ * @param message Le message de statut (optionnel)
+ * 
+ * Si le message est vide, un message par défaut correspondant
+ * au code de statut sera utilisé.
+ */
 void HttpResponse::setStatus(int code, const std::string& message) {
     status_code = code;
     if (!message.empty()) {
@@ -71,19 +90,35 @@ void HttpResponse::setStatus(int code, const std::string& message) {
     }
 }
 
-// Définir un header
+/**
+ * @brief Définit un en-tête HTTP
+ * @param key Le nom de l'en-tête
+ * @param value La valeur de l'en-tête
+ */
 void HttpResponse::setHeader(const std::string& key, const std::string& value) {
     headers[key] = value;
 }
 
-// Définir le body et mettre à jour les headers associés
+/**
+ * @brief Définit le body de la réponse et met à jour les en-têtes associés
+ * @param content Le contenu du body
+ * @param content_type Le type MIME du contenu
+ * 
+ * Met à jour les en-têtes Content-Type et Content-Length.
+ */
 void HttpResponse::setBody(const std::string& content, const std::string& content_type) {
     body = content;
     setHeader("Content-Type", content_type);
     setHeader("Content-Length", numberToString(body.size()));
 }
 
-// Configurer une réponse 304 Not Modified
+/**
+ * @brief Configure une réponse 304 Not Modified
+ * @param etag La valeur de l'ETag pour la validation du cache
+ * 
+ * Utilisé pour indiquer au client que la ressource n'a pas été modifiée
+ * depuis la dernière requête.
+ */
 void HttpResponse::setNotModified(const std::string& etag) {
     setStatus(304);
     body.clear();
@@ -91,7 +126,14 @@ void HttpResponse::setNotModified(const std::string& etag) {
     setHeader("Content-Length", "0");
 }
 
-// Configurer une redirection
+/**
+ * @brief Configure une réponse de redirection
+ * @param location L'URL de destination
+ * @param code Le code de statut à utiliser (301, 302, 303, etc.)
+ * 
+ * Configure une redirection HTTP avec un body HTML expliquant
+ * la redirection pour les clients qui ne suivent pas automatiquement.
+ */
 void HttpResponse::setRedirect(const std::string& location, int code) {
     setStatus(code);
     body.clear();
@@ -105,13 +147,26 @@ void HttpResponse::setRedirect(const std::string& location, int code) {
     setBody(redirect_body);
 }
 
-// Configurer le mode transfert chunked
+/**
+ * @brief Active le transfert en mode chunked
+ * 
+ * Supprime l'en-tête Content-Length et définit Transfer-Encoding: chunked.
+ * Utilisé pour les réponses de taille inconnue ou dynamique.
+ */
 void HttpResponse::setChunkedTransfer() {
     headers.erase("Content-Length");
     setHeader("Transfer-Encoding", "chunked");
 }
 
-// Activer CORS (Cross-Origin Resource Sharing)
+/**
+ * @brief Active le Cross-Origin Resource Sharing (CORS)
+ * @param origin L'origine autorisée
+ * @param methods Les méthodes HTTP autorisées
+ * @param headers_allowed Les en-têtes HTTP autorisés
+ * 
+ * Configure les en-têtes CORS pour autoriser les requêtes
+ * cross-origin selon les paramètres spécifiés.
+ */
 void HttpResponse::enableCORS(const std::string& origin, 
                 const std::string& methods, 
                 const std::string& headers_allowed) {
@@ -122,7 +177,13 @@ void HttpResponse::enableCORS(const std::string& origin,
     }
 }
 
-// Construire la réponse complète
+/**
+ * @brief Construit la réponse HTTP complète
+ * @return La chaîne de caractères représentant la réponse HTTP
+ * 
+ * Génère la réponse HTTP complète, incluant la ligne de statut,
+ * les en-têtes et le body.
+ */
 std::string HttpResponse::build() const {
     std::stringstream response;
     
@@ -146,7 +207,13 @@ std::string HttpResponse::build() const {
     return response.str();
 }
 
-// Construire une réponse pour méthode HEAD (sans body)
+/**
+ * @brief Construit une réponse pour la méthode HEAD (sans body)
+ * @return La chaîne de caractères représentant la réponse HTTP sans le body
+ * 
+ * Similaire à build() mais n'inclut pas le body de la réponse.
+ * Utilisé pour répondre aux requêtes HEAD.
+ */
 std::string HttpResponse::buildHeadResponse() const {
     std::stringstream response;
     
@@ -165,7 +232,15 @@ std::string HttpResponse::buildHeadResponse() const {
     return response.str();
 }
 
-// Fonction utilitaire pour créer une réponse d'erreur
+/**
+ * @brief Crée une réponse d'erreur HTTP
+ * @param error_code Le code d'erreur HTTP (ex: 404, 500)
+ * @param message Le message d'erreur (optionnel)
+ * @return Une réponse HTTP formatée pour l'erreur
+ * 
+ * Génère une réponse d'erreur HTTP avec un corps HTML simple
+ * décrivant l'erreur.
+ */
 HttpResponse createErrorResponse(int error_code, const std::string& message) {
     HttpResponse response;
     response.setStatus(error_code);
@@ -180,7 +255,14 @@ HttpResponse createErrorResponse(int error_code, const std::string& message) {
     return response;
 }
 
-// Fonction utilitaire pour déterminer le type MIME d'un fichier
+/**
+ * @brief Détermine le type MIME d'un fichier
+ * @param file_path Le chemin du fichier
+ * @return Le type MIME correspondant
+ * 
+ * Analyse l'extension du fichier pour déterminer son type MIME.
+ * Retourne "application/octet-stream" si le type est inconnu.
+ */
 std::string getMimeType(const std::string& file_path) {
     static std::map<std::string, std::string> mime_types;
     
@@ -229,7 +311,14 @@ std::string getMimeType(const std::string& file_path) {
     return it != mime_types.end() ? it->second : "application/octet-stream"; // Retourner le type MIME correspondant
 }
 
-// Fonction utilitaire pour calculer l'ETag d'un fichier
+/**
+ * @brief Calcule l'ETag d'un fichier
+ * @param file_path Le chemin du fichier
+ * @return La valeur de l'ETag
+ * 
+ * Génère un identifiant unique pour le fichier basé sur sa taille
+ * et sa date de dernière modification, utilisé pour la validation du cache.
+ */
 std::string calculateETag(const std::string& file_path) {
     struct stat file_info;
     if (stat(file_path.c_str(), &file_info) != 0) {
@@ -242,7 +331,16 @@ std::string calculateETag(const std::string& file_path) {
     return etag.str();
 }
 
-// Fonction utilitaire pour vérifier si une réponse 304 Not Modified peut être envoyée
+/**
+ * @brief Vérifie si une réponse 304 Not Modified peut être envoyée
+ * @param request La requête HTTP
+ * @param file_path Le chemin du fichier
+ * @param response La réponse HTTP à modifier
+ * @return true si une réponse 304 doit être envoyée, false sinon
+ * 
+ * Compare l'ETag du fichier avec celui dans la requête.
+ * Si correspondance, configure la réponse comme 304 Not Modified.
+ */
 bool checkNotModified(const HttpRequest& request, const std::string& file_path, HttpResponse& response) {
     // Calculer l'ETag du fichier
     std::string etag = calculateETag(file_path);
@@ -250,15 +348,17 @@ bool checkNotModified(const HttpRequest& request, const std::string& file_path, 
         return false;
     }
     
-    // Vérifier si le client a envoyé un If-None-Match
+    // Vérifier les en-têtes de la requête
     const std::map<std::string, std::string>& headers = request.getHeaders();
     std::map<std::string, std::string>::const_iterator it = headers.find("if-none-match");
+    
+    // Si l'ETag correspond, répondre avec 304 Not Modified
     if (it != headers.end() && it->second == etag) {
         response.setNotModified(etag);
         return true;
     }
     
-    // Ajouter l'ETag à la réponse pour les futures requêtes
+    // Sinon, ajouter l'ETag à la réponse et continuer normalement
     response.setHeader("ETag", etag);
     return false;
 } 

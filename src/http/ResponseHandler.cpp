@@ -6,7 +6,12 @@
 #include <iostream>
 #include <sstream>
 
-// Template pour convertir n'importe quel type numérique en string
+/**
+ * @brief Convertit une valeur numérique en chaîne de caractères
+ * @tparam T Type de la valeur numérique
+ * @param value La valeur à convertir
+ * @return La chaîne de caractères correspondante
+ */
 template<typename T>
 static std::string numberToString(T value) {
     std::ostringstream oss;
@@ -17,15 +22,29 @@ static std::string numberToString(T value) {
 // Initialisation de la variable statique
 std::map<int, std::string> ResponseHandler::pending_responses;
 
-// Constructeur
+/**
+ * @brief Constructeur par défaut
+ */
 ResponseHandler::ResponseHandler() {
 }
 
-// Destructeur
+/**
+ * @brief Destructeur
+ */
 ResponseHandler::~ResponseHandler() {
 }
 
-// Envoyer une réponse HTTP complète
+/**
+ * @brief Envoie une réponse HTTP complète au client
+ * @param client_fd Le descripteur de fichier du client
+ * @param response La réponse HTTP à envoyer
+ * @param request La requête HTTP originale
+ * @return Le nombre d'octets envoyés, ou -1 en cas d'erreur
+ * 
+ * Cette fonction envoie la réponse HTTP au client en tenant compte
+ * du type de requête (HEAD ne renvoie que les en-têtes) et gère
+ * les cas où le socket n'est pas prêt pour l'envoi complet.
+ */
 ssize_t ResponseHandler::sendResponse(int client_fd, const HttpResponse& response, const HttpRequest& request) {
     std::string raw_response;
     
@@ -58,7 +77,16 @@ ssize_t ResponseHandler::sendResponse(int client_fd, const HttpResponse& respons
     return total_sent;
 }
 
-// Envoyer un gros fichier en mode chunked
+/**
+ * @brief Envoie un fichier de grande taille au client en mode chunked
+ * @param client_fd Le descripteur de fichier du client
+ * @param file_path Le chemin du fichier à envoyer
+ * @param request La requête HTTP originale
+ * 
+ * Cette fonction optimise l'envoi de fichiers volumineux en utilisant
+ * le transfert chunked pour les fichiers > 1Mo. Pour les requêtes HEAD,
+ * seuls les en-têtes sont envoyés.
+ */
 void ResponseHandler::sendLargeFile(int client_fd, const std::string& file_path, const HttpRequest& request) {
     // Ouvrir le fichier
     std::ifstream file(file_path.c_str(), std::ios::binary);
@@ -131,17 +159,35 @@ void ResponseHandler::sendLargeFile(int client_fd, const std::string& file_path,
     }
 }
 
-// Stocker une réponse partielle pour l'envoyer plus tard
+/**
+ * @brief Stocke une réponse partielle pour l'envoyer plus tard
+ * @param client_fd Le descripteur de fichier du client
+ * @param remaining_data Les données restantes à envoyer
+ * 
+ * Utilisé lorsqu'un socket n'est pas prêt à recevoir toutes les données.
+ * Les données restantes sont stockées pour être envoyées ultérieurement.
+ */
 void ResponseHandler::storePendingResponse(int client_fd, const std::string& remaining_data) {
     pending_responses[client_fd] = remaining_data;
 }
 
-// Vérifier si un client a une réponse en attente
+/**
+ * @brief Vérifie si un client a une réponse en attente
+ * @param client_fd Le descripteur de fichier du client
+ * @return true si le client a des données en attente, false sinon
+ */
 bool ResponseHandler::hasPendingResponse(int client_fd) {
     return pending_responses.find(client_fd) != pending_responses.end();
 }
 
-// Continuer l'envoi d'une réponse partielle
+/**
+ * @brief Continue l'envoi d'une réponse partielle
+ * @param client_fd Le descripteur de fichier du client
+ * @return true si l'envoi est terminé ou en cas d'erreur, false si l'envoi est toujours en cours
+ * 
+ * Tente de terminer l'envoi d'une réponse partiellement envoyée.
+ * Retourne true quand tout a été envoyé ou en cas d'erreur fatale.
+ */
 bool ResponseHandler::continueSendingPendingResponse(int client_fd) {
     if (!hasPendingResponse(client_fd)) {
         return true;
@@ -170,7 +216,13 @@ bool ResponseHandler::continueSendingPendingResponse(int client_fd) {
     }
 }
 
-// Supprimer une réponse en attente
+/**
+ * @brief Supprime une réponse en attente
+ * @param client_fd Le descripteur de fichier du client
+ * 
+ * Nettoie les données en attente pour un client spécifique,
+ * typiquement après un envoi réussi ou une erreur fatale.
+ */
 void ResponseHandler::clearPendingResponse(int client_fd) {
     pending_responses.erase(client_fd);
 } 
