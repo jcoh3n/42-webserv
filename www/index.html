@@ -7,23 +7,21 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            line-height: 1.6;
+            line-height: 1.5;
             color: #333;
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 15px;
             background-color: #f9f9f9;
         }
         header {
             background: linear-gradient(135deg, #00babc 0%, #6200ea 100%);
             color: white;
-            padding: 30px;
-            border-radius: 16px;
+            padding: 20px;
+            border-radius: 12px;
             text-align: center;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 25px rgba(0, 188, 188, 0.1);
-            position: relative;
-            overflow: hidden;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 188, 188, 0.1);
         }
         h1 {
             margin: 0;
@@ -34,9 +32,10 @@
             color: #00babc;
             font-weight: 600;
             margin-top: 0;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             position: relative;
             display: inline-block;
+            margin-bottom: 15px;
         }
         h2::after {
             content: '';
@@ -44,51 +43,41 @@
             bottom: -8px;
             left: 0;
             width: 60px;
-            height: 4px;
+            height: 3px;
             background: linear-gradient(135deg, #00babc 0%, #6200ea 100%);
             border-radius: 2px;
         }
+        h3 {
+            color: #444;
+            font-weight: 600;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
         .card {
             background-color: white;
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 25px rgba(0, 188, 188, 0.08);
-            position: relative;
-            overflow: hidden;
-        }
-        .decoration {
-            position: absolute;
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(0, 186, 188, 0.1) 0%, rgba(98, 0, 234, 0.1) 100%);
-            z-index: 0;
-        }
-        .decoration-1 {
-            top: -75px;
-            right: -75px;
-        }
-        .decoration-2 {
-            bottom: -75px;
-            left: -75px;
-        }
-        .card > * {
-            position: relative;
-            z-index: 1;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 188, 188, 0.08);
         }
         .test-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .test-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
         }
         .test-button {
             background: linear-gradient(135deg, #00babc 0%, #008f91 100%);
             color: white;
             border: none;
-            padding: 14px 15px;
-            border-radius: 12px;
+            padding: 10px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s ease;
@@ -97,144 +86,184 @@
             display: inline-block;
             width: 100%;
             box-sizing: border-box;
-            box-shadow: 0 4px 12px rgba(0, 186, 188, 0.15);
+            box-shadow: 0 3px 8px rgba(0, 186, 188, 0.15);
         }
         .test-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 186, 188, 0.25);
+            box-shadow: 0 5px 12px rgba(0, 186, 188, 0.25);
+        }
+        .full-width {
+            grid-column: 1 / -1;
         }
         .special-test {
             background: linear-gradient(135deg, #6200ea 0%, #4a00b0 100%);
-            grid-column: 1 / -1;
-            box-shadow: 0 4px 12px rgba(98, 0, 234, 0.15);
+            box-shadow: 0 3px 8px rgba(98, 0, 234, 0.15);
         }
         .special-test:hover {
-            box-shadow: 0 6px 16px rgba(98, 0, 234, 0.25);
+            box-shadow: 0 5px 12px rgba(98, 0, 234, 0.25);
+        }
+        .error-test {
+            background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
+            box-shadow: 0 3px 8px rgba(255, 71, 87, 0.15);
+        }
+        .error-test:hover {
+            box-shadow: 0 5px 12px rgba(255, 71, 87, 0.25);
+        }
+        .viewer-button {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            box-shadow: 0 3px 8px rgba(0, 184, 148, 0.15);
+        }
+        .viewer-button:hover {
+            box-shadow: 0 5px 12px rgba(0, 184, 148, 0.25);
         }
         .result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 12px;
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
             display: none;
             white-space: pre-wrap;
             font-family: monospace;
             background-color: #f5f5f5;
             border: 1px solid #eee;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            font-size: 0.9rem;
         }
         .success {
-            border-left: 4px solid #00875a;
+            border-left: 3px solid #00875a;
         }
         .error {
-            border-left: 4px solid #de350b;
+            border-left: 3px solid #de350b;
         }
         footer {
             text-align: center;
-            margin-top: 40px;
+            margin-top: 20px;
             color: #777;
-            font-size: 0.9rem;
-            padding: 20px;
+            font-size: 0.85rem;
+            padding: 10px;
         }
         code {
             background-color: #f0f0f0;
-            padding: 3px 6px;
-            border-radius: 4px;
-            font-size: 0.9em;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.85em;
             font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-        }
-        .preview-frame {
-            width: 100%;
-            height: 300px;
-            border: 1px solid #eee;
-            border-radius: 12px;
-            margin-top: 20px;
-            display: none;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
         .info-item {
             display: flex;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
         }
         .info-icon {
-            margin-right: 10px;
-            font-size: 1.2rem;
+            margin-right: 8px;
+            font-size: 1.1rem;
             color: #00babc;
-            width: 24px;
+            width: 20px;
             text-align: center;
         }
         .logo-42 {
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 900;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             background: linear-gradient(135deg, #00babc 0%, #6200ea 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+        }
+        .grid-2-col {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        @media (max-width: 768px) {
+            .grid-2-col {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <header>
-        <div class="decoration decoration-1"></div>
-        <div class="decoration decoration-2"></div>
         <div class="logo-42">42</div>
         <h1>Webserv</h1>
         <p>Un serveur HTTP en C++98</p>
     </header>
 
-    <div class="card">
-        <div class="decoration decoration-1"></div>
-        <div class="decoration decoration-2"></div>
-        <h2>Tests du Serveur</h2>
-        <div class="test-grid">
-            <a href="/test.html" class="test-button" onclick="return testFile('/test.html', event)">Fichier HTML</a>
-            <a href="/test.css" class="test-button" onclick="return testFile('/test.css', event)">Fichier CSS</a>
-            <a href="/sample.txt" class="test-button" onclick="return testFile('/sample.txt', event)">Fichier TXT</a>
-            <a href="/test.json" class="test-button" onclick="return testFile('/test.json', event)">Fichier JSON</a>
-            <a href="/404.html" class="test-button" onclick="return testFile('/this_file_does_not_exist', event)">Erreur 404</a>
-            <a href="/403.html" class="test-button" onclick="return testFile('/403.html', event)">Erreur 403</a>
-            <a href="/500.html" class="test-button" onclick="return testFile('/500.html', event)">Erreur 500</a>
-            <a href="/cache-test.html" class="test-button special-test">Test Cache & ETags</a>
-        </div>
-        <div id="test-result" class="result"></div>
-        <iframe id="preview-frame" class="preview-frame"></iframe>
-    </div>
+    <div class="grid-2-col">
+        <div class="card">
+            <h2>Ressources</h2>
+            
+            <h3>Fichiers de Test</h3>
+            <div class="test-grid">
+                <a href="/test.html" class="test-button" onclick="return testFile('/test.html', event)">HTML</a>
+                <a href="/test.css" class="test-button" onclick="return testFile('/test.css', event)">CSS</a>
+                <a href="/sample.txt" class="test-button" onclick="return testFile('/sample.txt', event)">TXT</a>
+                <a href="/test.json" class="test-button" onclick="return testFile('/test.json', event)">JSON</a>
+            </div>
 
-    <div class="card">
-        <div class="decoration decoration-1"></div>
-        <div class="decoration decoration-2"></div>
-        <h2>Visualiseurs</h2>
-        <p>Explorez vos fichiers avec des visualiseurs améliorés pour une meilleure expérience.</p>
-        <div class="test-grid">
-            <a href="/json-viewer.html" class="test-button">Visualiseur JSON</a>
-            <a href="/css-viewer.html" class="test-button">Visualiseur CSS</a>
-            <a href="/text-viewer.html" class="test-button">Visualiseur Texte</a>
-        </div>
-    </div>
+            <h3>Visualiseurs Améliorés</h3>
+            <div class="test-grid">
+                <a href="/json-viewer.html" class="test-button viewer-button">Visualiseur JSON</a>
+                <a href="/css-viewer.html" class="test-button viewer-button">Visualiseur CSS</a>
+                <a href="/text-viewer.html" class="test-button viewer-button">Visualiseur TXT</a>
+            </div>
 
-    <div class="card">
-        <div class="decoration decoration-1"></div>
-        <div class="decoration decoration-2"></div>
-        <h2>Informations</h2>
-        <div class="info-item">
-            <div class="info-icon">✅</div>
-            <div><strong>Statut :</strong> Le serveur est opérationnel</div>
+            <div class="test-section">
+                <h3>Tests Spéciaux</h3>
+                <div class="test-grid">
+                    <a href="/cache-test.html" class="test-button special-test full-width">Test Cache & ETags</a>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3>Pages d'Erreur</h3>
+                <div class="test-grid">
+                    <a href="/404.html" class="test-button error-test" onclick="return testFile('/this_file_does_not_exist', event)">Erreur 404</a>
+                    <a href="/403.html" class="test-button error-test" onclick="return testFile('/403.html', event)">Erreur 403</a>
+                    <a href="/500.html" class="test-button error-test" onclick="return testFile('/500.html', event)">Erreur 500</a>
+                </div>
+            </div>
+
+            <div id="test-result" class="result"></div>
         </div>
-        <div class="info-item">
-            <div class="info-icon">📂</div>
-            <div><strong>Racine :</strong> <code>./www</code></div>
-        </div>
-        <div class="info-item">
-            <div class="info-icon">🌐</div>
-            <div><strong>Port :</strong> <code>8080</code></div>
-        </div>
-        <div class="info-item">
-            <div class="info-icon">📝</div>
-            <div><strong>Méthodes supportées :</strong> <code>GET</code></div>
-        </div>
-        <div class="info-item">
-            <div class="info-icon">🔄</div>
-            <div><strong>Cache HTTP :</strong> Support des <code>ETags</code> et validation conditionnelle</div>
+
+        <div class="card">
+            <h2>Informations du Serveur</h2>
+            <div class="info-item">
+                <div class="info-icon">✅</div>
+                <div><strong>Statut :</strong> Le serveur est opérationnel</div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon">📂</div>
+                <div><strong>Racine :</strong> <code>./www</code></div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon">🌐</div>
+                <div><strong>Port :</strong> <code>8080</code></div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon">📝</div>
+                <div><strong>Méthodes :</strong> <code>GET</code>, <code>POST</code>, <code>DELETE</code></div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon">🔄</div>
+                <div><strong>Cache HTTP :</strong> Support des <code>ETags</code> et validation conditionnelle</div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon">🧩</div>
+                <div><strong>Listing des répertoires :</strong> Activé</div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon">⚙️</div>
+                <div><strong>Requêtes parallèles :</strong> Jusqu'à <code>1024</code> connexions simultanées</div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon">🔒</div>
+                <div><strong>Taille maximale :</strong> <code>10Mo</code> pour un body de requête</div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon">🚀</div>
+                <div><strong>Performance :</strong> ~1500 requêtes/sec pour du contenu statique</div>
+            </div>
         </div>
     </div>
 
