@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700">
+  <!-- Fond -->
+  <rect width="900" height="700" fill="#f8f9fa" />
+  
+  <!-- Titre -->
+  <text x="450" y="40" font-family="Arial" font-size="24" fill="#333" text-anchor="middle" font-weight="bold">Parsing d'une requête HTTP dans WebServ</text>
+  
+  <!-- Entrée: Données brutes -->
+  <rect x="50" y="80" width="800" height="100" rx="5" ry="5" fill="#fff5f5" stroke="#ff8787" stroke-width="2" />
+  <text x="450" y="105" font-family="Arial" font-size="16" fill="#333" text-anchor="middle" font-weight="bold">DONNÉES BRUTES REÇUES PAR recv()</text>
+  <text x="450" y="130" font-family="Courier New" font-size="14" fill="#333" text-anchor="middle">GET /index.html HTTP/1.1</text>
+  <text x="450" y="150" font-family="Courier New" font-size="14" fill="#333" text-anchor="middle">Host: localhost:8080</text>
+  <text x="450" y="170" font-family="Courier New" font-size="14" fill="#333" text-anchor="middle">User-Agent: Mozilla/5.0 (...) Chrome/91.0.4472.124 Safari/537.36</text>
+
+  <!-- Flèche -->
+  <line x1="450" y1="180" x2="450" y2="210" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="500" y="200" font-family="Arial" font-size="14" fill="#333" text-anchor="start">HttpRequest::parse()</text>
+  
+  <!-- Étape 1: Parsing de la ligne de requête -->
+  <rect x="150" y="220" width="600" height="90" rx="5" ry="5" fill="#e7f5ff" stroke="#4dabf7" stroke-width="2" />
+  <text x="450" y="240" font-family="Arial" font-size="16" fill="#333" text-anchor="middle" font-weight="bold">1. PARSING DE LA LIGNE DE REQUÊTE</text>
+  <text x="450" y="265" font-family="Arial" font-size="14" fill="#333" text-anchor="middle">parseRequestLine()</text>
+  <text x="450" y="290" font-family="Courier New" font-size="14" fill="#333" text-anchor="middle">method="GET", uri="/index.html", version="HTTP/1.1"</text>
+
+  <!-- Flèche -->
+  <line x1="450" y1="310" x2="450" y2="340" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+  
+  <!-- Étape 2: Parsing des en-têtes -->
+  <rect x="150" y="350" width="600" height="110" rx="5" ry="5" fill="#e7f5ff" stroke="#4dabf7" stroke-width="2" />
+  <text x="450" y="370" font-family="Arial" font-size="16" fill="#333" text-anchor="middle" font-weight="bold">2. PARSING DES EN-TÊTES</text>
+  <text x="450" y="395" font-family="Arial" font-size="14" fill="#333" text-anchor="middle">parseHeaders()</text>
+  <text x="450" y="420" font-family="Courier New" font-size="14" fill="#333" text-anchor="middle">headers["host"] = "localhost:8080"</text>
+  <text x="450" y="440" font-family="Courier New" font-size="14" fill="#333" text-anchor="middle">headers["user-agent"] = "Mozilla/5.0 (...)"</text>
+
+  <!-- Flèche -->
+  <line x1="450" y1="460" x2="450" y2="490" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+  
+  <!-- Étape 3: Extraction du body et analyse spéciale -->
+  <rect x="150" y="500" width="600" height="110" rx="5" ry="5" fill="#e7f5ff" stroke="#4dabf7" stroke-width="2" />
+  <text x="450" y="520" font-family="Arial" font-size="16" fill="#333" text-anchor="middle" font-weight="bold">3. EXTRACTION DU BODY ET ANALYSE SPÉCIALE</text>
+  <text x="450" y="545" font-family="Arial" font-size="14" fill="#333" text-anchor="middle">parseQueryString(), parseFormBody()</text>
+  <text x="450" y="570" font-family="Courier New" font-size="14" fill="#333" text-anchor="middle">body = "" (vide pour une requête GET)</text>
+  <text x="450" y="590" font-family="Courier New" font-size="14" fill="#333" text-anchor="middle">query_string = "" (pas de paramètres dans l'URI)</text>
+
+  <!-- Flèche -->
+  <line x1="450" y1="610" x2="450" y2="640" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+  
+  <!-- Résultat -->
+  <rect x="100" y="650" width="700" height="40" rx="5" ry="5" fill="#d3f9d8" stroke="#40c057" stroke-width="2" />
+  <text x="450" y="675" font-family="Arial" font-size="16" fill="#333" text-anchor="middle" font-weight="bold">Objet HttpRequest complètement rempli et validé</text>
+  
+  <!-- Code à droite -->
+  <rect x="770" y="270" width="120" height="230" rx="3" ry="3" fill="#f8f9fa" stroke="#ced4da" stroke-width="1" />
+  <text x="830" y="290" font-family="Arial" font-size="12" fill="#495057" text-anchor="middle" font-weight="bold">Code</text>
+  <text x="830" y="315" font-family="Courier New" font-size="10" fill="#495057" text-anchor="middle">bool parse(</text>
+  <text x="830" y="330" font-family="Courier New" font-size="10" fill="#495057" text-anchor="middle">  const std::string&</text>
+  <text x="830" y="345" font-family="Courier New" font-size="10" fill="#495057" text-anchor="middle">  raw_request) {</text>
+  <text x="830" y="360" font-family="Courier New" font-size="10" fill="#495057" text-anchor="middle">  clear();</text>
+  <text x="830" y="375" font-family="Courier New" font-size="10" fill="#495057" text-anchor="middle">  size_t pos =</text>
+  <text x="830" y="390" font-family="Courier New" font-size="10" fill="#495057" text-anchor="middle">    raw_request.</text>
+  <text x="830" y="405" font-family="Courier New" font-size="10" fill="#495057" text-anchor="middle">    find("\r\n");</text>
+  <text x="830" y="420" font-family="Courier New" font-size="10" fill="#495057" text-anchor="middle">  ...</text>
+  <text x="830" y="435" font-family="Courier New" font-size="10" fill="#495057" text-anchor="middle">  parseRequestLine(</text>
+  <text x="830" y="450" font-family="Courier New" font-size="10" fill="#495057" text-anchor="middle">    line);</text>
+  <text x="830" y="465" font-family="Courier New" font-size="10" fill="#495057" text-anchor="middle">  parseHeaders(</text>
+  <text x="830" y="480" font-family="Courier New" font-size="10" fill="#495057" text-anchor="middle">    headers_sect);</text>
+  <text x="830" y="495" font-family="Courier New" font-size="10" fill="#495057" text-anchor="middle">}</text>
+  
+  <!-- Defs pour les flèches -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#333" />
+    </marker>
+  </defs>
+</svg>
