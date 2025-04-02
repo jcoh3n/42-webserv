@@ -179,6 +179,21 @@
                 grid-template-columns: 1fr;
             }
         }
+        .test-help {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 3px solid #00babc;
+        }
+        .test-help ul {
+            margin: 8px 0 0 0;
+            padding-left: 20px;
+        }
+        .test-help li {
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -217,9 +232,17 @@
             <div class="test-section">
                 <h3>Pages d'Erreur</h3>
                 <div class="test-grid">
-                    <a href="/404.html" class="test-button error-test" onclick="return testFile('/this_file_does_not_exist', event)">Erreur 404</a>
-                    <a href="/403.html" class="test-button error-test" onclick="return testFile('/403.html', event)">Erreur 403</a>
-                    <a href="/500.html" class="test-button error-test" onclick="return testFile('/500.html', event)">Erreur 500</a>
+                    <a href="/404.html" class="test-button error-test" onclick="return testFile('/this_file_does_not_exist', event)">Erreur 404 (Not Found)</a>
+                    <a href="/403.html" class="test-button error-test" onclick="return testFile('/restricted.txt', event)" title="Teste un fichier dont les permissions sont à 000">Erreur 403 (Forbidden)</a>
+                    <a href="/500.html" class="test-button error-test" onclick="return testFile('/trigger-500', event)">Erreur 500 (Server Error)</a>
+                </div>
+                <div class="test-help">
+                    <p><strong>Comment fonctionnent les tests d'erreur :</strong></p>
+                    <ul>
+                        <li><strong>404</strong> : Tente d'accéder à un fichier inexistant</li>
+                        <li><strong>403</strong> : Tente d'accéder au fichier <code>restricted.txt</code> dont les permissions ont été définies à <code>000</code> (aucun droit d'accès)</li>
+                        <li><strong>500</strong> : Tente d'accéder à un fichier mal formé qui provoque une erreur interne du serveur</li>
+                    </ul>
                 </div>
             </div>
 
@@ -275,6 +298,19 @@
         async function testFile(path, event) {
             event.preventDefault();
             const resultDiv = document.getElementById('test-result');
+            resultDiv.style.display = 'block';
+            
+            // Afficher un message de préchargement
+            if (path === '/restricted.txt') {
+                resultDiv.textContent = "⏳ Test en cours : Demande d'accès à un fichier avec permissions 000 (aucun droit)...";
+                resultDiv.className = 'result';
+            } else if (path === '/trigger-500') {
+                resultDiv.textContent = "⏳ Test en cours : Tentative de déclencher une erreur interne du serveur...";
+                resultDiv.className = 'result';
+            } else {
+                resultDiv.textContent = "⏳ Chargement en cours...";
+                resultDiv.className = 'result';
+            }
             
             try {
                 const startTime = performance.now();
@@ -290,6 +326,12 @@
                 result += `📥 Status : ${status} ${response.statusText}\n`;
                 result += `📎 Type : ${contentType || 'non spécifié'}\n`;
                 
+                if (path === '/restricted.txt' && status === 403) {
+                    result += `\n✅ Test réussi : Le serveur a correctement refusé l'accès au fichier sans permission`;
+                } else if (path === '/trigger-500' && status === 500) {
+                    result += `\n✅ Test réussi : Le serveur a renvoyé une erreur 500 comme prévu`;
+                }
+                
                 if (contentType && contentType.includes('text')) {
                     const text = await response.text();
                     result += `\n📄 Aperçu :\n${text.substring(0, 150)}...`;
@@ -297,11 +339,10 @@
                 
                 resultDiv.textContent = result;
                 resultDiv.className = 'result ' + (response.ok ? 'success' : 'error');
-                resultDiv.style.display = 'block';
-
+                
                 // Pour les tests d'erreur, on veut voir la page d'erreur
-                if (path === '/this_file_does_not_exist') {
-                    window.location.href = path;
+                if (path === '/this_file_does_not_exist' || status === 403 || path === '/trigger-500') {
+                    window.location.href = path === '/trigger-500' ? '/500.html' : path;
                     return false;
                 }
                 
@@ -313,7 +354,6 @@
             } catch (error) {
                 resultDiv.textContent = `❌ Erreur : ${error.message}`;
                 resultDiv.className = 'result error';
-                resultDiv.style.display = 'block';
             }
             return false;
         }

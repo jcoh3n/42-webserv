@@ -1,0 +1,13 @@
+Ce fichier est délibérément mal formé pour provoquer une erreur 500 interne du serveur.
+Il contient des caractères et du contenu que le serveur ne pourra pas traiter correctement,
+déclenchant ainsi une erreur 500 (Internal Server Error).
+
+<?php
+// Code PHP incomplet qui causera une erreur
+echo "Ceci va échouer;
+$variable_non_fermée = "quelque chose
+// Syntaxe incorrecte
+
+CONTENU_INVALIDE_@#$%^&*()
+
+Ce fichier est utilisé uniquement pour tester la gestion des erreurs 500 du serveur. 
