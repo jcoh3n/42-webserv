@@ -1,5 +1,7 @@
 #include "http/RouteHandler.hpp"
+#include "http/HttpResponse.hpp"
 #include "http/utils/FileUtils.hpp"
+#include "utils/Common.hpp"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -27,8 +29,6 @@ RouteHandler::~RouteHandler() {
  * @return La réponse HTTP à envoyer au client
  */
 HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
-    std::cout << "📥 Processing " << request.getMethod() << " request for: " << request.getUri() << std::endl;
-    
     // Vérifier la méthode HTTP et rediriger vers le gestionnaire approprié
     if (request.getMethod() == "GET") {
         return handleGetRequest(request);
@@ -127,8 +127,8 @@ HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
  * @return La réponse HTTP
  */
 HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request) {
-    // Utiliser le paramètre pour éviter l'avertissement de paramètre non utilisé
-    std::cout << "Requête POST reçue pour: " << request.getUri() << std::endl;
+    // Éviter l'avertissement de paramètre non utilisé
+    UNUSED(request);
     
     // Dans cette première version, nous ne gérons pas les POST
     // Cela sera implémenté dans une phase ultérieure
@@ -141,8 +141,8 @@ HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request) {
  * @return La réponse HTTP
  */
 HttpResponse RouteHandler::handleDeleteRequest(const HttpRequest& request) {
-    // Utiliser le paramètre pour éviter l'avertissement de paramètre non utilisé
-    std::cout << "Requête DELETE reçue pour: " << request.getUri() << std::endl;
+    // Éviter l'avertissement de paramètre non utilisé
+    UNUSED(request);
     
     // Dans cette première version, nous ne gérons pas les DELETE
     // Cela sera implémenté dans une phase ultérieure

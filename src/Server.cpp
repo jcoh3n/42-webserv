@@ -1,4 +1,9 @@
 #include "../include/Server.hpp"
+#include "http/ResponseHandler.hpp"
+#include "http/HttpRequest.hpp"
+#include "utils/Common.hpp"
+#include <csignal>
+#include <cstring>
 
 // Initialisation de la variable statique
 Server* Server::instance = NULL;
@@ -51,7 +56,7 @@ void Server::setupSignalHandlers() {
  * cette fonction arrête proprement le serveur.
  */
 void Server::signalHandler(int signal) {
-	std::cout << "Received signal " << signal << ", shutting down gracefully..." << std::endl;
+	LOG_INFO("Received signal " << signal << ", shutting down gracefully...");
 	if (instance) {
 		instance->stop();
 	}
@@ -74,7 +79,7 @@ void Server::cleanupResources() {
 	// Réinitialiser le nombre de descripteurs
 	nfds = 1;
 	
-	std::cout << "✓ All client connections closed cleanly" << std::endl;
+	LOG_SUCCESS("All client connections closed cleanly");
 }
 
 /**
@@ -102,7 +107,8 @@ void Server::start() {
 		// Configuration des gestionnaires de signaux
 		setupSignalHandlers();
 		
-		std::cout << "✅ Server started successfully on port " << port << std::endl;
+		LOG_SUCCESS("Server started successfully on port " << port);
+		LOG_INFO("Server running at " << BLUE << BOLD << "http://localhost:" << port << RESET);
 		
 		running = true;
 		
@@ -129,7 +135,7 @@ void Server::start() {
 			}
 		}
 	} catch (const std::exception& e) {
-		std::cerr << "❌ Server error: " << e.what() << std::endl;
+		LOG_ERROR("Server error: " << e.what());
 		cleanupResources();
 		throw;
 	}
@@ -161,7 +167,7 @@ bool Server::handleEvent(int index) {
 		if (index > 0) { // Ne pas fermer le socket serveur
 			// Fermer le socket client
 			::close(fds[index].fd);
-			std::cout << "➖ Client socket closed due to error/hangup, fd: " << fds[index].fd << std::endl;
+			LOG_NETWORK("Client socket closed due to error/hangup, fd: " << fds[index].fd);
 			
 			// Compacter le tableau
 			for (int j = index; j < nfds - 1; j++) {
@@ -222,7 +228,7 @@ void Server::acceptNewConnection() {
 		
 		// Vérifier si on a atteint le nombre maximum de clients
 		if (nfds >= MAX_CLIENTS) {
-			std::cerr << "⚠️ Maximum client limit reached, rejecting connection" << std::endl;
+			LOG_WARNING("Maximum client limit reached, rejecting connection");
 			::close(client_fd);
 			return;
 		}
@@ -237,10 +243,10 @@ void Server::acceptNewConnection() {
 		char client_ip[INET_ADDRSTRLEN];
 		inet_ntop(AF_INET, &(client_addr.sin_addr), client_ip, INET_ADDRSTRLEN);
 		
-		std::cout << "➕ New client connected from " << client_ip << ", fd: " << client_fd 
-				  << ", total clients: " << (nfds-1) << std::endl;
+		LOG_NETWORK("New client connected from " << client_ip << ", fd: " << client_fd 
+				  << ", total clients: " << (nfds-1));
 	} catch (const std::exception& e) {
-		std::cerr << "❌ Error accepting connection: " << e.what() << std::endl;
+		LOG_ERROR("Error accepting connection: " << e.what());
 	}
 }
 
@@ -262,7 +268,7 @@ void Server::handleClientData(int client_index) {
 	if (nbytes <= 0) {
 		// Cas: nbytes < 0: une erreur est survenue
 		if (nbytes < 0) {
-			std::cerr << "❌ Error reading from client: " << strerror(errno) << std::endl;
+			LOG_ERROR("Error reading from client: " << strerror(errno));
 		}
 		// Cas: nbytes = 0: le client a fermé la connexion
 		// Fermer le socket client
@@ -274,8 +280,8 @@ void Server::handleClientData(int client_index) {
 		}
 		nfds--;
 		
-		std::cout << "➖ Client disconnected, fd: " << client_fd 
-				 << ", remaining clients: " << (nfds-1) << std::endl;
+		LOG_NETWORK("Client disconnected, fd: " << client_fd 
+				 << ", remaining clients: " << (nfds-1));
 		return;
 	}
 	
@@ -288,7 +294,7 @@ void Server::handleClientData(int client_index) {
 	
 	if (!request.parse(raw_request)) {
 		// Requête malformée
-		std::cerr << "❌ Malformed HTTP request" << std::endl;
+		LOG_ERROR("Malformed HTTP request");
 		HttpResponse error_response = createErrorResponse(400, "Bad Request");
 		ResponseHandler::sendResponse(client_fd, error_response, request);
 		return;
@@ -296,9 +302,6 @@ void Server::handleClientData(int client_index) {
 	
 	// Envoyer une réponse HTTP
 	sendHttpResponse(client_fd, request);
-	
-	// Log des données reçues (la première ligne de la requête)
-	std::cout << "📩 Received " << request.getMethod() << " request for: " << request.getUri() << std::endl;
 }
 
 /**
@@ -310,6 +313,9 @@ void Server::handleClientData(int client_index) {
  * puis envoie la réponse générée au client.
  */
 void Server::sendHttpResponse(int client_fd, const HttpRequest& request) {
+	// Log de la requête reçue
+	LOG_REQUEST(request.getMethod(), request.getUri(), "Processing");
+	
 	// Utiliser le gestionnaire de routes pour traiter la requête
 	HttpResponse response = route_handler.processRequest(request);
 	
@@ -317,6 +323,5 @@ void Server::sendHttpResponse(int client_fd, const HttpRequest& request) {
 	ssize_t bytes_sent = ResponseHandler::sendResponse(client_fd, response, request);
 	
 	// Log de la réponse envoyée
-	std::cout << "📤 Sent HTTP " << response.getStatusCode() << " response: " 
-			  << bytes_sent << " bytes" << std::endl;
+	LOG_RESPONSE(response.getStatusCode(), bytes_sent);
 }

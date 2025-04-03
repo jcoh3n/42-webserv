@@ -1,13 +1,14 @@
 #include "http/HttpRequest.hpp"
 #include "http/HttpResponse.hpp"
 #include "http/RouteHandler.hpp"
+#include "utils/Common.hpp"
 #include <iostream>
 #include <cassert>
 
 // Test d'intégration simple pour vérifier que l'intégration entre 
 // le parsing des requêtes HTTP et la génération des réponses fonctionne correctement
 void test_integration_basic() {
-    std::cout << "Test d'intégration: requête GET simple... ";
+    LOG_INFO("Test d'intégration: requête GET simple... ");
     
     // Créer une requête GET simple
     std::string raw_request = "GET /index.html HTTP/1.1\r\n"
@@ -40,12 +41,12 @@ void test_integration_basic() {
         assert(response.getHeaders().find("Content-Length") != response.getHeaders().end());
     }
     
-    std::cout << "OK" << std::endl;
+    LOG_SUCCESS("GET simple - OK");
 }
 
 // Test d'intégration pour une requête malformée
 void test_integration_malformed_request() {
-    std::cout << "Test d'intégration: requête malformée... ";
+    LOG_INFO("Test d'intégration: requête malformée... ");
     
     // Créer une requête malformée
     std::string raw_request = "INVALID /index.html\r\n"
@@ -59,12 +60,12 @@ void test_integration_malformed_request() {
     // Vérifier que le parsing échoue
     assert(!parse_result);
     
-    std::cout << "OK" << std::endl;
+    LOG_SUCCESS("Requête malformée - OK");
 }
 
 // Test d'intégration pour une requête 404
 void test_integration_not_found() {
-    std::cout << "Test d'intégration: fichier non trouvé (404)... ";
+    LOG_INFO("Test d'intégration: fichier non trouvé (404)... ");
     
     // Créer une requête pour un fichier inexistant
     std::string raw_request = "GET /fichier_inexistant.html HTTP/1.1\r\n"
@@ -88,12 +89,12 @@ void test_integration_not_found() {
     assert(response.getStatusCode() == 404);
     assert(!response.getBody().empty());
     
-    std::cout << "OK" << std::endl;
+    LOG_SUCCESS("404 - OK");
 }
 
 // Test d'intégration pour une requête POST
 void test_integration_post_request() {
-    std::cout << "Test d'intégration: requête POST... ";
+    LOG_INFO("Test d'intégration: requête POST... ");
     
     // Créer une requête POST simple
     std::string raw_request = "POST /submit HTTP/1.1\r\n"
@@ -120,17 +121,17 @@ void test_integration_post_request() {
     // car nous n'avons pas encore implémenté le traitement des POST
     assert(response.getStatusCode() == 501);
     
-    std::cout << "OK" << std::endl;
+    LOG_SUCCESS("POST - OK");
 }
 
 int main() {
-    std::cout << "=== Tests d'intégration HTTP ===\n";
+    LOG_INFO("=== Tests d'intégration HTTP ===");
     
     test_integration_basic();
     test_integration_malformed_request();
     test_integration_not_found();
     test_integration_post_request();
     
-    std::cout << "\n✅ Tous les tests d'intégration ont réussi!" << std::endl;
+    LOG_SUCCESS("Tous les tests d'intégration ont réussi !");
     return 0;
 } 

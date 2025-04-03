@@ -1,25 +1,26 @@
-#include "../include/http/HttpRequest.hpp"
+#include "http/HttpRequest.hpp"
+#include "utils/Common.hpp"
 #include <iostream>
 
 void printRequestInfo(const HttpRequest& req) {
-    std::cout << "\nParsed Request Info:" << std::endl;
-    std::cout << "Method: " << req.getMethod() << std::endl;
-    std::cout << "URI: " << req.getUri() << std::endl;
-    std::cout << "Version: " << req.getVersion() << std::endl;
-    std::cout << "Query String: " << req.getQueryString() << std::endl;
-    std::cout << "\nHeaders:" << std::endl;
+    LOG_INFO("\nParsed Request Info:");
+    LOG_INFO("Method: " << req.getMethod());
+    LOG_INFO("URI: " << req.getUri());
+    LOG_INFO("Version: " << req.getVersion());
+    LOG_INFO("Query String: " << req.getQueryString());
+    LOG_INFO("\nHeaders:");
     for (std::map<std::string, std::string>::const_iterator it = req.getHeaders().begin();
          it != req.getHeaders().end(); ++it) {
-        std::cout << it->first << ": " << it->second << std::endl;
+        LOG_INFO(it->first << ": " << it->second);
     }
-    std::cout << "\nBody: " << req.getBody() << std::endl;
+    LOG_INFO("\nBody: " << req.getBody());
 }
 
 int main() {
     HttpRequest request;
     
     // Test 1: GET simple
-    std::cout << "\n=== Test 1: GET simple ===" << std::endl;
+    LOG_INFO("\n=== Test 1: GET simple ===");
     std::string get_request = 
         "GET /index.html HTTP/1.1\r\n"
         "Host: localhost:8080\r\n"
@@ -29,11 +30,11 @@ int main() {
     if (request.parse(get_request)) {
         printRequestInfo(request);
     } else {
-        std::cout << "Failed to parse GET request" << std::endl;
+        LOG_ERROR("Failed to parse GET request");
     }
     
     // Test 2: GET avec query string
-    std::cout << "\n=== Test 2: GET avec query string ===" << std::endl;
+    LOG_INFO("\n=== Test 2: GET avec query string ===");
     std::string get_query_request = 
         "GET /search?name=john&age=25 HTTP/1.1\r\n"
         "Host: localhost:8080\r\n"
@@ -42,11 +43,11 @@ int main() {
     if (request.parse(get_query_request)) {
         printRequestInfo(request);
     } else {
-        std::cout << "Failed to parse GET request with query" << std::endl;
+        LOG_ERROR("Failed to parse GET request with query");
     }
     
     // Test 3: POST avec body
-    std::cout << "\n=== Test 3: POST avec body ===" << std::endl;
+    LOG_INFO("\n=== Test 3: POST avec body ===");
     std::string post_request = 
         "POST /submit HTTP/1.1\r\n"
         "Host: localhost:8080\r\n"
@@ -58,17 +59,17 @@ int main() {
     if (request.parse(post_request)) {
         printRequestInfo(request);
     } else {
-        std::cout << "Failed to parse POST request" << std::endl;
+        LOG_ERROR("Failed to parse POST request");
     }
     
     // Test 4: Requête invalide
-    std::cout << "\n=== Test 4: Requête invalide ===" << std::endl;
+    LOG_INFO("\n=== Test 4: Requête invalide ===");
     std::string invalid_request = "INVALID /test HTTP/1.1\r\n\r\n";
     
     if (!request.parse(invalid_request)) {
-        std::cout << "Successfully rejected invalid request" << std::endl;
+        LOG_SUCCESS("Successfully rejected invalid request");
     } else {
-        std::cout << "Error: Invalid request was accepted" << std::endl;
+        LOG_ERROR("Error: Invalid request was accepted");
     }
     
     return 0;

@@ -2,21 +2,18 @@
 #include "http/HttpRequest.hpp"
 #include "http/ResponseHandler.hpp"
 #include "http/utils/FileUtils.hpp"
+#include "utils/Common.hpp"
 #include <iostream>
 #include <cassert>
 #include <cstring>
 
-// Couleurs pour les logs de test
-#define GREEN "\033[32m"
-#define RED "\033[31m"
-#define RESET "\033[0m"
-
+// Les fonctions de log utilisent maintenant les macros définies dans Common.hpp
 void log_success(const std::string& message) {
-    std::cout << GREEN << "[SUCCESS] " << message << RESET << std::endl;
+    LOG_SUCCESS(message);
 }
 
 void log_error(const std::string& message) {
-    std::cout << RED << "[ERROR] " << message << RESET << std::endl;
+    LOG_ERROR(message);
 }
 
 void test_http_response_basic() {
@@ -127,7 +124,7 @@ void test_not_modified() {
 }
 
 int main() {
-    std::cout << "=== TEST DU SYSTÈME DE RÉPONSE HTTP ===" << std::endl;
+    LOG_INFO("=== TEST DU SYSTÈME DE RÉPONSE HTTP ===");
     
     test_http_response_basic();
     test_http_response_status();
@@ -138,6 +135,6 @@ int main() {
     test_redirect();
     test_not_modified();
     
-    std::cout << "\nTous les tests ont réussi !" << std::endl;
+    LOG_SUCCESS("Tous les tests ont réussi !");
     return 0;
 } 

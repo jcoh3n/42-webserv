@@ -1,9 +1,10 @@
 #include "http/HttpRequest.hpp"
+#include "utils/Common.hpp"
 #include <iostream>
 #include <cassert>
 
 void testUrlEncodedForm() {
-    std::cout << "\n=== Test: URL-encoded form ===\n";
+    LOG_INFO("\n=== Test: URL-encoded form ===");
     
     std::string request = 
         "POST /submit HTTP/1.1\r\n"
@@ -20,20 +21,20 @@ void testUrlEncodedForm() {
     assert(req.getMethod() == "POST");
     assert(req.getUri() == "/submit");
     
-    std::cout << "Form values:\n";
-    std::cout << "  username: " << req.getFormValue("username") << std::endl;
-    std::cout << "  password: " << req.getFormValue("password") << std::endl;
-    std::cout << "  age: " << req.getFormValue("age") << std::endl;
+    LOG_INFO("Form values:");
+    LOG_INFO("  username: " << req.getFormValue("username"));
+    LOG_INFO("  password: " << req.getFormValue("password"));
+    LOG_INFO("  age: " << req.getFormValue("age"));
     
     assert(req.getFormValue("username") == "john_doe");
     assert(req.getFormValue("password") == "secret!"); // %21 décodé en !
     assert(req.getFormValue("age") == "25");
     
-    std::cout << "URL-encoded form test passed!\n";
+    LOG_SUCCESS("URL-encoded form test passed!");
 }
 
 void testMultipartFormData() {
-    std::cout << "\n=== Test: Multipart form data ===\n";
+    LOG_INFO("\n=== Test: Multipart form data ===");
     
     std::string boundary = "----WebKitFormBoundaryABC123";
     std::string request = 
@@ -60,8 +61,8 @@ void testMultipartFormData() {
     assert(req.getMethod() == "POST");
     assert(req.getUri() == "/upload");
     
-    std::cout << "Form values:\n";
-    std::cout << "  username: " << req.getFormValue("username") << std::endl;
+    LOG_INFO("Form values:");
+    LOG_INFO("  username: " << req.getFormValue("username"));
     
     assert(req.getFormValue("username") == "john_doe");
     assert(req.hasUploadedFile("file"));
@@ -69,23 +70,23 @@ void testMultipartFormData() {
     const UploadedFile* file = req.getUploadedFile("file");
     assert(file != NULL);
     
-    std::cout << "Uploaded file:\n";
-    std::cout << "  Name: " << file->name << std::endl;
-    std::cout << "  Filename: " << file->filename << std::endl;
-    std::cout << "  Content-Type: " << file->content_type << std::endl;
-    std::cout << "  Size: " << file->data.size() << " bytes\n";
-    std::cout << "  Content: " << file->data << std::endl;
+    LOG_INFO("Uploaded file:");
+    LOG_INFO("  Name: " << file->name);
+    LOG_INFO("  Filename: " << file->filename);
+    LOG_INFO("  Content-Type: " << file->content_type);
+    LOG_INFO("  Size: " << file->data.size() << " bytes");
+    LOG_INFO("  Content: " << file->data);
     
     assert(file->name == "file");
     assert(file->filename == "test.txt");
     assert(file->content_type == "text/plain");
     assert(file->data == "This is the content of the file");
     
-    std::cout << "Multipart form data test passed!\n";
+    LOG_SUCCESS("Multipart form data test passed!");
 }
 
 void testContentLengthValidation() {
-    std::cout << "\n=== Test: Content-Length validation ===\n";
+    LOG_INFO("\n=== Test: Content-Length validation ===");
     
     // Créer une requête avec un Content-Length énorme (> MAX_BODY_SIZE)
     std::string request = 
@@ -101,22 +102,22 @@ void testContentLengthValidation() {
     // La validation devrait échouer à cause du Content-Length trop grand
     assert(!result);
     
-    std::cout << "Content-Length validation test passed!\n";
+    LOG_SUCCESS("Content-Length validation test passed!");
 }
 
 int main() {
-    std::cout << "Starting Form Parser tests...\n";
+    LOG_INFO("Starting Form Parser tests...");
     
     try {
         testUrlEncodedForm();
         testMultipartFormData();
         testContentLengthValidation();
         
-        std::cout << "\nAll tests passed successfully!\n";
+        LOG_SUCCESS("\nAll tests passed successfully!");
         return 0;
     }
     catch (const std::exception& e) {
-        std::cerr << "Test failed: " << e.what() << std::endl;
+        LOG_ERROR("Test failed: " << e.what());
         return 1;
     }
 } 
