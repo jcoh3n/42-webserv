@@ -29,6 +29,10 @@ private:
     // Méthodes utilitaires
     std::string getFilePath(const std::string& uri);
     bool serveStaticFile(const std::string& file_path, HttpResponse& response);
+    
+    // Méthodes de gestion du cache
+    bool checkNotModified(const HttpRequest& request, const std::string& file_path, HttpResponse& response);
+    std::string calculateETag(const std::string& file_path);
 };
 
 #endif // ROUTE_HANDLER_HPP 

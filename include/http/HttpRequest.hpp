@@ -29,6 +29,14 @@ public:
     const std::string& getQueryString() const { return query_string; }
     const std::map<std::string, std::string>& getHeaders() const { return headers; }
     
+    // Récupérer une en-tête spécifique
+    std::string getHeader(const std::string& name) const {
+        std::map<std::string, std::string>::const_iterator it = headers.find(name);
+        if (it != headers.end())
+            return it->second;
+        return "";
+    }
+    
     // Getters pour les formulaires et fichiers (délégués à FormData)
     const std::map<std::string, std::string>& getFormValues() const;
     const std::map<std::string, UploadedFile>& getUploadedFiles() const;
