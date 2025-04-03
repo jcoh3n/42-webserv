@@ -1,24 +1,37 @@
 #include "Server.hpp"
 #include "utils/Common.hpp"
+#include "config/ConfigParser.hpp"
 #include <iostream>
 #include <cstdlib>
 
 int main(int argc, char* argv[]) {
-	int port = DEFAULT_PORT;
-	
-	// Vérifier si un port a été fourni en argument
-	if (argc > 1)
-	{
-		int tmp_port = std::atoi(argv[1]);
-		if (tmp_port > 0 && tmp_port < 65536) {
-			port = tmp_port;
-		} else {
-			LOG_WARNING("Invalid port number. Using default port " << DEFAULT_PORT);
-		}
+	// Vérifier qu'un fichier de configuration a été fourni
+	if (argc < 2) {
+		std::cerr << "Usage: " << argv[0] << " <config_file>" << std::endl;
+		std::cerr << "Error: Configuration file required" << std::endl;
+		return 1;
 	}
-
-	// Créer et démarrer le serveur
+	
+	std::string config_file = argv[1];
+	LOG_INFO("Using config file: " << config_file);
+	
+	// Charger la configuration
 	try {
+		HTTP::ConfigParser parser;
+		HTTP::WebservConfig config = parser.parseFile(config_file);
+		
+		if (config.servers.empty()) {
+			LOG_ERROR("No server configured in " << config_file);
+			return 1;
+		}
+		
+		// Pour l'instant, nous utilisons seulement le premier serveur configuré
+		// À l'avenir, nous pourrons lancer plusieurs serveurs en parallèle
+		int port = config.servers[0].port;
+		LOG_INFO("Loaded configuration with " << config.servers.size() << " server(s)");
+		LOG_INFO("Using port " << port << " from configuration");
+		
+		// Créer et démarrer le serveur
 		Server server(port);
 		server.start();
 	} catch (const std::exception& e) {

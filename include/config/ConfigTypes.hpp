@@ -5,22 +5,25 @@
 #include <vector>
 #include <map>
 
+namespace HTTP {
+
 /**
  * @brief Configuration d'une location (route) dans le serveur
  */
 struct LocationConfig {
-    std::string path;                        // Chemin de la location (ex: "/api")
-    std::vector<std::string> allowed_methods; // Méthodes HTTP autorisées
-    bool directory_listing;                  // Activation de l'autoindex
-    std::string index_file;                  // Fichier index par défaut
-    std::string redirect_url;                // URL de redirection (pour return)
-    std::string root_override;               // Répertoire racine spécifique à cette location
-    std::string cgi_extension;               // Extension pour le CGI (ex: ".php")
-    std::string upload_directory;            // Répertoire pour les uploads
+    std::vector<std::string> allowed_methods;  // Méthodes HTTP autorisées
+    bool autoindex;                            // Activation de l'autoindex
+    std::vector<std::string> index_files;      // Fichiers index par défaut
+    std::string redirect_url;                  // URL de redirection (pour return)
+    int redirect_code;                         // Code de redirection HTTP
+    std::string root_override;                 // Répertoire racine spécifique à cette location
+    std::vector<std::string> cgi_extensions;   // Extensions pour le CGI (ex: ".php")
+    std::string upload_directory;              // Répertoire pour les uploads
+    std::string alias;                         // Alias pour cette location
     
     LocationConfig() 
-        : directory_listing(false)
-        , index_file("index.html") {}
+        : autoindex(false)
+        , redirect_code(301) {}
 };
 
 /**
@@ -31,7 +34,8 @@ struct ServerConfig {
     int port;                                        // Port d'écoute
     std::vector<std::string> server_names;           // Noms de serveur (pour virtual hosting)
     std::string root_directory;                      // Répertoire racine pour ce serveur
-    std::map<std::string, std::string> error_pages;  // Pages d'erreur personnalisées
+    std::vector<std::string> index_files;            // Fichiers index par défaut
+    std::map<int, std::string> error_pages;          // Pages d'erreur personnalisées
     size_t client_max_body_size;                     // Taille maximale du body client
     std::map<std::string, LocationConfig> locations; // Configurations des locations
     
@@ -48,5 +52,7 @@ struct ServerConfig {
 struct WebservConfig {
     std::vector<ServerConfig> servers; // Liste des serveurs configurés
 };
+
+} // namespace HTTP
 
 #endif // CONFIG_TYPES_HPP 

@@ -21,13 +21,17 @@ HTTP_RESPONSE_SRCS = $(SRC_DIR)/http/HttpResponse.cpp \
 # Sources Routes
 ROUTE_SRCS = $(SRC_DIR)/http/RouteHandler.cpp
 
+# Sources Configuration
+CONFIG_SRCS = $(SRC_DIR)/config/ConfigParser.cpp
+
 # Toutes les sources HTTP
 HTTP_SRCS = $(HTTP_REQUEST_SRCS) $(HTTP_RESPONSE_SRCS) $(ROUTE_SRCS)
 
-# Sources principales (incluant les fichiers HTTP)
+# Sources principales (incluant les fichiers HTTP et config)
 SRCS = $(wildcard $(SRC_DIR)/*.cpp) \
        $(wildcard $(SRC_DIR)/*/*.cpp) \
-       $(HTTP_SRCS)
+       $(HTTP_SRCS) \
+       $(CONFIG_SRCS)
 
 # Objets principaux
 OBJS = $(sort $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS)))
@@ -37,10 +41,12 @@ TEST_PARSER = test_parser
 TEST_FORM = test_form
 TEST_RESPONSE = test_response
 TEST_INTEGRATION = test_integration
+TEST_CONFIG = test_config
 TEST_PARSER_SRC = $(TEST_DIR)/test_parser.cpp
 TEST_FORM_SRC = $(TEST_DIR)/test_form_parser.cpp
 TEST_RESPONSE_SRC = $(TEST_DIR)/test_response.cpp
 TEST_INTEGRATION_SRC = $(TEST_DIR)/test_integration.cpp
+TEST_CONFIG_SRC = $(TEST_DIR)/test_config.cpp
 
 # Règle par défaut : compile uniquement le serveur
 all: $(NAME)
@@ -55,7 +61,7 @@ $(NAME): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME)
 
 # Tests optionnels
-test: test_parser test_form test_response test_integration
+test: test_parser test_form test_response test_integration test_config
 
 test_parser: 
 	@mkdir -p $(OBJ_DIR)
@@ -77,6 +83,11 @@ test_integration:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(HTTP_SRCS) $(TEST_INTEGRATION_SRC) -o $(TEST_INTEGRATION)
 	./$(TEST_INTEGRATION)
 
+test_config:
+	@mkdir -p $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(CONFIG_SRCS) $(TEST_CONFIG_SRC) -o $(TEST_CONFIG)
+	./$(TEST_CONFIG)
+
 clean:
 	rm -rf $(OBJ_DIR)
 
@@ -86,8 +97,9 @@ fclean: clean
 	rm -f $(TEST_FORM)
 	rm -f $(TEST_RESPONSE)
 	rm -f $(TEST_INTEGRATION)
+	rm -f $(TEST_CONFIG)
 
 re: fclean all
 
-.PHONY: all clean fclean re test test_parser test_form test_response test_integration
+.PHONY: all clean fclean re test test_parser test_form test_response test_integration test_config
 
