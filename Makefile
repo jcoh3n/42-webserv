@@ -22,7 +22,10 @@ HTTP_RESPONSE_SRCS = $(SRC_DIR)/http/HttpResponse.cpp \
 ROUTE_SRCS = $(SRC_DIR)/http/RouteHandler.cpp
 
 # Sources Configuration
-CONFIG_SRCS = $(SRC_DIR)/config/ConfigParser.cpp
+CONFIG_SRCS = $(SRC_DIR)/config/ConfigParser.cpp \
+              $(SRC_DIR)/config/ConfigUtils.cpp \
+              $(SRC_DIR)/config/ConfigValidator.cpp \
+              $(SRC_DIR)/config/ConfigSelector.cpp
 
 # Toutes les sources HTTP
 HTTP_SRCS = $(HTTP_REQUEST_SRCS) $(HTTP_RESPONSE_SRCS) $(ROUTE_SRCS)
