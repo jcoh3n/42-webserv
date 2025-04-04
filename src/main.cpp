@@ -7,8 +7,8 @@
 int main(int argc, char* argv[]) {
 	// Vérifier qu'un fichier de configuration a été fourni
 	if (argc < 2) {
-		std::cerr << "Usage: " << argv[0] << " <config_file>" << std::endl;
-		std::cerr << "Error: Configuration file required" << std::endl;
+		LOG_ERROR("Usage: " << argv[0] << " <config_file>");
+		LOG_ERROR("Configuration file required");
 		return 1;
 	}
 	
@@ -17,8 +17,8 @@ int main(int argc, char* argv[]) {
 	
 	// Charger la configuration
 	try {
-		HTTP::ConfigParser parser;
-		HTTP::WebservConfig config = parser.parseFile(config_file);
+		ConfigParser parser;
+		WebservConfig config = parser.parseFile(config_file);
 		
 		if (config.servers.empty()) {
 			LOG_ERROR("No server configured in " << config_file);
