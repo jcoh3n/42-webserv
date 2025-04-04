@@ -1,6 +1,7 @@
 #include "http/RouteHandler.hpp"
 #include "http/HttpResponse.hpp"
 #include "http/utils/FileUtils.hpp"
+#include "http/utils/HttpStringUtils.hpp"
 #include "utils/Common.hpp"
 #include <fstream>
 #include <sstream>
@@ -50,9 +51,6 @@ HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
 HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
     HttpResponse response;
     std::string file_path = getFilePath(request.getUri()); 
-    
-    // Log détaillé pour le debugging des requêtes GET
-    LOG_HTTP("GET request for: " << request.getUri() << " (File: " << file_path << ")");
     
     // Vérifier d'abord si le fichier existe | Cas: 404
     if (!FileUtils::fileExists(file_path)) {
@@ -215,18 +213,21 @@ bool RouteHandler::serveStaticFile(const std::string& file_path, HttpResponse& r
 bool RouteHandler::checkNotModified(const HttpRequest& request, const std::string& file_path, HttpResponse& response) {
     // Vérifier si le client a envoyé un ETag
     std::string if_none_match = request.getHeader("If-None-Match");
+    
     if (!if_none_match.empty()) {
         // Calculer l'ETag de la ressource
         std::string etag = calculateETag(file_path);
         
-        // Vérifier si l'ETag correspond
-        if (if_none_match == etag) {
+        // Normaliser les ETags pour la comparaison (enlever les guillemets)
+        std::string normalized_client_etag = HttpStringUtils::normalizeETag(if_none_match);
+        std::string normalized_server_etag = HttpStringUtils::normalizeETag(etag);
+        
+        // Vérifier si l'ETag correspond après normalisation
+        if (normalized_client_etag == normalized_server_etag) {
             // La ressource n'a pas été modifiée
             response.setNotModified(etag);
-            LOG_HTTP("Cache validation: ETag match (" << etag << ") for " << request.getUri() << " → 304 Not Modified");
             return true;
         }
-        LOG_HTTP("Cache validation: ETag mismatch (Client: " << if_none_match << ", Server: " << etag << ") for " << request.getUri());
     }
     
     // Vérifier si le client a envoyé une date de dernière modification
@@ -245,32 +246,11 @@ bool RouteHandler::checkNotModified(const HttpRequest& request, const std::strin
                 // La ressource n'a pas été modifiée
                 response.setStatus(304);
                 response.setHeader("Last-Modified", last_modified);
-                LOG_HTTP("Cache validation: Last-Modified match for " << request.getUri() << " → 304 Not Modified");
                 return true;
             }
-            LOG_HTTP("Cache validation: Last-Modified mismatch for " << request.getUri());
         }
     }
     
     // La ressource a été modifiée ou pas d'information de cache
     return false;
 }
-
-/**
- * @brief Calcule un ETag pour un fichier
- * @param file_path Le chemin du fichier
- * @return L'ETag sous forme de chaîne de caractères
- *
- * L'ETag est un identifiant unique qui change si le fichier change.
- * Cette implémentation simple utilise la taille et la date de modification.
- */
-std::string RouteHandler::calculateETag(const std::string& file_path) {
-    struct stat file_stat;
-    if (stat(file_path.c_str(), &file_stat) == 0) {
-        // Combiner taille et date de modification
-        std::stringstream ss;
-        ss << "\"" << file_stat.st_size << "-" << file_stat.st_mtime << "\"";
-        return ss.str();
-    }
-    return "\"0\""; // Valeur par défaut si le fichier n'existe pas
-} 

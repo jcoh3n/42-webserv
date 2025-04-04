@@ -4,6 +4,7 @@
 #include "http/parser/FormData.hpp"
 #include <string>
 #include <map>
+#include <algorithm>
 
 /**
  * @brief Classe représentant une requête HTTP | But: parser la requête HTTP et stocker les données dans les variables membres
@@ -31,7 +32,11 @@ public:
     
     // Récupérer une en-tête spécifique
     std::string getHeader(const std::string& name) const {
-        std::map<std::string, std::string>::const_iterator it = headers.find(name);
+        std::string lowercase_name = name;
+        // Convertir en minuscules pour la recherche
+        std::transform(lowercase_name.begin(), lowercase_name.end(), lowercase_name.begin(), ::tolower);
+        
+        std::map<std::string, std::string>::const_iterator it = headers.find(lowercase_name);
         if (it != headers.end())
             return it->second;
         return "";

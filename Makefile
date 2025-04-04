@@ -16,7 +16,8 @@ HTTP_REQUEST_SRCS = $(SRC_DIR)/http/HttpRequest.cpp \
 # Sources HTTP Response
 HTTP_RESPONSE_SRCS = $(SRC_DIR)/http/HttpResponse.cpp \
            $(SRC_DIR)/http/ResponseHandler.cpp \
-           $(SRC_DIR)/http/utils/FileUtils.cpp
+           $(SRC_DIR)/http/utils/FileUtils.cpp \
+           $(SRC_DIR)/http/utils/HttpStringUtils.cpp
 
 # Sources Routes
 ROUTE_SRCS = $(SRC_DIR)/http/RouteHandler.cpp

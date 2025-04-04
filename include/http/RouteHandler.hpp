@@ -32,7 +32,6 @@ private:
     
     // Méthodes de gestion du cache
     bool checkNotModified(const HttpRequest& request, const std::string& file_path, HttpResponse& response);
-    std::string calculateETag(const std::string& file_path);
 };
 
 #endif // ROUTE_HANDLER_HPP 

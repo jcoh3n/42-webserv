@@ -1,5 +1,6 @@
 #include "http/HttpResponse.hpp"
 #include "http/HttpRequest.hpp"
+#include "http/utils/HttpStringUtils.hpp"
 #include <fstream>
 #include <sstream>
 #include <sys/stat.h>
@@ -321,15 +322,14 @@ std::string getMimeType(const std::string& file_path) {
  */
 std::string calculateETag(const std::string& file_path) {
     struct stat file_info;
-    if (stat(file_path.c_str(), &file_info) != 0) {
-        return "";
+    if (stat(file_path.c_str(), &file_info) == 0) {
+        // Calculer un ETag simple basé sur la taille et la date de modification
+        // Ce format est suffisant pour la plupart des cas d'utilisation
+        std::stringstream etag;
+        etag << "\"" << file_info.st_size << "-" << file_info.st_mtime << "\"";
+        return etag.str();
     }
-    
-    // Calculer un ETag simple basé sur la taille et la date de modification
-    // Ce format est suffisant pour la plupart des cas d'utilisation
-    std::stringstream etag;
-    etag << "\"" << file_info.st_size << "-" << file_info.st_mtime << "\"";
-    return etag.str();
+    return "\"0\"";  // Même valeur par défaut que dans RouteHandler
 }
 
 /**
@@ -345,7 +345,8 @@ std::string calculateETag(const std::string& file_path) {
 bool checkNotModified(const HttpRequest& request, const std::string& file_path, HttpResponse& response) {
     // Calculer l'ETag du fichier
     std::string etag = calculateETag(file_path);
-    if (etag.empty()) {
+    // Ne pas continuer si l'ETag est la valeur par défaut ("0")
+    if (etag == "\"0\"") {
         return false;
     }
     
@@ -353,10 +354,17 @@ bool checkNotModified(const HttpRequest& request, const std::string& file_path, 
     const std::map<std::string, std::string>& headers = request.getHeaders();
     std::map<std::string, std::string>::const_iterator it = headers.find("if-none-match");
     
-    // Si l'ETag correspond, répondre avec 304 Not Modified
-    if (it != headers.end() && it->second == etag) {
-        response.setNotModified(etag);
-        return true;
+    // Si l'ETag correspondant a été trouvé
+    if (it != headers.end()) {
+        // Normaliser les ETags pour la comparaison
+        std::string normalized_client_etag = HttpStringUtils::normalizeETag(it->second);
+        std::string normalized_server_etag = HttpStringUtils::normalizeETag(etag);
+        
+        // Si l'ETag correspond après normalisation, répondre avec 304 Not Modified
+        if (normalized_client_etag == normalized_server_etag) {
+            response.setNotModified(etag);
+            return true;
+        }
     }
     
     // Sinon, ajouter l'ETag à la réponse et continuer normalement
