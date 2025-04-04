@@ -32,11 +32,13 @@ bool HttpUtils::isUriSafe(const std::string& uri) {
 }
 
 bool HttpUtils::isMethodSupported(const std::string& method) {
-    for (size_t i = 0; i < METHOD_COUNT; ++i) {
-        if (method == ALLOWED_METHODS[i])
-            return true;
+    // Accepter toutes les méthodes HTTP valides
+    // Une méthode HTTP valide ne doit contenir que des caractères alphanumériques en majuscules
+    for (size_t i = 0; i < method.length(); ++i) {
+        if (!isupper(method[i]) && !isdigit(method[i]))
+            return false;
     }
-    return false;
+    return !method.empty();
 }
 
 bool HttpUtils::isVersionSupported(const std::string& version) {
