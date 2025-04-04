@@ -5,8 +5,6 @@
 #include <vector>
 #include <map>
 
-namespace HTTP {
-
 /**
  * @brief Configuration d'une location (route) dans le serveur
  */
@@ -52,7 +50,5 @@ struct ServerConfig {
 struct WebservConfig {
     std::vector<ServerConfig> servers; // Liste des serveurs configurés
 };
-
-} // namespace HTTP
 
 #endif // CONFIG_TYPES_HPP 
