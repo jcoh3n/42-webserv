@@ -5,13 +5,11 @@
 #include "utils/Common.hpp"
 #include <string>
 #include <vector>
-
-namespace HTTP {
+#include <map>
 
 /**
- * @brief Classe pour parser les fichiers de configuration simplifiés
- * Format: clé=valeur, un par ligne
- * Les sections sont délimitées par [section]
+ * @brief Classe pour parser les fichiers de configuration de style Nginx
+ * Format supporté: blocs avec accolades, directives clé=valeur ou clé valeur
  */
 class ConfigParser {
 public:
@@ -25,59 +23,65 @@ public:
 
 private:
     /**
-     * @brief Parse une ligne de configuration
+     * @brief Parse une ligne de configuration avec la nouvelle syntaxe à accolades
      * @param line La ligne à parser
+     * @param config La configuration en cours de construction
      * @param current_server Le serveur en cours de configuration
      * @param current_location La location en cours de configuration
-     * @param section La section en cours (server, location, etc.)
      * @param location_path Le chemin de la location en cours
+     * @param in_server Indicateur si on est dans un bloc server
+     * @param in_location Indicateur si on est dans un bloc location
+     * @param brace_level Niveau d'imbrication des accolades
      */
-    void parseLine(const std::string& line, ServerConfig& current_server, 
-                   LocationConfig& current_location, std::string& section, 
-                   std::string& location_path);
-                   
+    void parseNewSyntax(const std::string& line, WebservConfig& config,
+                     ServerConfig& current_server, LocationConfig& current_location,
+                     std::string& location_path, bool& in_server, bool& in_location,
+                     int& brace_level);
+
     /**
-     * @brief Valide la configuration complète
-     * @param config La configuration à valider
-     * @throw std::runtime_error Si la configuration est invalide
+     * @brief Parse une directive de type clé=valeur ou clé valeur
+     * @param line La ligne à parser
+     * @param in_server Indicateur si on est dans un bloc server
+     * @param in_location Indicateur si on est dans un bloc location
+     * @param server Le serveur en cours de configuration
+     * @param location La location en cours de configuration
      */
-    void validateConfig(const WebservConfig& config);
-    
+    void parseDirective(const std::string& line, bool in_server, bool in_location,
+                     ServerConfig& server, LocationConfig& location);
+
     /**
-     * @brief Analyse une taille en octets à partir d'une chaîne
-     * @param size_str La chaîne représentant la taille (ex: "10M", "1G")
-     * @return La taille en octets
+     * @brief Traite une directive de serveur
+     * @param key Clé de la directive
+     * @param value Valeur de la directive
+     * @param server Configuration du serveur à modifier
      */
-    size_t parseSize(const std::string& size_str);
-    
+    void processServerDirective(const std::string& key, const std::string& value,
+                             ServerConfig& server);
+
     /**
-     * @brief Vérifie si un répertoire existe
-     * @param path Le chemin du répertoire
-     * @return true si le répertoire existe, false sinon
+     * @brief Traite une directive de location
+     * @param key Clé de la directive
+     * @param value Valeur de la directive
+     * @param location Configuration de la location à modifier
      */
-    bool directoryExists(const std::string& path);
-    
-    /**
-     * @brief Vérifie si un fichier existe
-     * @param path Le chemin du fichier
-     * @return true si le fichier existe, false sinon
-     */
-    bool fileExists(const std::string& path);
-    
-    /**
-     * @brief Supprime les espaces au début et à la fin d'une chaîne
-     * @param str La chaîne à traiter
-     * @return La chaîne sans espaces au début et à la fin
-     */
-    std::string trim(const std::string& str);
-    
-    /**
-     * @brief Divise une chaîne en fonction d'un délimiteur
-     * @param str La chaîne à diviser
-     * @param delimiter Le délimiteur
-     * @return Un vecteur contenant les parties de la chaîne
-     */
+    void processLocationDirective(const std::string& key, const std::string& value,
+                               LocationConfig& location);
+
+    // Méthodes utilitaires
     std::vector<std::string> split(const std::string& str, char delimiter);
+    std::string trim(const std::string& str);
+    size_t parseSize(const std::string& size_str);
+    bool fileExists(const std::string& path);
+    bool directoryExists(const std::string& path);
+
+    // Méthodes de validation
+    void validateConfig(const WebservConfig& config);
+    void countServersByAddress(const WebservConfig& config, std::map<std::pair<std::string, int>, int>& port_counts);
+    void checkDuplicateServerNames(const WebservConfig& config, const std::map<std::pair<std::string, int>, int>& port_counts);
+    void validateServerConfigs(const WebservConfig& config);
+    void checkDuplicateLocations(const ServerConfig& server);
+    void validateLocationDirectories(const LocationConfig& location);
+    void checkErrorPages(const ServerConfig& server);
 };
 
 /**
@@ -93,6 +97,24 @@ const ServerConfig& selectVirtualServer(const WebservConfig& config,
                                        int port);
 
 /**
+ * @brief Recherche les serveurs correspondant à un port donné
+ * @param config La configuration complète
+ * @param port Le port recherché
+ * @param matching_servers Liste des serveurs correspondants (sortie)
+ */
+void findServersByPort(const WebservConfig& config, int port,
+                     std::vector<const ServerConfig*>& matching_servers);
+
+/**
+ * @brief Recherche un serveur par nom dans une liste de serveurs
+ * @param servers La liste des serveurs à vérifier
+ * @param hostname Le hostname recherché
+ * @return Le serveur correspondant ou NULL si aucun ne correspond
+ */
+const ServerConfig* findServerByName(const std::vector<const ServerConfig*>& servers, 
+                                   const std::string& hostname);
+
+/**
  * @brief Sélectionne la location appropriée en fonction de l'URI
  * @param server La configuration du serveur
  * @param uri L'URI demandée
@@ -100,6 +122,20 @@ const ServerConfig& selectVirtualServer(const WebservConfig& config,
  */
 const LocationConfig& selectLocation(const ServerConfig& server, const std::string& uri);
 
-} // namespace HTTP
+/**
+ * @brief Trouve la meilleure correspondance de location pour une URI
+ * @param server La configuration du serveur
+ * @param uri L'URI demandée
+ * @return Pointeur vers la location la plus appropriée ou NULL si aucune ne correspond
+ */
+const LocationConfig* findBestLocationMatch(const ServerConfig& server, const std::string& uri);
+
+/**
+ * @brief Vérifie si un chemin de location correspond à un préfixe d'URI
+ * @param uri L'URI à vérifier
+ * @param location_path Le chemin de location à comparer
+ * @return true si le chemin correspond, false sinon
+ */
+bool isLocationPrefixMatch(const std::string& uri, const std::string& location_path);
 
 #endif // CONFIG_PARSER_HPP 
