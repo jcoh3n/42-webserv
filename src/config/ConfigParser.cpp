@@ -176,7 +176,11 @@ void ConfigParser::parseDirective(const std::string& line, bool in_server, bool 
 void ConfigParser::processServerDirective(const std::string& key, const std::string& value,
                                        ServerConfig& server) {
     if (key == "port") {
-        server.port = atoi(value.c_str());
+        int port = atoi(value.c_str());
+        if (port <= 0 || port > 65535) {
+            throw std::runtime_error("Invalid port number (must be between 1 and 65535)");
+        }
+        server.port = port;
     } else if (key == "host") {
         server.host = value;
     } else if (key == "server_name") {
@@ -185,8 +189,6 @@ void ConfigParser::processServerDirective(const std::string& key, const std::str
         server.root_directory = value;
     } else if (key == "index") {
         server.index_files = split(value, ' ');
-    } else if (key == "client_max_body_size") {
-        server.client_max_body_size = parseSize(value);
     } else if (key == "error_page") {
         std::vector<std::string> parts = split(value, ' ');
         if (parts.size() < 2) {
@@ -222,6 +224,11 @@ void ConfigParser::processLocationDirective(const std::string& key, const std::s
         location.cgi_extensions = split(value, ' ');
     } else if (key == "alias") {
         location.alias = value;
+    } else if (key == "client_max_body_size") {
+        location.client_max_body_size = parseSize(value);
+        if (location.client_max_body_size == 0) {
+            throw std::runtime_error("client_max_body_size must be greater than 0");
+        }
     } else {
         throw std::runtime_error("Unknown location directive: " + key);
     }

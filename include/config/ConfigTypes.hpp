@@ -18,10 +18,12 @@ struct LocationConfig {
     std::vector<std::string> cgi_extensions;   // Extensions pour le CGI (ex: ".php")
     std::string upload_directory;              // Répertoire pour les uploads
     std::string alias;                         // Alias pour cette location
+    size_t client_max_body_size;               // Taille maximale du body pour cette location
     
     LocationConfig() 
         : autoindex(false)
-        , redirect_code(301) {}
+        , redirect_code(0)
+        , client_max_body_size(1024 * 1024) {} // 1MB par défaut
 };
 
 /**
@@ -34,14 +36,12 @@ struct ServerConfig {
     std::string root_directory;                      // Répertoire racine pour ce serveur
     std::vector<std::string> index_files;            // Fichiers index par défaut
     std::map<int, std::string> error_pages;          // Pages d'erreur personnalisées
-    size_t client_max_body_size;                     // Taille maximale du body client
     std::map<std::string, LocationConfig> locations; // Configurations des locations
     
     ServerConfig() 
         : host("0.0.0.0")
-        , port(8080)
-        , root_directory("./www")
-        , client_max_body_size(1024 * 1024) {} // 1MB par défaut
+        , port(0)
+        , root_directory("./www") {}
 };
 
 /**

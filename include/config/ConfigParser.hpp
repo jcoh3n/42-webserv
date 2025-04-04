@@ -39,12 +39,13 @@ private:
                      int& brace_level);
 
     /**
-     * @brief Parse une directive de type clé=valeur ou clé valeur
+     * @brief Parse une directive de configuration
      * @param line La ligne à parser
      * @param in_server Indicateur si on est dans un bloc server
      * @param in_location Indicateur si on est dans un bloc location
      * @param server Le serveur en cours de configuration
      * @param location La location en cours de configuration
+     * @throw std::runtime_error Si la directive est invalide
      */
     void parseDirective(const std::string& line, bool in_server, bool in_location,
                      ServerConfig& server, LocationConfig& location);
@@ -54,6 +55,7 @@ private:
      * @param key Clé de la directive
      * @param value Valeur de la directive
      * @param server Configuration du serveur à modifier
+     * @throw std::runtime_error Si la directive est invalide
      */
     void processServerDirective(const std::string& key, const std::string& value,
                              ServerConfig& server);
@@ -63,9 +65,63 @@ private:
      * @param key Clé de la directive
      * @param value Valeur de la directive
      * @param location Configuration de la location à modifier
+     * @throw std::runtime_error Si la directive est invalide
      */
     void processLocationDirective(const std::string& key, const std::string& value,
                                LocationConfig& location);
+
+    // Méthodes de validation
+    /**
+     * @brief Valide la configuration globale
+     * @param config Configuration à valider
+     * @throw std::runtime_error Si la configuration est invalide
+     */
+    void validateConfig(const WebservConfig& config);
+
+    /**
+     * @brief Compte et valide les serveurs par adresse
+     * @param config Configuration à vérifier
+     * @param port_counts Map pour stocker les comptes
+     * @throw std::runtime_error Si une adresse est invalide
+     */
+    void countServersByAddress(const WebservConfig& config, 
+                             std::map<std::pair<std::string, int>, int>& port_counts);
+
+    /**
+     * @brief Vérifie les noms de serveurs en double
+     * @param config Configuration à vérifier
+     * @param port_counts Map des comptes par port
+     * @throw std::runtime_error Si des noms sont en double
+     */
+    void checkDuplicateServerNames(const WebservConfig& config, 
+                                 const std::map<std::pair<std::string, int>, int>& port_counts);
+
+    /**
+     * @brief Valide les configurations des serveurs
+     * @param config Configuration à vérifier
+     * @throw std::runtime_error Si une configuration est invalide
+     */
+    void validateServerConfigs(const WebservConfig& config);
+
+    /**
+     * @brief Valide les configurations des locations
+     * @param server Serveur dont les locations sont à vérifier
+     * @throw std::runtime_error Si une location est invalide
+     */
+    void validateLocations(const ServerConfig& server);
+
+    /**
+     * @brief Valide les répertoires d'une location
+     * @param location Location à vérifier
+     */
+    void validateLocationDirectories(const LocationConfig& location);
+
+    /**
+     * @brief Valide les pages d'erreur
+     * @param server Serveur dont les pages sont à vérifier
+     * @throw std::runtime_error Si une page d'erreur est invalide
+     */
+    void validateErrorPages(const ServerConfig& server);
 
     // Méthodes utilitaires
     std::vector<std::string> split(const std::string& str, char delimiter);
@@ -73,15 +129,6 @@ private:
     size_t parseSize(const std::string& size_str);
     bool fileExists(const std::string& path);
     bool directoryExists(const std::string& path);
-
-    // Méthodes de validation
-    void validateConfig(const WebservConfig& config);
-    void countServersByAddress(const WebservConfig& config, std::map<std::pair<std::string, int>, int>& port_counts);
-    void checkDuplicateServerNames(const WebservConfig& config, const std::map<std::pair<std::string, int>, int>& port_counts);
-    void validateServerConfigs(const WebservConfig& config);
-    void checkDuplicateLocations(const ServerConfig& server);
-    void validateLocationDirectories(const LocationConfig& location);
-    void checkErrorPages(const ServerConfig& server);
 };
 
 /**
