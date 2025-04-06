@@ -27,12 +27,13 @@ int main(int argc, char* argv[]) {
 		
 		// Pour l'instant, nous utilisons seulement le premier serveur configuré
 		// À l'avenir, nous pourrons lancer plusieurs serveurs en parallèle
-		int port = config.servers[0].port;
+		const ServerConfig& server_config = config.servers[0];
+		int port = server_config.port;
 		LOG_INFO("Loaded configuration with " << config.servers.size() << " server(s)");
 		LOG_INFO("Using port " << port << " from configuration");
 		
 		// Créer et démarrer le serveur
-		Server server(port);
+		Server server(port, server_config);
 		server.start();
 	} catch (const std::exception& e) {
 		LOG_ERROR("Error: " << e.what());

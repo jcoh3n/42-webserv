@@ -11,11 +11,17 @@ Server* Server::instance = NULL;
 /**
  * @brief Constructeur de la classe Server
  * @param port Le port sur lequel le serveur va écouter
+ * @param config La configuration du serveur
  * 
  * Initialise le serveur avec un port spécifique, prépare les descripteurs
  * de fichier pour poll() et initialise l'instance statique pour le gestionnaire de signal.
  */
-Server::Server(int port) : port(port), nfds(1), running(false), route_handler("www") {
+Server::Server(int port, const ServerConfig& config) 
+    : port(port)
+    , nfds(1)
+    , running(false)
+    , server_config(config)
+    , route_handler(config.root_directory, config) {
 	// Initialiser le tableau fds
 	memset(fds, 0, sizeof(fds));
 	

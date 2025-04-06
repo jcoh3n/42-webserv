@@ -7,6 +7,7 @@
 # include "http/HttpResponse.hpp"
 # include "http/ResponseHandler.hpp"
 # include "http/RouteHandler.hpp"
+# include "config/ConfigTypes.hpp"
 
 # define MAX_CLIENTS 1024
 
@@ -18,6 +19,7 @@ class Server
 	struct pollfd fds[MAX_CLIENTS]; // Tableau des descripteurs pour poll()
 	int nfds;                  // Nombre de descripteurs actifs
 	bool running;              // État d'exécution du serveur
+	ServerConfig server_config; // Configuration du serveur
 	RouteHandler route_handler; // Gestionnaire de routes
 
 	// Méthodes privées
@@ -27,7 +29,7 @@ class Server
 	void sendHttpResponse(int client_fd, const HttpRequest& request); // Envoi d'une réponse HTTP
 
   public:
-	Server(int port);
+	Server(int port, const ServerConfig& config);
 	~Server();
 
 	void start();  // Démarrage du serveur

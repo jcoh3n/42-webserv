@@ -1,0 +1,13 @@
+{
+    "status": "success",
+    "message": "API test endpoint",
+    "data": {
+        "method": "GET",
+        "timestamp": "2024-03-21T12:00:00Z",
+        "features_tested": [
+            "GET request",
+            "JSON response",
+            "Content-Type headers"
+        ]
+    }
+} 

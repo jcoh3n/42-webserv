@@ -9,13 +9,16 @@
 #include <sys/stat.h>
 #include <ctime>
 #include <algorithm>
+#include <map>
 
 /**
  * @brief Constructeur
  * @param root_directory Le répertoire racine pour les fichiers statiques
+ * @param server_config La configuration du serveur
  */
-RouteHandler::RouteHandler(const std::string& root_directory)
-    : root_directory(root_directory) {
+RouteHandler::RouteHandler(const std::string& root_directory, const ServerConfig& server_config)
+    : root_directory(root_directory)
+    , server_config(server_config) {
 }
 
 /**
@@ -54,26 +57,12 @@ HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
     
     // Vérifier d'abord si le fichier existe | Cas: 404
     if (!FileUtils::fileExists(file_path)) {
-        std::string error_404_path = root_directory + "/404.html";
-        if (FileUtils::fileExists(error_404_path)) {
-            response.setStatus(404);
-            if (serveStaticFile(error_404_path, response)) {
-                return response;
-            }
-        }
-        return createErrorResponse(404, "Not Found");
+        return serveErrorPage(404, "Not Found");
     }
 
     // Ensuite vérifier les permissions de lecture | Cas: 403
     if (!FileUtils::hasReadPermission(file_path)) {
-        std::string error_403_path = root_directory + "/403.html";
-        if (FileUtils::fileExists(error_403_path)) {
-            response.setStatus(403);
-            if (serveStaticFile(error_403_path, response)) {
-                return response;
-            }
-        }
-        return createErrorResponse(403, "Forbidden");
+        return serveErrorPage(403, "Forbidden");
     }
 
     // Traitement des répertoires | Cas: 301 -> Rediriger vers le répertoire
@@ -93,7 +82,7 @@ HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
                 return response;
             }
             return serveStaticFile(index_path, response) ? 
-                response : createErrorResponse(500, "Internal Server Error");
+                response : serveErrorPage(500, "Internal Server Error");
         }
         
         // Générer la liste du répertoire
@@ -109,14 +98,7 @@ HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
 
     // Servir le fichier statique | Cas: 500 -> Erreur interne du serveur
     if (!serveStaticFile(file_path, response)) {
-        std::string error_500_path = root_directory + "/500.html";
-        if (FileUtils::fileExists(error_500_path)) {
-            response.setStatus(500);
-            if (serveStaticFile(error_500_path, response)) {
-                return response;
-            }
-        }
-        return createErrorResponse(500, "Internal Server Error");
+        return serveErrorPage(500, "Internal Server Error");
     }
 
     return response;
@@ -253,4 +235,22 @@ bool RouteHandler::checkNotModified(const HttpRequest& request, const std::strin
     
     // La ressource a été modifiée ou pas d'information de cache
     return false;
+}
+
+HttpResponse RouteHandler::serveErrorPage(int error_code, const std::string& message) {
+    // Chercher la page d'erreur personnalisée dans la configuration
+    std::map<int, std::string>::const_iterator it = server_config.error_pages.find(error_code);
+    if (it != server_config.error_pages.end()) {
+        std::string error_page_path = root_directory + "/" + it->second;
+        if (FileUtils::fileExists(error_page_path) && FileUtils::hasReadPermission(error_page_path)) {
+            HttpResponse response;
+            response.setStatus(error_code);
+            if (serveStaticFile(error_page_path, response)) {
+                return response;
+            }
+        }
+    }
+    
+    // Si la page personnalisée n'existe pas ou ne peut pas être servie, utiliser la page par défaut
+    return createErrorResponse(error_code, message);
 }
