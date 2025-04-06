@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test POST/DELETE - 42 Webserv</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.5;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f9f9f9;
+        }
+        
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .back-link {
+            display: flex;
+            align-items: center;
+            color: #00babc;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 8px 16px;
+            border-radius: 30px;
+            transition: all 0.2s ease;
+            background-color: rgba(0, 186, 188, 0.1);
+        }
+        
+        .back-link:hover {
+            background-color: rgba(98, 0, 234, 0.1);
+            color: #6200ea;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: #444;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #00babc 0%, #6200ea 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        header h2 {
+            margin: 0;
+            font-size: 1.6rem;
+        }
+        
+        header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 30px;
+        }
+        
+        .test-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .method-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-right: 10px;
+        }
+        
+        .post {
+            background-color: #49cc90;
+        }
+        
+        .delete {
+            background-color: #f93e3e;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        h3 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: #333;
+        }
+        
+        .description {
+            margin-bottom: 20px;
+            color: #555;
+        }
+        
+        .field-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #00babc;
+        }
+        
+        .action-button {
+            background: linear-gradient(135deg, #00babc 0%, #008f91 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 186, 188, 0.2);
+        }
+        
+        .delete-button {
+            background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
+        }
+        
+        .delete-button:hover {
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.2);
+        }
+        
+        .result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            font-family: monospace;
+            white-space: pre-wrap;
+            display: none;
+            border-left: 4px solid #ddd;
+        }
+        
+        .success {
+            border-left-color: #49cc90;
+            background-color: #f0fff4;
+        }
+        
+        .error {
+            border-left-color: #f93e3e;
+            background-color: #fff5f5;
+        }
+        
+        footer {
+            margin-top: 30px;
+            color: #777;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <a href="/" class="back-link">
+            <span>←</span> Retour à l'accueil
+        </a>
+        <h1>Test HTTP</h1>
+    </div>
+
+    <header>
+        <h2>Test des méthodes POST et DELETE</h2>
+        <p>Vérifiez rapidement le fonctionnement des méthodes HTTP avancées</p>
+    </header>
+
+    <div class="card">
+        <div class="test-section">
+            <div class="section-header">
+                <span class="method-badge post">POST</span>
+                <h3>Créer un fichier</h3>
+            </div>
+            
+            <p class="description">
+                Utilisez cette méthode pour créer un nouveau fichier sur le serveur.
+                Le serveur traite la requête POST via un script CGI et crée le fichier demandé.
+            </p>
+            
+            <div class="field-group">
+                <label for="post-filename">Nom du fichier :</label>
+                <input type="text" id="post-filename" value="test_file.txt" placeholder="Exemple: mon_fichier.txt">
+            </div>
+            
+            <div class="field-group">
+                <label for="post-content">Contenu du fichier :</label>
+                <textarea id="post-content" rows="5">Ceci est un fichier de test créé avec une requête POST.
+La méthode POST est utilisée pour créer des ressources sur le serveur.</textarea>
+            </div>
+            
+            <button class="action-button" onclick="createFile()">Créer le fichier</button>
+            
+            <div id="post-result" class="result-area"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="section-header">
+                <span class="method-badge delete">DELETE</span>
+                <h3>Supprimer un fichier</h3>
+            </div>
+            
+            <p class="description">
+                Utilisez cette méthode pour supprimer un fichier existant du serveur.
+                Vous pouvez supprimer le fichier que vous venez de créer avec la méthode POST.
+            </p>
+            
+            <div class="field-group">
+                <label for="delete-filename">Nom du fichier à supprimer :</label>
+                <input type="text" id="delete-filename" value="test_file.txt" placeholder="Exemple: mon_fichier.txt">
+            </div>
+            
+            <button class="action-button delete-button" onclick="deleteFile()">Supprimer le fichier</button>
+            
+            <div id="delete-result" class="result-area"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>42 Webserv - Test des méthodes HTTP</p>
+    </footer>
+
+    <script>
+        function createFile() {
+            const filename = document.getElementById('post-filename').value.trim();
+            const content = document.getElementById('post-content').value;
+            const resultArea = document.getElementById('post-result');
+            
+            if (!filename) {
+                showResult(resultArea, "Erreur : Veuillez entrer un nom de fichier.", "error");
+                return;
+            }
+            
+            showResult(resultArea, "Envoi de la requête POST...", "");
+            
+            fetch('/cgi-bin/file_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=create&filename=${encodeURIComponent(filename)}&content=${encodeURIComponent(content)}`
+            })
+            .then(response => {
+                const status = response.status;
+                
+                try {
+                    return response.json().then(data => {
+                        return { status, data };
+                    });
+                } catch (e) {
+                    return { status, data: null };
+                }
+            })
+            .then(({ status, data }) => {
+                let resultText = `Statut HTTP: ${status}\n\n`;
+                
+                if (status >= 200 && status < 300) {
+                    resultText += "✅ Fichier créé avec succès !\n\n";
+                    if (data) {
+                        resultText += `Nom: ${data.data?.filename || filename}\n`;
+                        resultText += `Taille: ${data.data?.size || content.length} octets\n`;
+                        resultText += `Message: ${data.message || "Opération réussie"}`;
+                    }
+                    showResult(resultArea, resultText, "success");
+                } else {
+                    resultText += "❌ Erreur lors de la création du fichier.\n\n";
+                    if (data) {
+                        resultText += `Message d'erreur: ${data.message || "Erreur inconnue"}`;
+                    }
+                    showResult(resultArea, resultText, "error");
+                }
+            })
+            .catch(error => {
+                showResult(resultArea, `❌ Erreur: ${error.message}`, "error");
+            });
+        }
+        
+        function deleteFile() {
+            const filename = document.getElementById('delete-filename').value.trim();
+            const resultArea = document.getElementById('delete-result');
+            
+            if (!filename) {
+                showResult(resultArea, "Erreur : Veuillez entrer un nom de fichier.", "error");
+                return;
+            }
+            
+            showResult(resultArea, "Envoi de la requête DELETE...", "");
+            
+            fetch(`/${filename}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                const status = response.status;
+                let resultText = `Statut HTTP: ${status}\n\n`;
+                
+                if (status === 204) {
+                    resultText += "✅ Fichier supprimé avec succès !";
+                    showResult(resultArea, resultText, "success");
+                } else if (status === 404) {
+                    resultText += "❌ Le fichier n'existe pas sur le serveur.";
+                    showResult(resultArea, resultText, "error");
+                } else if (status === 403) {
+                    resultText += "❌ Permission refusée. Le serveur n'est pas autorisé à supprimer ce fichier.";
+                    showResult(resultArea, resultText, "error");
+                } else {
+                    resultText += "❌ Erreur lors de la suppression du fichier.";
+                    showResult(resultArea, resultText, "error");
+                }
+            })
+            .catch(error => {
+                showResult(resultArea, `❌ Erreur: ${error.message}`, "error");
+            });
+        }
+        
+        function showResult(element, text, className) {
+            element.textContent = text;
+            element.className = "result-area";
+            if (className) {
+                element.classList.add(className);
+            }
+            element.style.display = "block";
+        }
+    </script>
+</body>
+</html> 

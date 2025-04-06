@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste de Tâches - 42 Webserv</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.5;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+        
+        .top-nav {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .back-link {
+            display: flex;
+            align-items: center;
+            color: #00babc;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 8px 16px;
+            border-radius: 30px;
+            transition: all 0.2s ease;
+            background-color: rgba(0, 186, 188, 0.1);
+        }
+        
+        .back-link:hover {
+            color: #6200ea;
+            background-color: rgba(98, 0, 234, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: #444;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #00babc 0%, #6200ea 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 188, 188, 0.15);
+        }
+        
+        header h2 {
+            margin: 0;
+            font-size: 1.6rem;
+        }
+        
+        header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .form-group {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .form-input {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px 0 0 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #00babc;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #00babc 0%, #008f91 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #00d4d6 0%, #00a8aa 100%);
+        }
+        
+        .todo-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+        }
+        
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.3s;
+        }
+        
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+        
+        .todo-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .todo-text {
+            font-size: 1.05rem;
+        }
+        
+        .delete-btn {
+            background-color: #ff5252;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .delete-btn:hover {
+            background-color: #ff0000;
+            transform: scale(1.05);
+        }
+        
+        .empty-state {
+            padding: 20px;
+            color: #888;
+            font-style: italic;
+        }
+        
+        .method-info {
+            margin-top: 30px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: left;
+            border-left: 3px solid #00babc;
+        }
+        
+        .method-info h3 {
+            margin-top: 0;
+            color: #444;
+        }
+        
+        .method-info p {
+            margin-bottom: 10px;
+        }
+        
+        .method-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 5px;
+            color: white;
+        }
+        
+        .get-tag {
+            background-color: #61affe;
+        }
+        
+        .post-tag {
+            background-color: #49cc90;
+        }
+        
+        .delete-tag {
+            background-color: #f93e3e;
+        }
+        
+        footer {
+            margin-top: 30px;
+            color: #777;
+            font-size: 0.9rem;
+        }
+        
+        .status-message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .success {
+            background-color: #e3f9e5;
+            color: #00875a;
+            border-left: 3px solid #00875a;
+        }
+        
+        .error {
+            background-color: #ffe9e3;
+            color: #de350b;
+            border-left: 3px solid #de350b;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <a href="/" class="back-link">
+            <span class="back-icon">←</span> Retour à l'accueil
+        </a>
+        <h1>Démo HTTP</h1>
+    </div>
+
+    <header>
+        <h2>Liste de Tâches</h2>
+        <p>Une application simple pour démontrer les méthodes POST et DELETE</p>
+    </header>
+
+    <div class="card">
+        <form id="todo-form">
+            <div class="form-group">
+                <input type="text" class="form-input" id="task-input" placeholder="Ajouter une nouvelle tâche..." required>
+                <button type="submit" class="submit-btn">Ajouter</button>
+            </div>
+        </form>
+        
+        <div id="status-message" class="status-message"></div>
+        
+        <ul id="todo-list" class="todo-list">
+            <li class="empty-state">Aucune tâche pour le moment. Ajoutez votre première tâche !</li>
+        </ul>
+    </div>
+    
+    <div class="card method-info">
+        <h3>Méthodes HTTP utilisées</h3>
+        <p><span class="method-tag get-tag">GET</span> Charger la page et obtenir la liste des tâches</p>
+        <p><span class="method-tag post-tag">POST</span> Ajouter une nouvelle tâche à la liste</p>
+        <p><span class="method-tag delete-tag">DELETE</span> Supprimer une tâche existante</p>
+    </div>
+
+    <footer>
+        <p>42 Webserv © 2025</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const todoForm = document.getElementById('todo-form');
+            const taskInput = document.getElementById('task-input');
+            const todoList = document.getElementById('todo-list');
+            const statusMessage = document.getElementById('status-message');
+            
+            // Tableau local pour stocker les tâches
+            let tasks = [];
+            
+            // Fonction pour afficher un message de statut
+            function showStatusMessage(message, isSuccess) {
+                statusMessage.textContent = message;
+                statusMessage.className = `status-message ${isSuccess ? 'success' : 'error'}`;
+                statusMessage.style.display = 'block';
+                
+                // Masquer le message après 3 secondes
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 3000);
+            }
+            
+            // Fonction pour afficher la liste des tâches
+            function renderTasks() {
+                if (tasks.length === 0) {
+                    todoList.innerHTML = '<li class="empty-state">Aucune tâche pour le moment. Ajoutez votre première tâche !</li>';
+                    return;
+                }
+                
+                todoList.innerHTML = '';
+                tasks.forEach((task, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'todo-item';
+                    li.innerHTML = `
+                        <span class="todo-text">${task}</span>
+                        <button class="delete-btn" data-id="${index}">Supprimer</button>
+                    `;
+                    todoList.appendChild(li);
+                });
+                
+                // Ajouter les gestionnaires d'événements pour les boutons de suppression
+                document.querySelectorAll('.delete-btn').forEach(button => {
+                    button.addEventListener('click', handleDelete);
+                });
+            }
+            
+            // Gestionnaire pour l'ajout de tâche (méthode POST)
+            function handleSubmit(e) {
+                e.preventDefault();
+                
+                const taskText = taskInput.value.trim();
+                if (!taskText) return;
+                
+                // Effectuer une requête POST
+                fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `task=${encodeURIComponent(taskText)}`
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Ajouter la tâche localement
+                        tasks.push(taskText);
+                        renderTasks();
+                        taskInput.value = '';
+                        showStatusMessage('Tâche ajoutée avec succès !', true);
+                    } else {
+                        showStatusMessage('Erreur lors de l'ajout de la tâche.', false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showStatusMessage('Erreur lors de l'ajout de la tâche.', false);
+                });
+            }
+            
+            // Gestionnaire pour la suppression de tâche (méthode DELETE)
+            function handleDelete() {
+                const taskId = this.dataset.id;
+                
+                // Effectuer une requête DELETE
+                fetch(`/api/tasks/${taskId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Supprimer la tâche localement
+                        tasks.splice(taskId, 1);
+                        renderTasks();
+                        showStatusMessage('Tâche supprimée avec succès !', true);
+                    } else {
+                        showStatusMessage('Erreur lors de la suppression de la tâche.', false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showStatusMessage('Erreur lors de la suppression de la tâche.', false);
+                });
+            }
+            
+            // Charger quelques tâches d'exemple pour la démonstration
+            function loadSampleTasks() {
+                tasks = [
+                    "Terminer le serveur HTTP",
+                    "Implémenter la méthode POST",
+                    "Implémenter la méthode DELETE",
+                    "Tester avec différents navigateurs"
+                ];
+                renderTasks();
+            }
+            
+            // Ajouter les écouteurs d'événements
+            todoForm.addEventListener('submit', handleSubmit);
+            
+            // Charger les tâches d'exemple
+            loadSampleTasks();
+        });
+    </script>
+</body>
+</html> 

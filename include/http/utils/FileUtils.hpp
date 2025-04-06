@@ -20,6 +20,9 @@ public:
     // Vérifier les permissions en lecture
     static bool hasReadPermission(const std::string& path);
     
+    // Vérifier les permissions en écriture
+    static bool hasWritePermission(const std::string& path);
+    
     // Normaliser un chemin (supprimer les '..' et les '/')
     static std::string normalizePath(const std::string& base_path, const std::string& uri_path);
     

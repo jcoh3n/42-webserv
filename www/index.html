@@ -209,7 +209,8 @@
             <div class="test-section">
                 <h3>Tests Spéciaux</h3>
                 <div class="test-grid">
-                    <a href="/cache-test.html" class="test-button special-test full-width">Test Cache & ETags</a>
+                    <a href="/cache-test.html" class="test-button special-test">Test Cache & ETags</a>
+                    <a href="/api-test.html" class="test-button special-test">Test Méthodes HTTP</a>
                 </div>
             </div>
 
@@ -235,16 +236,14 @@
                 <div class="test-grid">
                     <a href="/calculator.html" class="test-button cgi-test" onclick="return testCGI('/calculator.html', 'Calculatrice interactive', event)">Calculatrice</a>
                     <a href="/cgi-bin/info.php" class="test-button cgi-test" onclick="return testCGI('/cgi-bin/info.php', 'Informations du serveur', event)">Info Serveur</a>
-                    <a href="/cgi-bin/test.php" class="test-button cgi-test" onclick="return testCGI('/cgi-bin/test.php', 'Script de test PHP', event)">Test PHP</a>
-                    <a href="/cgi-bin/info.php?format=json" class="test-button cgi-test" onclick="return testCGI('/cgi-bin/info.php?format=json', 'Informations au format JSON', event)">API JSON</a>
+                    <a href="/todo.html" class="test-button cgi-test" onclick="return testCGI('/todo.html', 'Démo POST/DELETE avec todo list', event)">Liste de Tâches</a>
                 </div>
                 <div class="test-help">
                     <p><strong>À propos des tests CGI :</strong></p>
                     <ul>
                         <li><strong>Calculatrice</strong> : Une application de calcul interactive utilisant PHP comme backend</li>
                         <li><strong>Info Serveur</strong> : Affiche les informations détaillées du serveur fournies par l'environnement CGI</li>
-                        <li><strong>Test PHP</strong> : Teste les fonctionnalités de base de PHP avec retour au format JSON</li>
-                        <li><strong>API JSON</strong> : Version API des informations serveur, utilisable pour des intégrations</li>
+                        <li><strong>Liste de Tâches</strong> : Démontre les méthodes HTTP POST et DELETE avec une interface simple</li>
                     </ul>
                 </div>
             </div>

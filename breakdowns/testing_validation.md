@@ -90,7 +90,7 @@ class WebservBasicTests(unittest.TestCase):
     
     def test_cgi_script(self):
         """Vérifier que les scripts CGI fonctionnent"""
-        response = requests.get(f"{self.base_url}/cgi-bin/test.php")
+        response = requests.get(f"{self.base_url}/cgi-bin/cgi_debug.php")
         self.assertEqual(response.status_code, 200)
     
     def test_directory_listing(self):

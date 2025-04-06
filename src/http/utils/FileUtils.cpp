@@ -38,6 +38,11 @@ bool FileUtils::hasReadPermission(const std::string& path) {
     return (access(path.c_str(), R_OK) == 0);
 }
 
+// Vérifier les permissions en écriture
+bool FileUtils::hasWritePermission(const std::string& path) {
+    return (access(path.c_str(), W_OK) == 0);
+}
+
 // Normaliser un chemin (supprimer les '..' et les '/')
 std::string FileUtils::normalizePath(const std::string& base_path, const std::string& uri_path) {
     // Empêcher la traversée de répertoire

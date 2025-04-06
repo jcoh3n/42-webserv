@@ -9,7 +9,7 @@ void testPHPScript() {
     
     // Créer une requête HTTP de test
     std::string raw_request = 
-        "GET /cgi-bin/test.php?param1=value1&param2=value2 HTTP/1.1\r\n"
+        "GET /cgi-bin/cgi_debug.php?param1=value1&param2=value2 HTTP/1.1\r\n"
         "Host: localhost:8080\r\n"
         "Content-Type: application/x-www-form-urlencoded\r\n"
         "\r\n";
@@ -24,7 +24,7 @@ void testPHPScript() {
     std::cout << "Query string : " << request.getQueryString() << std::endl;
 
     // Créer une instance de CGIHandler avec le chemin absolu
-    std::string script_path = "/home/j/Desktop/GITHUB-42/42-webserv/www/cgi-bin/test.php";
+    std::string script_path = "/home/j/Desktop/GITHUB-42/42-webserv/www/cgi-bin/cgi_debug.php";
     std::cout << "Création du CGIHandler avec le script : " << script_path << std::endl;
     CGIHandler handler(request, script_path, "/usr/bin/php-cgi");
     
@@ -132,7 +132,7 @@ void testPOSTRequest() {
     std::cout << "Test 3: Test d'une requête POST..." << std::endl;
     
     std::string raw_request = 
-        "POST /cgi-bin/test.php HTTP/1.1\r\n"
+        "POST /cgi-bin/cgi_debug.php HTTP/1.1\r\n"
         "Host: localhost:8080\r\n"
         "Content-Type: application/x-www-form-urlencoded\r\n"
         "Content-Length: 23\r\n"
@@ -143,7 +143,7 @@ void testPOSTRequest() {
     bool parsed = request.parse(raw_request);
     std::cout << "Parsing de la requête : " << (parsed ? "OK" : "ÉCHEC") << std::endl;
     
-    std::string script_path = "/home/j/Desktop/GITHUB-42/42-webserv/www/cgi-bin/test.php";
+    std::string script_path = "/home/j/Desktop/GITHUB-42/42-webserv/www/cgi-bin/cgi_debug.php";
     CGIHandler handler(request, script_path, "/usr/bin/php-cgi");
     
     HttpResponse response = handler.executeCGI();
@@ -165,7 +165,7 @@ void testEnvironmentVariables() {
     std::cout << "Test 4: Test des variables d'environnement..." << std::endl;
     
     std::string raw_request = 
-        "GET /cgi-bin/test.php HTTP/1.1\r\n"
+        "GET /cgi-bin/cgi_debug.php HTTP/1.1\r\n"
         "Host: localhost:8080\r\n"
         "X-Custom-Header: TestValue\r\n"
         "\r\n";
@@ -173,7 +173,7 @@ void testEnvironmentVariables() {
     HttpRequest request;
     request.parse(raw_request);
     
-    std::string script_path = "/home/j/Desktop/GITHUB-42/42-webserv/www/cgi-bin/test.php";
+    std::string script_path = "/home/j/Desktop/GITHUB-42/42-webserv/www/cgi-bin/cgi_debug.php";
     CGIHandler handler(request, script_path, "/usr/bin/php-cgi");
     
     HttpResponse response = handler.executeCGI();

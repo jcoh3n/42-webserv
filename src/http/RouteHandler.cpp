@@ -130,12 +130,31 @@ HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
  * @return La réponse HTTP
  */
 HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request) {
-    // Éviter l'avertissement de paramètre non utilisé
-    UNUSED(request);
+    HttpResponse response;
+    const std::string uri = request.getUri();
     
-    // Dans cette première version, nous ne gérons pas les POST
-    // Cela sera implémenté dans une phase ultérieure
-    return HttpResponse::createError(501, "Not Implemented");
+    // Vérifier si c'est une requête pour l'API des tâches
+    if (uri == "/api/tasks") {
+        return handleCGIRequest(request, getFilePath("/cgi-bin/tasks.php"), *findMatchingLocation("/cgi-bin/"));
+    }
+    
+    // Vérifier si c'est un formulaire ou une autre ressource CGI
+    const LocationConfig* location = findMatchingLocation(uri);
+    if (location && !location->cgi_handlers.empty()) {
+        std::string file_path = getFilePath(uri);
+        return handleCGIRequest(request, file_path, *location);
+    }
+    
+    // Vérifier si c'est une requête de téléchargement de fichier
+    if (request.getHeader("content-type").find("multipart/form-data") != std::string::npos) {
+        // Logique pour traiter les uploads de fichiers
+        // (Cette partie serait implémentée selon le breakdown file_upload.md)
+        return HttpResponse::createError(501, "File upload not yet implemented");
+    }
+    
+    // Pour les autres types de requêtes POST
+    // Si aucun handler spécifique n'est trouvé, renvoyer une erreur
+    return HttpResponse::createError(400, "Invalid POST request");
 }
 
 /**
@@ -144,12 +163,35 @@ HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request) {
  * @return La réponse HTTP
  */
 HttpResponse RouteHandler::handleDeleteRequest(const HttpRequest& request) {
-    // Éviter l'avertissement de paramètre non utilisé
-    UNUSED(request);
+    HttpResponse response;
+    const std::string uri = request.getUri();
     
-    // Dans cette première version, nous ne gérons pas les DELETE
-    // Cela sera implémenté dans une phase ultérieure
-    return HttpResponse::createError(501, "Not Implemented");
+    // Vérifier si c'est une requête pour l'API des tâches
+    if (uri.find("/api/tasks/") == 0) {
+        return handleCGIRequest(request, getFilePath("/cgi-bin/tasks.php"), *findMatchingLocation("/cgi-bin/"));
+    }
+    
+    // Pour les requêtes de suppression de fichier
+    std::string file_path = getFilePath(uri);
+    
+    // Vérifier si le fichier existe
+    if (!FileUtils::fileExists(file_path)) {
+        return serveErrorPage(404, "File not found");
+    }
+    
+    // Vérifier les permissions
+    if (!FileUtils::hasWritePermission(file_path)) {
+        return serveErrorPage(403, "Forbidden: No permission to delete file");
+    }
+    
+    // Essayer de supprimer le fichier
+    if (std::remove(file_path.c_str()) != 0) {
+        return serveErrorPage(500, "Failed to delete file");
+    }
+    
+    // Réponse réussie (No Content)
+    response.setStatus(204);
+    return response;
 }
 
 /**
