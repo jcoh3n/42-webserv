@@ -256,8 +256,12 @@
             
             showResult(resultArea, "Envoi de la requête DELETE...", "");
             
-            fetch(`/cgi-bin/file_handler.php?filename=${encodeURIComponent(filename)}`, {
-                method: 'DELETE'
+            fetch(`/cgi-bin/file_handler.php`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `_method=DELETE&filename=${encodeURIComponent(filename)}`
             })
             .then(response => {
                 const status = response.status;

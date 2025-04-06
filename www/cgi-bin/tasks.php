@@ -7,6 +7,16 @@ header('Content-Type: application/json');
 // Récupérer la méthode HTTP
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Support pour les requêtes DELETE simulées via POST avec _method=DELETE
+if ($method === 'POST' && isset($_POST['_method']) && $_POST['_method'] === 'DELETE') {
+    $method = 'DELETE';
+}
+
+// Support pour les requêtes DELETE simulées via GET avec _method=DELETE
+if ($method === 'GET' && isset($_GET['_method']) && $_GET['_method'] === 'DELETE') {
+    $method = 'DELETE';
+}
+
 // Fichier pour stocker les tâches
 $tasks_file = '../data/tasks.json';
 

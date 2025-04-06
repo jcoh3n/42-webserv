@@ -207,10 +207,19 @@
             </div>
 
             <div class="test-section">
-                <h3>Tests Spéciaux</h3>
+                <h3>Tests HTTP Simples</h3>
                 <div class="test-grid">
+                    <a href="/pages/api-test.html" class="test-button special-test">Test API POST/DELETE Simple</a>
+                    <a href="/pages/todo.html" class="test-button special-test">Démo Liste de Tâches POST/DELETE</a>
                     <a href="/pages/cache-test.html" class="test-button special-test">Test Cache & ETags</a>
-                    <a href="/pages/api-test.html" class="test-button special-test">Test Méthodes HTTP</a>
+                </div>
+                <div class="test-help">
+                    <p><strong>Méthodes HTTP disponibles :</strong></p>
+                    <ul>
+                        <li><strong>Test API Simple</strong> : Teste POST pour créer un fichier et DELETE pour le supprimer - tests simples</li>
+                        <li><strong>Démo Liste de Tâches</strong> : Application complète utilisant POST/DELETE pour gérer une liste de tâches</li>
+                        <li><strong>Test Cache</strong> : Vérifie le support d'ETag et la validation conditionnelle</li>
+                    </ul>
                 </div>
             </div>
 
@@ -236,14 +245,12 @@
                 <div class="test-grid">
                     <a href="/pages/calculator.html" class="test-button cgi-test" onclick="return testCGI('/pages/calculator.html', 'Calculatrice interactive', event)">Calculatrice</a>
                     <a href="/cgi-bin/info.php" class="test-button cgi-test" onclick="return testCGI('/cgi-bin/info.php', 'Informations du serveur', event)">Info Serveur</a>
-                    <a href="/pages/todo.html" class="test-button cgi-test" onclick="return testCGI('/pages/todo.html', 'Démo POST/DELETE avec todo list', event)">Liste de Tâches</a>
                 </div>
                 <div class="test-help">
                     <p><strong>À propos des tests CGI :</strong></p>
                     <ul>
                         <li><strong>Calculatrice</strong> : Une application de calcul interactive utilisant PHP comme backend</li>
                         <li><strong>Info Serveur</strong> : Affiche les informations détaillées du serveur fournies par l'environnement CGI</li>
-                        <li><strong>Liste de Tâches</strong> : Démontre les méthodes HTTP POST et DELETE avec une interface simple</li>
                     </ul>
                 </div>
             </div>

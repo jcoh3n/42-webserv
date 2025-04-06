@@ -13,6 +13,16 @@ if (!is_dir($upload_dir)) {
 // Récupérer la méthode HTTP
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Support pour les requêtes DELETE simulées via POST avec _method=DELETE
+if ($method === 'POST' && isset($_POST['_method']) && $_POST['_method'] === 'DELETE') {
+    $method = 'DELETE';
+}
+
+// Support pour les requêtes DELETE simulées via GET avec _method=DELETE
+if ($method === 'GET' && isset($_GET['_method']) && $_GET['_method'] === 'DELETE') {
+    $method = 'DELETE';
+}
+
 // Fonction simple pour renvoyer une réponse JSON
 function send_response($status_code, $status, $message, $data = null) {
     http_response_code($status_code);
@@ -64,8 +74,11 @@ switch ($method) {
         break;
         
     case 'DELETE':
-        // Pour DELETE, on utilise le paramètre GET
+        // Pour DELETE, on utilise le paramètre GET ou POST selon la méthode utilisée
         $filename = isset($_GET['filename']) ? $_GET['filename'] : '';
+        if (empty($filename) && isset($_POST['filename'])) {
+            $filename = $_POST['filename'];
+        }
         
         if (empty($filename)) {
             send_response(400, 'error', 'Nom de fichier manquant');
