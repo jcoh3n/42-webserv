@@ -345,7 +345,7 @@
                 const startTime1 = performance.now();
                 
                 // Utiliser un fichier plus grand pour mieux montrer l'avantage
-                const response1 = await fetch('test.json');
+                const response1 = await fetch('/data/test.json');
                 const content1 = await response1.text();
                 fileSize = content1.length;
                 
@@ -415,7 +415,7 @@
                 // Deuxième requête avec If-None-Match
                 const headers = new Headers();
                 headers.append('If-None-Match', savedEtag);
-                const response2 = await fetch('test.json', { headers });
+                const response2 = await fetch('/data/test.json', { headers });
                 
                 // Tenter de récupérer le contenu (sera vide pour 304)
                 let content2 = '';

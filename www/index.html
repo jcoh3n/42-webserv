@@ -200,32 +200,32 @@
             
             <h3>Fichiers de Test</h3>
             <div class="test-grid">
-                <a href="/test.html" class="test-button" onclick="return testFile('/test.html', event)">HTML</a>
-                <a href="/test.css" class="test-button" onclick="return testFile('/test.css', event)">CSS</a>
-                <a href="/sample.txt" class="test-button" onclick="return testFile('/sample.txt', event)">TXT</a>
-                <a href="/test.json" class="test-button" onclick="return testFile('/test.json', event)">JSON</a>
+                <a href="/pages/test.html" class="test-button" onclick="return testFile('/pages/test.html', event)">HTML</a>
+                <a href="/styles/test.css" class="test-button" onclick="return testFile('/styles/test.css', event)">CSS</a>
+                <a href="/documents/sample.txt" class="test-button" onclick="return testFile('/documents/sample.txt', event)">TXT</a>
+                <a href="/data/test.json" class="test-button" onclick="return testFile('/data/test.json', event)">JSON</a>
             </div>
 
             <div class="test-section">
                 <h3>Tests Spéciaux</h3>
                 <div class="test-grid">
-                    <a href="/cache-test.html" class="test-button special-test">Test Cache & ETags</a>
-                    <a href="/api-test.html" class="test-button special-test">Test Méthodes HTTP</a>
+                    <a href="/pages/cache-test.html" class="test-button special-test">Test Cache & ETags</a>
+                    <a href="/pages/api-test.html" class="test-button special-test">Test Méthodes HTTP</a>
                 </div>
             </div>
 
             <div class="test-section">
                 <h3>Pages d'Erreur</h3>
                 <div class="test-grid">
-                    <a href="/404.html" class="test-button error-test" onclick="return testFile('/this_file_does_not_exist', event)">Erreur 404 (Not Found)</a>
-                    <a href="/403.html" class="test-button error-test" onclick="return testFile('/restricted.txt', event)" title="Teste un fichier dont les permissions sont à 000">Erreur 403 (Forbidden)</a>
-                    <a href="/500.html" class="test-button error-test" onclick="return testFile('/trigger-500', event)">Erreur 500 (Server Error)</a>
+                    <a href="/error/404.html" class="test-button error-test" onclick="return testFile('/this_file_does_not_exist', event)">Erreur 404 (Not Found)</a>
+                    <a href="/error/403.html" class="test-button error-test" onclick="return testFile('/documents/restricted.txt', event)" title="Teste un fichier dont les permissions sont à 000">Erreur 403 (Forbidden)</a>
+                    <a href="/error/500.html" class="test-button error-test" onclick="return testFile('/scripts/trigger-500', event)">Erreur 500 (Server Error)</a>
                 </div>
                 <div class="test-help">
                     <p><strong>Comment fonctionnent les tests d'erreur :</strong></p>
                     <ul>
                         <li><strong>404</strong> : Tente d'accéder à un fichier inexistant</li>
-                        <li><strong>403</strong> : Tente d'accéder au fichier <code>restricted.txt</code> dont les permissions ont été définies à <code>000</code> (aucun droit d'accès)</li>
+                        <li><strong>403</strong> : Tente d'accéder au fichier <code>documents/restricted.txt</code> dont les permissions ont été définies à <code>000</code> (aucun droit d'accès)</li>
                         <li><strong>500</strong> : Tente d'accéder à un fichier mal formé qui provoque une erreur interne du serveur</li>
                     </ul>
                 </div>
@@ -234,9 +234,9 @@
             <div class="test-section">
                 <h3>Tests CGI</h3>
                 <div class="test-grid">
-                    <a href="/calculator.html" class="test-button cgi-test" onclick="return testCGI('/calculator.html', 'Calculatrice interactive', event)">Calculatrice</a>
+                    <a href="/pages/calculator.html" class="test-button cgi-test" onclick="return testCGI('/pages/calculator.html', 'Calculatrice interactive', event)">Calculatrice</a>
                     <a href="/cgi-bin/info.php" class="test-button cgi-test" onclick="return testCGI('/cgi-bin/info.php', 'Informations du serveur', event)">Info Serveur</a>
-                    <a href="/todo.html" class="test-button cgi-test" onclick="return testCGI('/todo.html', 'Démo POST/DELETE avec todo list', event)">Liste de Tâches</a>
+                    <a href="/pages/todo.html" class="test-button cgi-test" onclick="return testCGI('/pages/todo.html', 'Démo POST/DELETE avec todo list', event)">Liste de Tâches</a>
                 </div>
                 <div class="test-help">
                     <p><strong>À propos des tests CGI :</strong></p>
@@ -307,10 +307,10 @@
             resultDiv.style.display = 'block';
             
             // Afficher un message de préchargement
-            if (path === '/restricted.txt') {
+            if (path === '/documents/restricted.txt') {
                 resultDiv.textContent = "⏳ Test en cours : Demande d'accès à un fichier avec permissions 000 (aucun droit)...";
                 resultDiv.className = 'result';
-            } else if (path === '/trigger-500') {
+            } else if (path === '/scripts/trigger-500') {
                 resultDiv.textContent = "⏳ Test en cours : Tentative de déclencher une erreur interne du serveur...";
                 resultDiv.className = 'result';
             } else {
@@ -332,9 +332,9 @@
                 result += `📥 Status : ${status} ${response.statusText}\n`;
                 result += `📎 Type : ${contentType || 'non spécifié'}\n`;
                 
-                if (path === '/restricted.txt' && status === 403) {
+                if (path === '/documents/restricted.txt' && status === 403) {
                     result += `\n✅ Test réussi : Le serveur a correctement refusé l'accès au fichier sans permission`;
-                } else if (path === '/trigger-500' && status === 500) {
+                } else if (path === '/scripts/trigger-500' && status === 500) {
                     result += `\n✅ Test réussi : Le serveur a renvoyé une erreur 500 comme prévu`;
                 }
                 
@@ -347,8 +347,8 @@
                 resultDiv.className = 'result ' + (response.ok ? 'success' : 'error');
                 
                 // Pour les tests d'erreur, on veut voir la page d'erreur
-                if (path === '/this_file_does_not_exist' || status === 403 || path === '/trigger-500') {
-                    window.location.href = path === '/trigger-500' ? '/500.html' : path;
+                if (path === '/this_file_does_not_exist' || status === 403 || path === '/scripts/trigger-500') {
+                    window.location.href = path === '/scripts/trigger-500' ? '/error/500.html' : path;
                     return false;
                 }
                 

@@ -115,10 +115,10 @@
                         path = '/nonexistent';
                         break;
                     case 403:
-                        path = '/restricted.txt';
+                        path = '/documents/restricted.txt';
                         break;
                     case 500:
-                        path = '/trigger-500';
+                        path = '/scripts/trigger-500';
                         break;
                 }
                 const response = await fetch(path);
@@ -134,11 +134,11 @@
             const resultDiv = document.getElementById('cache-result');
             try {
                 // Premier appel
-                const response1 = await fetch('/test.html');
+                const response1 = await fetch('/pages/test.html');
                 const etag = response1.headers.get('ETag');
                 
                 // Deuxième appel avec ETag
-                const response2 = await fetch('/test.html', {
+                const response2 = await fetch('/pages/test.html', {
                     headers: {
                         'If-None-Match': etag
                     }
