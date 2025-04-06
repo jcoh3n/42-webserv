@@ -33,17 +33,37 @@ RouteHandler::~RouteHandler() {
  * @return La réponse HTTP à envoyer au client
  */
 HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
-    // Vérifier la méthode HTTP et rediriger vers le gestionnaire approprié
+    // Trouver la location correspondante
+    const LocationConfig* location = findMatchingLocation(request.getUri());
+    if (!location) {
+        return serveErrorPage(404, "Location not found");
+    }
+
+    // Vérifier si la méthode est autorisée
+    if (std::find(location->allowed_methods.begin(), 
+                  location->allowed_methods.end(), 
+                  request.getMethod()) == location->allowed_methods.end()) {
+        return serveErrorPage(405, "Method not allowed");
+    }
+
+    // Construire le chemin du fichier
+    std::string file_path = getFilePath(request.getUri());
+
+    // Vérifier si c'est une requête CGI
+    if (isCGIRequest(file_path, *location)) {
+        return handleCGIRequest(request, file_path, *location);
+    }
+
+    // Traiter comme une requête normale
     if (request.getMethod() == "GET") {
         return handleGetRequest(request);
     } else if (request.getMethod() == "POST") {
         return handlePostRequest(request);
     } else if (request.getMethod() == "DELETE") {
         return handleDeleteRequest(request);
-    } else {
-        // Méthode non supportée
-        return createErrorResponse(405, "Method Not Allowed");
     }
+
+    return serveErrorPage(501, "Method not implemented");
 }
 
 /**
@@ -115,7 +135,7 @@ HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request) {
     
     // Dans cette première version, nous ne gérons pas les POST
     // Cela sera implémenté dans une phase ultérieure
-    return createErrorResponse(501, "Not Implemented");
+    return HttpResponse::createError(501, "Not Implemented");
 }
 
 /**
@@ -129,7 +149,7 @@ HttpResponse RouteHandler::handleDeleteRequest(const HttpRequest& request) {
     
     // Dans cette première version, nous ne gérons pas les DELETE
     // Cela sera implémenté dans une phase ultérieure
-    return createErrorResponse(501, "Not Implemented");
+    return HttpResponse::createError(501, "Not Implemented");
 }
 
 /**
@@ -238,19 +258,55 @@ bool RouteHandler::checkNotModified(const HttpRequest& request, const std::strin
 }
 
 HttpResponse RouteHandler::serveErrorPage(int error_code, const std::string& message) {
-    // Chercher la page d'erreur personnalisée dans la configuration
-    std::map<int, std::string>::const_iterator it = server_config.error_pages.find(error_code);
-    if (it != server_config.error_pages.end()) {
-        std::string error_page_path = root_directory + "/" + it->second;
-        if (FileUtils::fileExists(error_page_path) && FileUtils::hasReadPermission(error_page_path)) {
-            HttpResponse response;
-            response.setStatus(error_code);
-            if (serveStaticFile(error_page_path, response)) {
-                return response;
+    return HttpResponse::createError(error_code, message);
+}
+
+const LocationConfig* RouteHandler::findMatchingLocation(const std::string& uri) const {
+    const LocationConfig* best_location = NULL;
+    size_t best_match_length = 0;
+    
+    std::map<std::string, LocationConfig>::const_iterator it;
+    for (it = server_config.locations.begin(); it != server_config.locations.end(); ++it) {
+        const std::string& location_path = it->first;
+        if (uri.find(location_path) == 0) {
+            if (location_path.length() > best_match_length) {
+                best_match_length = location_path.length();
+                best_location = &it->second;
             }
         }
     }
     
-    // Si la page personnalisée n'existe pas ou ne peut pas être servie, utiliser la page par défaut
-    return createErrorResponse(error_code, message);
+    return best_location;
+}
+
+bool RouteHandler::isCGIRequest(const std::string& path, const LocationConfig& location) const {
+    std::string ext = getFileExtension(path);
+    std::map<std::string, std::string>::const_iterator it = location.cgi_handlers.find(ext);
+    return it != location.cgi_handlers.end();
+}
+
+HttpResponse RouteHandler::handleCGIRequest(const HttpRequest& request, 
+                                          const std::string& script_path, 
+                                          const LocationConfig& location) {
+    std::string ext = getFileExtension(script_path);
+    std::map<std::string, std::string>::const_iterator it = location.cgi_handlers.find(ext);
+    if (it == location.cgi_handlers.end()) {
+        return HttpResponse::createError(500, "No CGI handler found for extension");
+    }
+
+    CGIHandler handler(request, script_path, it->second);
+    return handler.executeCGI();
+}
+
+/**
+ * @brief Obtient l'extension d'un fichier
+ * @param path Le chemin du fichier
+ * @return L'extension du fichier (avec le point)
+ */
+std::string RouteHandler::getFileExtension(const std::string& path) const {
+    size_t dot_pos = path.find_last_of('.');
+    if (dot_pos == std::string::npos) {
+        return "";
+    }
+    return path.substr(dot_pos);
 }

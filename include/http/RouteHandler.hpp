@@ -4,6 +4,7 @@
 #include "http/HttpRequest.hpp"
 #include "http/HttpResponse.hpp"
 #include "http/utils/FileUtils.hpp"
+#include "http/CGIHandler.hpp"
 #include "config/ConfigTypes.hpp"
 #include <string>
 
@@ -29,10 +30,15 @@ private:
     HttpResponse handleGetRequest(const HttpRequest& request);
     HttpResponse handlePostRequest(const HttpRequest& request);
     HttpResponse handleDeleteRequest(const HttpRequest& request);
+    HttpResponse handleCGIRequest(const HttpRequest& request, const std::string& script_path,
+                                const LocationConfig& location);
     
     // Méthodes utilitaires
     std::string getFilePath(const std::string& uri);
     bool serveStaticFile(const std::string& file_path, HttpResponse& response);
+    const LocationConfig* findMatchingLocation(const std::string& uri) const;
+    bool isCGIRequest(const std::string& path, const LocationConfig& location) const;
+    std::string getFileExtension(const std::string& path) const;
     
     // Méthodes de gestion du cache
     bool checkNotModified(const HttpRequest& request, const std::string& file_path, HttpResponse& response);

@@ -16,6 +16,7 @@ struct LocationConfig {
     int redirect_code;                         // Code de redirection HTTP
     std::string root_override;                 // Répertoire racine spécifique à cette location
     std::vector<std::string> cgi_extensions;   // Extensions pour le CGI (ex: ".php")
+    std::map<std::string, std::string> cgi_handlers;  // Map extension -> chemin interpréteur
     std::string upload_directory;              // Répertoire pour les uploads
     std::string alias;                         // Alias pour cette location
     size_t client_max_body_size;               // Taille maximale du body pour cette location

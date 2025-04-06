@@ -235,24 +235,23 @@ std::string HttpResponse::buildHeadResponse() const {
 
 /**
  * @brief Crée une réponse d'erreur HTTP
- * @param error_code Le code d'erreur HTTP (ex: 404, 500)
- * @param message Le message d'erreur (optionnel)
- * @return Une réponse HTTP formatée pour l'erreur
- * 
- * Génère une réponse d'erreur HTTP avec un corps HTML simple
- * décrivant l'erreur.
+ * @param error_code Le code d'erreur HTTP
+ * @param message Un message d'erreur personnalisé (optionnel)
+ * @return Une réponse HTTP configurée pour l'erreur
  */
-HttpResponse createErrorResponse(int error_code, const std::string& message) {
+HttpResponse HttpResponse::createError(int error_code, const std::string& message) {
     HttpResponse response;
     response.setStatus(error_code);
     
-    std::string error_message = message.empty() ? response.getStatusMessage() : message;
-    std::string error_page = "<html><body><h1>" + 
-                             numberToString(error_code) + " " + 
-                             error_message + 
-                             "</h1></body></html>";
+    std::string error_body = "<html><head><title>Error " + numberToString(error_code) + "</title></head>"
+                            "<body><h1>" + numberToString(error_code) + " " + response.getStatusMessage() + "</h1>";
     
-    response.setBody(error_page);
+    if (!message.empty()) {
+        error_body += "<p>" + message + "</p>";
+    }
+    error_body += "</body></html>";
+    
+    response.setBody(error_body);
     return response;
 }
 

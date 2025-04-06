@@ -40,6 +40,9 @@ public:
     const std::map<std::string, std::string>& getHeaders() const { return headers; }
     const std::string& getBody() const { return body; }
 
+    // Méthodes statiques pour créer des réponses spécifiques
+    static HttpResponse createError(int error_code, const std::string& message = "");
+
 private:
     int status_code;
     std::string status_message;
@@ -48,7 +51,6 @@ private:
 };
 
 // Fonctions utilitaires pour les réponses HTTP
-HttpResponse createErrorResponse(int error_code, const std::string& message = "");
 std::string getMimeType(const std::string& file_path);
 std::string calculateETag(const std::string& file_path);
 bool checkNotModified(const HttpRequest& request, const std::string& file_path, HttpResponse& response);

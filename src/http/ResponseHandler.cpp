@@ -91,7 +91,7 @@ void ResponseHandler::sendLargeFile(int client_fd, const std::string& file_path,
     // Ouvrir le fichier
     std::ifstream file(file_path.c_str(), std::ios::binary);
     if (!file.is_open()) {
-        HttpResponse error_response = createErrorResponse(404);
+        HttpResponse error_response = HttpResponse::createError(404);
         sendResponse(client_fd, error_response, request);
         return;
     }

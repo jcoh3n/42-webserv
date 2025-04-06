@@ -1,6 +1,7 @@
 #include "../include/Server.hpp"
 #include "http/ResponseHandler.hpp"
 #include "http/HttpRequest.hpp"
+#include "http/HttpResponse.hpp"
 #include "utils/Common.hpp"
 #include <csignal>
 #include <cstring>
@@ -301,7 +302,7 @@ void Server::handleClientData(int client_index) {
 	if (!request.parse(raw_request)) {
 		// Requête malformée
 		LOG_ERROR("Malformed HTTP request");
-		HttpResponse error_response = createErrorResponse(400, "Bad Request");
+		HttpResponse error_response = HttpResponse::createError(400, "Bad Request");
 		ResponseHandler::sendResponse(client_fd, error_response, request);
 		return;
 	}

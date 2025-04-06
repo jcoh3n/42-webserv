@@ -205,12 +205,22 @@ void ConfigParser::processLocationDirective(const std::string& key, const std::s
                                          LocationConfig& location) {
     if (key == "allowed_methods") {
         location.allowed_methods = split(value, ' ');
-    } else if (key == "root") {
-        location.root_override = value;
+    } else if (key == "autoindex") {
+        location.autoindex = (value == "on" || value == "true");
     } else if (key == "index") {
         location.index_files = split(value, ' ');
-    } else if (key == "autoindex") {
-        location.autoindex = (value == "on" || value == "true" || value == "1");
+    } else if (key == "root") {
+        location.root_override = value;
+    } else if (key == "client_max_body_size") {
+        location.client_max_body_size = parseSize(value);
+    } else if (key == "cgi_ext") {
+        location.cgi_extensions.push_back(value);
+    } else if (key == "cgi_handler") {
+        // L'extension doit avoir été définie avant
+        if (location.cgi_extensions.empty()) {
+            throw std::runtime_error("cgi_handler defined without cgi_ext");
+        }
+        location.cgi_handlers[location.cgi_extensions.back()] = value;
     } else if (key == "upload_directory") {
         location.upload_directory = value;
     } else if (key == "return") {
@@ -220,15 +230,8 @@ void ConfigParser::processLocationDirective(const std::string& key, const std::s
         }
         location.redirect_code = atoi(parts[0].c_str());
         location.redirect_url = parts[1];
-    } else if (key == "cgi") {
-        location.cgi_extensions = split(value, ' ');
     } else if (key == "alias") {
         location.alias = value;
-    } else if (key == "client_max_body_size") {
-        location.client_max_body_size = parseSize(value);
-        if (location.client_max_body_size == 0) {
-            throw std::runtime_error("client_max_body_size must be greater than 0");
-        }
     } else {
         throw std::runtime_error("Unknown location directive: " + key);
     }
