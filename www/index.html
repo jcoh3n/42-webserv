@@ -109,6 +109,13 @@
         .error-test:hover {
             box-shadow: 0 5px 12px rgba(255, 71, 87, 0.25);
         }
+        .cgi-test {
+            background: linear-gradient(135deg, #2ed573 0%, #1e9956 100%);
+            box-shadow: 0 3px 8px rgba(46, 213, 115, 0.15);
+        }
+        .cgi-test:hover {
+            box-shadow: 0 5px 12px rgba(46, 213, 115, 0.25);
+        }
         .result {
             margin-top: 15px;
             padding: 12px;
@@ -223,6 +230,25 @@
                 </div>
             </div>
 
+            <div class="test-section">
+                <h3>Tests CGI</h3>
+                <div class="test-grid">
+                    <a href="/calculator.html" class="test-button cgi-test" onclick="return testCGI('/calculator.html', 'Calculatrice interactive', event)">Calculatrice</a>
+                    <a href="/cgi-bin/info.php" class="test-button cgi-test" onclick="return testCGI('/cgi-bin/info.php', 'Informations du serveur', event)">Info Serveur</a>
+                    <a href="/cgi-bin/test.php" class="test-button cgi-test" onclick="return testCGI('/cgi-bin/test.php', 'Script de test PHP', event)">Test PHP</a>
+                    <a href="/cgi-bin/info.php?format=json" class="test-button cgi-test" onclick="return testCGI('/cgi-bin/info.php?format=json', 'Informations au format JSON', event)">API JSON</a>
+                </div>
+                <div class="test-help">
+                    <p><strong>À propos des tests CGI :</strong></p>
+                    <ul>
+                        <li><strong>Calculatrice</strong> : Une application de calcul interactive utilisant PHP comme backend</li>
+                        <li><strong>Info Serveur</strong> : Affiche les informations détaillées du serveur fournies par l'environnement CGI</li>
+                        <li><strong>Test PHP</strong> : Teste les fonctionnalités de base de PHP avec retour au format JSON</li>
+                        <li><strong>API JSON</strong> : Version API des informations serveur, utilisable pour des intégrations</li>
+                    </ul>
+                </div>
+            </div>
+
             <div id="test-result" class="result"></div>
         </div>
 
@@ -263,6 +289,10 @@
             <div class="info-item">
                 <div class="info-icon">🚀</div>
                 <div><strong>Performance :</strong> ~1500 requêtes/sec pour du contenu statique</div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon">📊</div>
+                <div><strong>CGI :</strong> Support pour PHP et autres scripts CGI</div>
             </div>
         </div>
     </div>
@@ -330,6 +360,57 @@
                 
             } catch (error) {
                 resultDiv.textContent = `❌ Erreur : ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+            return false;
+        }
+
+        async function testCGI(path, description, event) {
+            event.preventDefault();
+            const resultDiv = document.getElementById('test-result');
+            resultDiv.style.display = 'block';
+            
+            // Afficher un message de préchargement
+            resultDiv.textContent = `⏳ Test CGI en cours : ${description}...`;
+            resultDiv.className = 'result';
+            
+            try {
+                const startTime = performance.now();
+                const response = await fetch(path);
+                const endTime = performance.now();
+                const duration = (endTime - startTime).toFixed(2);
+                
+                const contentType = response.headers.get('Content-Type');
+                const status = response.status;
+                
+                let result = `📡 Test CGI : ${path}\n`;
+                result += `📝 Description : ${description}\n`;
+                result += `⏱️ Temps de réponse : ${duration}ms\n`;
+                result += `📥 Status : ${status} ${response.statusText}\n`;
+                result += `📎 Type : ${contentType || 'non spécifié'}\n`;
+                
+                if (contentType && contentType.includes('json')) {
+                    const json = await response.json();
+                    result += '\n📊 Aperçu de la réponse JSON :\n';
+                    if (json.performance && json.performance.execution_time) {
+                        result += `⏱️ Temps d'exécution CGI : ${json.performance.execution_time}\n`;
+                    }
+                    result += JSON.stringify(json, null, 2).substring(0, 200) + '...';
+                } else if (contentType && contentType.includes('text')) {
+                    const text = await response.text();
+                    result += `\n📄 Aperçu de la réponse :\n${text.substring(0, 150)}...`;
+                }
+                
+                resultDiv.textContent = result;
+                resultDiv.className = 'result ' + (response.ok ? 'success' : 'error');
+                
+                // Rediriger vers la page plutôt que d'afficher dans un nouvel onglet
+                if (response.ok) {
+                    window.location.href = path;
+                }
+                
+            } catch (error) {
+                resultDiv.textContent = `❌ Erreur CGI : ${error.message}`;
                 resultDiv.className = 'result error';
             }
             return false;
