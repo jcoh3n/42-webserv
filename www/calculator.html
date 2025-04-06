@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculatrice CGI - 42 Webserv</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.5;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        header {
+            background: linear-gradient(135deg, #00babc 0%, #6200ea 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 188, 188, 0.1);
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+        h2 {
+            color: #00babc;
+            font-weight: 600;
+            margin-top: 0;
+            font-size: 1.5rem;
+            position: relative;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(135deg, #00babc 0%, #6200ea 100%);
+            border-radius: 2px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 188, 188, 0.08);
+        }
+        .calculator {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #444;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        select {
+            background-color: white;
+            cursor: pointer;
+        }
+        .btn {
+            background: linear-gradient(135deg, #00babc 0%, #008f91 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
+            font-size: 16px;
+            box-shadow: 0 3px 8px rgba(0, 186, 188, 0.15);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(0, 186, 188, 0.25);
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f5f5f5;
+            border-left: 3px solid #00babc;
+            display: none;
+        }
+        .result.error {
+            border-left: 3px solid #de350b;
+        }
+        .result-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00babc;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .debug {
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #00babc;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .back-link:hover {
+            color: #6200ea;
+            text-decoration: underline;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #777;
+            font-size: 0.85rem;
+            padding: 10px;
+        }
+        .performance {
+            font-size: 0.9rem;
+            color: #777;
+            margin-top: 10px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Calculatrice CGI</h1>
+        <p>Un exemple d'application CGI sur Webserv</p>
+    </header>
+
+    <div class="card calculator">
+        <h2>Calculatrice</h2>
+        
+        <form id="calculatorForm">
+            <div class="form-group">
+                <label for="num1">Premier nombre</label>
+                <input type="number" id="num1" name="num1" value="0" step="any" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="operation">Opération</label>
+                <select id="operation" name="operation">
+                    <option value="add">Addition (+)</option>
+                    <option value="subtract">Soustraction (-)</option>
+                    <option value="multiply">Multiplication (×)</option>
+                    <option value="divide">Division (÷)</option>
+                    <option value="power">Puissance (^)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="num2">Second nombre</label>
+                <input type="number" id="num2" name="num2" value="0" step="any" required>
+            </div>
+            
+            <button type="submit" class="btn">Calculer</button>
+        </form>
+        
+        <div id="result" class="result">
+            <div id="resultMsg"></div>
+            <div id="resultValue" class="result-value"></div>
+            <div id="performance" class="performance"></div>
+        </div>
+        
+        <div id="debug" class="debug"></div>
+        
+        <a href="/" class="back-link">← Retour à la page d'accueil</a>
+    </div>
+
+    <footer>
+        <p>42 Webserv © 2025</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('calculatorForm');
+            const resultDiv = document.getElementById('result');
+            const resultMsg = document.getElementById('resultMsg');
+            const resultValue = document.getElementById('resultValue');
+            const performanceDiv = document.getElementById('performance');
+            const debugDiv = document.getElementById('debug');
+            
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                
+                // Récupérer les valeurs du formulaire
+                const formData = new FormData(form);
+                const num1 = formData.get('num1');
+                const num2 = formData.get('num2');
+                const operation = formData.get('operation');
+                
+                // Afficher un message de chargement
+                resultDiv.style.display = 'block';
+                resultMsg.textContent = '⏳ Calcul en cours...';
+                resultValue.textContent = '';
+                performanceDiv.textContent = '';
+                resultDiv.className = 'result';
+                
+                try {
+                    // Construire l'URL avec les paramètres de requête
+                    const url = `/cgi-bin/calculator.php?num1=${encodeURIComponent(num1)}&num2=${encodeURIComponent(num2)}&operation=${encodeURIComponent(operation)}`;
+                    
+                    // Mesurer le temps de réponse
+                    const startTime = performance.now();
+                    const response = await fetch(url);
+                    const endTime = performance.now();
+                    const duration = (endTime - startTime).toFixed(2);
+                    
+                    // Traiter la réponse
+                    const data = await response.json();
+                    
+                    if (data.status === 'success') {
+                        resultMsg.textContent = data.message;
+                        resultValue.textContent = data.result;
+                        resultDiv.className = 'result';
+                    } else {
+                        resultMsg.textContent = `Erreur: ${data.message}`;
+                        resultValue.textContent = '';
+                        resultDiv.className = 'result error';
+                    }
+                    
+                    // Afficher les performances
+                    performanceDiv.textContent = `Temps de réponse: ${duration}ms | Temps d'exécution CGI: ${data.performance.execution_time}`;
+                    
+                    // Afficher les données de débogage
+                    debugDiv.textContent = JSON.stringify(data, null, 2);
+                    debugDiv.style.display = 'block';
+                    
+                } catch (error) {
+                    resultMsg.textContent = `❌ Erreur: ${error.message}`;
+                    resultValue.textContent = '';
+                    resultDiv.className = 'result error';
+                    performanceDiv.textContent = '';
+                }
+            });
+            
+            // Précharger avec des valeurs par défaut pour un affichage immédiat
+            form.dispatchEvent(new Event('submit'));
+        });
+    </script>
+</body>
+</html> 
