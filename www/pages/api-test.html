@@ -3,273 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test POST/DELETE - 42 Webserv</title>
+    <title>Test API Simple - 42 Webserv</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.5;
             color: #333;
             max-width: 800px;
             margin: 0 auto;
-            padding: 30px;
-            background-color: #f9f9f9;
-        }
-        
-        .top-nav {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-        
-        .back-link {
-            display: flex;
-            align-items: center;
-            color: #00babc;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 1rem;
-            padding: 8px 16px;
-            border-radius: 30px;
-            transition: all 0.2s ease;
-            background-color: rgba(0, 186, 188, 0.1);
-        }
-        
-        .back-link:hover {
-            background-color: rgba(98, 0, 234, 0.1);
-            color: #6200ea;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
         
         h1 {
-            margin: 0;
-            font-size: 1.8rem;
-            color: #444;
-        }
-        
-        header {
-            background: linear-gradient(135deg, #00babc 0%, #6200ea 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 25px;
             text-align: center;
+            margin-bottom: 20px;
         }
         
-        header h2 {
-            margin: 0;
-            font-size: 1.6rem;
-        }
-        
-        header p {
-            margin: 10px 0 0;
-            opacity: 0.9;
+        .back-link {
+            display: block;
+            margin-bottom: 20px;
+            color: #0066cc;
+            text-decoration: none;
         }
         
         .card {
             background-color: white;
-            border-radius: 15px;
-            padding: 25px;
+            border-radius: 8px;
+            padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .test-section {
-            margin-bottom: 40px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 30px;
-        }
-        
-        .test-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-        
-        .method-badge {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 6px;
-            color: white;
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-right: 10px;
-        }
-        
-        .post {
-            background-color: #49cc90;
-        }
-        
-        .delete {
-            background-color: #f93e3e;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
         .section-header {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
-        h3 {
+        .method-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .post {
+            background-color: #28a745;
+        }
+        
+        .delete {
+            background-color: #dc3545;
+        }
+        
+        h2 {
             margin: 0;
-            font-size: 1.4rem;
-            color: #333;
         }
         
         .description {
-            margin-bottom: 20px;
-            color: #555;
-        }
-        
-        .field-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         label {
             display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
         
         input[type="text"], textarea {
             width: 100%;
-            padding: 12px;
+            padding: 8px;
             border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 4px;
+            margin-bottom: 10px;
             box-sizing: border-box;
         }
         
-        input[type="text"]:focus, textarea:focus {
-            outline: none;
-            border-color: #00babc;
-        }
-        
-        .action-button {
-            background: linear-gradient(135deg, #00babc 0%, #008f91 100%);
-            color: white;
+        button {
+            padding: 8px 15px;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+            border-radius: 4px;
+            color: white;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            font-weight: bold;
         }
         
-        .action-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 186, 188, 0.2);
+        .post-button {
+            background-color: #28a745;
         }
         
         .delete-button {
-            background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
-        }
-        
-        .delete-button:hover {
-            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.2);
+            background-color: #dc3545;
         }
         
         .result-area {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
             background-color: #f8f9fa;
-            font-family: monospace;
             white-space: pre-wrap;
+            font-family: monospace;
             display: none;
-            border-left: 4px solid #ddd;
         }
         
         .success {
-            border-left-color: #49cc90;
-            background-color: #f0fff4;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
         }
         
         .error {
-            border-left-color: #f93e3e;
-            background-color: #fff5f5;
-        }
-        
-        footer {
-            margin-top: 30px;
-            color: #777;
-            font-size: 0.9rem;
-            text-align: center;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
         }
     </style>
 </head>
 <body>
-    <div class="top-nav">
-        <a href="/" class="back-link">
-            <span>←</span> Retour à l'accueil
-        </a>
-        <h1>Test HTTP</h1>
-    </div>
-
-    <header>
-        <h2>Test des méthodes POST et DELETE</h2>
-        <p>Vérifiez rapidement le fonctionnement des méthodes HTTP avancées</p>
-    </header>
-
+    <a href="/" class="back-link">← Retour à l'accueil</a>
+    
+    <h1>Test API Simple - POST & DELETE</h1>
+    
     <div class="card">
-        <div class="test-section">
-            <div class="section-header">
-                <span class="method-badge post">POST</span>
-                <h3>Créer un fichier</h3>
-            </div>
-            
-            <p class="description">
-                Utilisez cette méthode pour créer un nouveau fichier sur le serveur.
-                Le serveur traite la requête POST via un script CGI et crée le fichier demandé.
-            </p>
-            
-            <div class="field-group">
-                <label for="post-filename">Nom du fichier :</label>
-                <input type="text" id="post-filename" value="test_file.txt" placeholder="Exemple: mon_fichier.txt">
-            </div>
-            
-            <div class="field-group">
-                <label for="post-content">Contenu du fichier :</label>
-                <textarea id="post-content" rows="5">Ceci est un fichier de test créé avec une requête POST.
-La méthode POST est utilisée pour créer des ressources sur le serveur.</textarea>
-            </div>
-            
-            <button class="action-button" onclick="createFile()">Créer le fichier</button>
-            
-            <div id="post-result" class="result-area"></div>
+        <div class="section-header">
+            <span class="method-badge post">POST</span>
+            <h2>Créer un fichier</h2>
         </div>
         
-        <div class="test-section">
-            <div class="section-header">
-                <span class="method-badge delete">DELETE</span>
-                <h3>Supprimer un fichier</h3>
-            </div>
-            
-            <p class="description">
-                Utilisez cette méthode pour supprimer un fichier existant du serveur.
-                Vous pouvez supprimer le fichier que vous venez de créer avec la méthode POST.
-            </p>
-            
-            <div class="field-group">
-                <label for="delete-filename">Nom du fichier à supprimer :</label>
-                <input type="text" id="delete-filename" value="test_file.txt" placeholder="Exemple: mon_fichier.txt">
-            </div>
-            
-            <button class="action-button delete-button" onclick="deleteFile()">Supprimer le fichier</button>
-            
-            <div id="delete-result" class="result-area"></div>
+        <p class="description">
+            <strong>Test de la méthode POST :</strong> Crée un fichier sur le serveur avec le contenu spécifié.
+        </p>
+        
+        <div>
+            <label for="post-filename">Nom du fichier:</label>
+            <input type="text" id="post-filename" value="test_file.txt" placeholder="Exemple: test.txt">
         </div>
+        
+        <div>
+            <label for="post-content">Contenu:</label>
+            <textarea id="post-content" rows="4" placeholder="Contenu du fichier">Ceci est un test de création de fichier via POST.</textarea>
+        </div>
+        
+        <button class="post-button" onclick="createFile()">Créer le fichier (POST)</button>
+        
+        <div id="post-result" class="result-area"></div>
     </div>
-
-    <footer>
-        <p>42 Webserv - Test des méthodes HTTP</p>
-    </footer>
-
+    
+    <div class="card">
+        <div class="section-header">
+            <span class="method-badge delete">DELETE</span>
+            <h2>Supprimer un fichier</h2>
+        </div>
+        
+        <p class="description">
+            <strong>Test de la méthode DELETE :</strong> Supprime un fichier existant du serveur.
+        </p>
+        
+        <div>
+            <label for="delete-filename">Nom du fichier à supprimer:</label>
+            <input type="text" id="delete-filename" value="test_file.txt" placeholder="Exemple: test.txt">
+        </div>
+        
+        <button class="delete-button" onclick="deleteFile()">Supprimer le fichier (DELETE)</button>
+        
+        <div id="delete-result" class="result-area"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Comment utiliser ce test</h2>
+        <ol>
+            <li>Entrez un nom de fichier et un contenu, puis cliquez sur "Créer le fichier"</li>
+            <li>Vérifiez que le résultat indique une création réussie</li>
+            <li>Pour supprimer, entrez le même nom de fichier et cliquez sur "Supprimer le fichier"</li>
+            <li>Vérifiez que le résultat indique une suppression réussie</li>
+        </ol>
+    </div>
+    
     <script>
+        function showResult(element, text, className) {
+            element.textContent = text;
+            element.className = "result-area";
+            if (className) {
+                element.classList.add(className);
+            }
+            element.style.display = "block";
+        }
+        
         function createFile() {
             const filename = document.getElementById('post-filename').value.trim();
             const content = document.getElementById('post-content').value;
@@ -285,7 +206,7 @@ La méthode POST est utilisée pour créer des ressources sur le serveur.</texta
             fetch('/cgi-bin/file_handler.php', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/x-www-form-urlencoded'
                 },
                 body: `action=create&filename=${encodeURIComponent(filename)}&content=${encodeURIComponent(content)}`
             })
@@ -335,7 +256,7 @@ La méthode POST est utilisée pour créer des ressources sur le serveur.</texta
             
             showResult(resultArea, "Envoi de la requête DELETE...", "");
             
-            fetch(`/${filename}`, {
+            fetch(`/cgi-bin/file_handler.php?filename=${encodeURIComponent(filename)}`, {
                 method: 'DELETE'
             })
             .then(response => {
@@ -359,15 +280,6 @@ La méthode POST est utilisée pour créer des ressources sur le serveur.</texta
             .catch(error => {
                 showResult(resultArea, `❌ Erreur: ${error.message}`, "error");
             });
-        }
-        
-        function showResult(element, text, className) {
-            element.textContent = text;
-            element.className = "result-area";
-            if (className) {
-                element.classList.add(className);
-            }
-            element.style.display = "block";
         }
     </script>
 </body>
