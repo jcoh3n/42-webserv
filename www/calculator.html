@@ -6,197 +6,306 @@
     <title>Calculatrice CGI - 42 Webserv</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.5;
             color: #333;
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 15px;
+            padding: 30px;
             background-color: #f9f9f9;
-        }
-        header {
-            background: linear-gradient(135deg, #00babc 0%, #6200ea 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
             text-align: center;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 15px rgba(0, 188, 188, 0.1);
         }
-        h1 {
-            margin: 0;
-            font-size: 2.5rem;
-            font-weight: 800;
+        
+        .page-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 50px;
         }
-        h2 {
-            color: #00babc;
-            font-weight: 600;
-            margin-top: 0;
-            font-size: 1.5rem;
-            position: relative;
-            display: inline-block;
-            margin-bottom: 15px;
-        }
-        h2::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 0;
-            width: 60px;
-            height: 3px;
-            background: linear-gradient(135deg, #00babc 0%, #6200ea 100%);
-            border-radius: 2px;
-        }
-        .card {
-            background-color: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 15px rgba(0, 188, 188, 0.08);
-        }
-        .calculator {
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: #444;
-        }
-        input, select {
+        
+        .navigation {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box;
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 20px;
         }
-        select {
-            background-color: white;
-            cursor: pointer;
-        }
-        .btn {
-            background: linear-gradient(135deg, #00babc 0%, #008f91 100%);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-align: center;
-            width: 100%;
-            font-size: 16px;
-            box-shadow: 0 3px 8px rgba(0, 186, 188, 0.15);
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 12px rgba(0, 186, 188, 0.25);
-        }
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #f5f5f5;
-            border-left: 3px solid #00babc;
-            display: none;
-        }
-        .result.error {
-            border-left: 3px solid #de350b;
-        }
-        .result-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #00babc;
-            margin: 10px 0;
-            text-align: center;
-        }
-        .debug {
-            margin-top: 20px;
-            font-family: monospace;
-            font-size: 0.9rem;
-            white-space: pre-wrap;
-            background-color: #f0f0f0;
-            padding: 15px;
-            border-radius: 8px;
-            display: none;
-            max-height: 300px;
-            overflow-y: auto;
-        }
+        
         .back-link {
-            display: inline-block;
-            margin-top: 20px;
+            display: flex;
+            align-items: center;
             color: #00babc;
             text-decoration: none;
             font-weight: 500;
+            font-size: 1rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 8px 16px;
+            border-radius: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             transition: all 0.2s ease;
         }
+        
         .back-link:hover {
             color: #6200ea;
-            text-decoration: underline;
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
         }
+        
+        .back-icon {
+            margin-right: 8px;
+            font-size: 1.1rem;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #00babc 0%, #6200ea 100%);
+            color: white;
+            padding: 25px 40px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 188, 188, 0.15);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+        
+        header p {
+            margin: 10px 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            margin-top: 30px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Calculatrice design */
+        .calculator-container {
+            max-width: 350px;
+            margin: 0 auto;
+            background-color: #38393a;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+        }
+        
+        .calculator-display {
+            background-color: #222222;
+            color: white;
+            text-align: right;
+            padding: 20px 25px;
+            font-size: 2.5rem;
+            font-weight: 300;
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        
+        .expression {
+            font-size: 1.1rem;
+            color: #a0a0a0;
+            margin-bottom: 10px;
+            min-height: 24px;
+        }
+        
+        .current-value {
+            font-weight: 400;
+            text-align: right;
+            padding-right: 2px;
+        }
+        
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px;
+            background-color: #444;
+            padding: 2px;
+        }
+        
+        .calculator-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            height: 70px;
+            background-color: #616161;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .calculator-button:hover {
+            background-color: #777;
+            transform: scale(1.05);
+        }
+        
+        .number {
+            background-color: #4d4d4d;
+        }
+        
+        .operation {
+            background-color: #f69906;
+            font-weight: 500;
+        }
+        
+        .operation:hover {
+            background-color: #ffb143;
+        }
+        
+        .special {
+            background-color: #616161;
+        }
+        
+        .equals {
+            background-color: #00babc;
+        }
+        
+        .equals:hover {
+            background-color: #00d4d6;
+        }
+        
+        .span-2 {
+            grid-column: span 2;
+        }
+        
+        .history-panel {
+            background-color: #f5f5f5;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 30px auto 0;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            max-height: 200px;
+            max-width: 350px;
+            overflow-y: auto;
+            text-align: left;
+        }
+        
+        .history-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eaeaea;
+            font-size: 1rem;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-expression {
+            color: #555;
+        }
+        
+        .history-result {
+            font-weight: 600;
+            color: #00babc;
+        }
+        
+        .clear-history {
+            background: none;
+            border: none;
+            color: #ff5252;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .clear-history:hover {
+            color: #ff0000;
+            background-color: rgba(255, 82, 82, 0.1);
+        }
+        
         footer {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 50px;
             color: #777;
-            font-size: 0.85rem;
-            padding: 10px;
-        }
-        .performance {
             font-size: 0.9rem;
-            color: #777;
-            margin-top: 10px;
-            text-align: right;
+            padding: 20px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Calculatrice CGI</h1>
-        <p>Un exemple d'application CGI sur Webserv</p>
-    </header>
+    <div class="page-header">
+        <div class="navigation">
+            <a href="/" class="back-link">
+                <span class="back-icon">←</span>Retour à l'accueil
+            </a>
+        </div>
+        <header>
+            <h1>Calculatrice CGI</h1>
+            <p>Un exemple d'application CGI sur Webserv</p>
+        </header>
+    </div>
 
-    <div class="card calculator">
-        <h2>Calculatrice</h2>
-        
-        <form id="calculatorForm">
-            <div class="form-group">
-                <label for="num1">Premier nombre</label>
-                <input type="number" id="num1" name="num1" value="0" step="any" required>
+    <div class="main-content">
+        <div class="calculator-container">
+            <div class="calculator-display">
+                <div class="expression" id="expression"></div>
+                <div class="current-value" id="current-value">0</div>
             </div>
             
-            <div class="form-group">
-                <label for="operation">Opération</label>
-                <select id="operation" name="operation">
-                    <option value="add">Addition (+)</option>
-                    <option value="subtract">Soustraction (-)</option>
-                    <option value="multiply">Multiplication (×)</option>
-                    <option value="divide">Division (÷)</option>
-                    <option value="power">Puissance (^)</option>
-                </select>
+            <div class="calculator-buttons">
+                <!-- Première ligne -->
+                <button class="calculator-button special" id="clear">AC</button>
+                <button class="calculator-button special" id="sign">+/-</button>
+                <button class="calculator-button special" id="percent">%</button>
+                <button class="calculator-button operation" data-op="divide">÷</button>
+                
+                <!-- Deuxième ligne -->
+                <button class="calculator-button number" data-num="7">7</button>
+                <button class="calculator-button number" data-num="8">8</button>
+                <button class="calculator-button number" data-num="9">9</button>
+                <button class="calculator-button operation" data-op="multiply">×</button>
+                
+                <!-- Troisième ligne -->
+                <button class="calculator-button number" data-num="4">4</button>
+                <button class="calculator-button number" data-num="5">5</button>
+                <button class="calculator-button number" data-num="6">6</button>
+                <button class="calculator-button operation" data-op="subtract">−</button>
+                
+                <!-- Quatrième ligne -->
+                <button class="calculator-button number" data-num="1">1</button>
+                <button class="calculator-button number" data-num="2">2</button>
+                <button class="calculator-button number" data-num="3">3</button>
+                <button class="calculator-button operation" data-op="add">+</button>
+                
+                <!-- Cinquième ligne -->
+                <button class="calculator-button number span-2" data-num="0">0</button>
+                <button class="calculator-button number" data-num=".">.</button>
+                <button class="calculator-button equals" id="equals">=</button>
             </div>
-            
-            <div class="form-group">
-                <label for="num2">Second nombre</label>
-                <input type="number" id="num2" name="num2" value="0" step="any" required>
-            </div>
-            
-            <button type="submit" class="btn">Calculer</button>
-        </form>
-        
-        <div id="result" class="result">
-            <div id="resultMsg"></div>
-            <div id="resultValue" class="result-value"></div>
-            <div id="performance" class="performance"></div>
         </div>
         
-        <div id="debug" class="debug"></div>
-        
-        <a href="/" class="back-link">← Retour à la page d'accueil</a>
+        <div class="history-panel" id="history-panel">
+            <div class="history-title">
+                <span>Historique des calculs</span>
+                <button class="clear-history" id="clear-history">Effacer</button>
+            </div>
+            <div id="history-list">
+                <!-- L'historique sera inséré ici par JavaScript -->
+            </div>
+        </div>
     </div>
 
     <footer>
@@ -205,69 +314,177 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('calculatorForm');
-            const resultDiv = document.getElementById('result');
-            const resultMsg = document.getElementById('resultMsg');
-            const resultValue = document.getElementById('resultValue');
-            const performanceDiv = document.getElementById('performance');
-            const debugDiv = document.getElementById('debug');
+            // Éléments DOM
+            const expressionDisplay = document.getElementById('expression');
+            const currentValueDisplay = document.getElementById('current-value');
+            const historyList = document.getElementById('history-list');
             
-            form.addEventListener('submit', async function(event) {
-                event.preventDefault();
+            // Variables de la calculatrice
+            let currentValue = '0';
+            let firstOperand = null;
+            let operator = null;
+            let waitingForSecondOperand = false;
+            
+            // Historique
+            let history = [];
+            
+            // Fonction pour mettre à jour l'affichage
+            function updateDisplay() {
+                currentValueDisplay.textContent = currentValue;
                 
-                // Récupérer les valeurs du formulaire
-                const formData = new FormData(form);
-                const num1 = formData.get('num1');
-                const num2 = formData.get('num2');
-                const operation = formData.get('operation');
-                
-                // Afficher un message de chargement
-                resultDiv.style.display = 'block';
-                resultMsg.textContent = '⏳ Calcul en cours...';
-                resultValue.textContent = '';
-                performanceDiv.textContent = '';
-                resultDiv.className = 'result';
-                
-                try {
-                    // Construire l'URL avec les paramètres de requête
-                    const url = `/cgi-bin/calculator.php?num1=${encodeURIComponent(num1)}&num2=${encodeURIComponent(num2)}&operation=${encodeURIComponent(operation)}`;
+                if (operator) {
+                    expressionDisplay.textContent = `${firstOperand} ${getOperatorSymbol(operator)}`;
+                } else {
+                    expressionDisplay.textContent = '';
+                }
+            }
+            
+            // Fonction pour obtenir le symbole de l'opérateur
+            function getOperatorSymbol(op) {
+                switch (op) {
+                    case 'add': return '+';
+                    case 'subtract': return '−';
+                    case 'multiply': return '×';
+                    case 'divide': return '÷';
+                    default: return '';
+                }
+            }
+            
+            // Gestionnaire pour les boutons numériques
+            document.querySelectorAll('.calculator-button.number').forEach(button => {
+                button.addEventListener('click', function() {
+                    const digit = this.dataset.num;
                     
-                    // Mesurer le temps de réponse
-                    const startTime = performance.now();
-                    const response = await fetch(url);
-                    const endTime = performance.now();
-                    const duration = (endTime - startTime).toFixed(2);
-                    
-                    // Traiter la réponse
-                    const data = await response.json();
-                    
-                    if (data.status === 'success') {
-                        resultMsg.textContent = data.message;
-                        resultValue.textContent = data.result;
-                        resultDiv.className = 'result';
+                    if (waitingForSecondOperand) {
+                        currentValue = digit;
+                        waitingForSecondOperand = false;
                     } else {
-                        resultMsg.textContent = `Erreur: ${data.message}`;
-                        resultValue.textContent = '';
-                        resultDiv.className = 'result error';
+                        currentValue = currentValue === '0' && digit !== '.' ? digit : currentValue + digit;
                     }
                     
-                    // Afficher les performances
-                    performanceDiv.textContent = `Temps de réponse: ${duration}ms | Temps d'exécution CGI: ${data.performance.execution_time}`;
+                    updateDisplay();
+                });
+            });
+            
+            // Gestionnaire pour les boutons d'opération
+            document.querySelectorAll('.calculator-button.operation').forEach(button => {
+                button.addEventListener('click', function() {
+                    const nextOperator = this.dataset.op;
                     
-                    // Afficher les données de débogage
-                    debugDiv.textContent = JSON.stringify(data, null, 2);
-                    debugDiv.style.display = 'block';
+                    if (firstOperand === null) {
+                        firstOperand = currentValue;
+                    } else if (operator) {
+                        // Effectuer le calcul précédent
+                        calculateViaCGI();
+                    }
                     
-                } catch (error) {
-                    resultMsg.textContent = `❌ Erreur: ${error.message}`;
-                    resultValue.textContent = '';
-                    resultDiv.className = 'result error';
-                    performanceDiv.textContent = '';
+                    waitingForSecondOperand = true;
+                    operator = nextOperator;
+                    updateDisplay();
+                });
+            });
+            
+            // Gestionnaire pour le bouton égal
+            document.getElementById('equals').addEventListener('click', function() {
+                if (operator && !waitingForSecondOperand) {
+                    calculateViaCGI();
                 }
             });
             
-            // Précharger avec des valeurs par défaut pour un affichage immédiat
-            form.dispatchEvent(new Event('submit'));
+            // Gestionnaire pour les boutons spéciaux
+            document.getElementById('clear').addEventListener('click', function() {
+                currentValue = '0';
+                firstOperand = null;
+                operator = null;
+                waitingForSecondOperand = false;
+                updateDisplay();
+            });
+            
+            document.getElementById('sign').addEventListener('click', function() {
+                currentValue = (parseFloat(currentValue) * -1).toString();
+                updateDisplay();
+            });
+            
+            document.getElementById('percent').addEventListener('click', function() {
+                currentValue = (parseFloat(currentValue) / 100).toString();
+                updateDisplay();
+            });
+            
+            // Gestionnaire pour effacer l'historique
+            document.getElementById('clear-history').addEventListener('click', function() {
+                history = [];
+                updateHistory();
+            });
+            
+            // Fonction pour mettre à jour l'historique
+            function updateHistory() {
+                historyList.innerHTML = '';
+                
+                if (history.length === 0) {
+                    const emptyHistoryMsg = document.createElement('div');
+                    emptyHistoryMsg.className = 'history-item';
+                    emptyHistoryMsg.innerHTML = '<span class="history-expression">Aucun calcul effectué</span>';
+                    historyList.appendChild(emptyHistoryMsg);
+                    return;
+                }
+                
+                history.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.innerHTML = `
+                        <span class="history-expression">${item.expression}</span>
+                        <span class="history-result">${item.result}</span>
+                    `;
+                    historyList.appendChild(historyItem);
+                });
+            }
+            
+            // Fonction pour calculer via CGI
+            function calculateViaCGI() {
+                const num1 = parseFloat(firstOperand);
+                const num2 = parseFloat(currentValue);
+                
+                // Construire l'expression pour l'historique
+                const expressionSymbol = getOperatorSymbol(operator);
+                const expression = `${num1} ${expressionSymbol} ${num2}`;
+                
+                // Afficher un indicateur de chargement
+                currentValueDisplay.textContent = '...';
+                
+                // Effectuer la requête CGI
+                fetch(`/cgi-bin/calculator.php?num1=${num1}&num2=${num2}&operation=${operator}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Mettre à jour l'affichage
+                            currentValue = data.result.toString();
+                            
+                            // Ajouter à l'historique
+                            history.unshift({
+                                expression: expression,
+                                result: data.result
+                            });
+                            
+                            // Réinitialiser les variables d'opération
+                            firstOperand = null;
+                            operator = null;
+                            waitingForSecondOperand = false;
+                            
+                            // Mettre à jour l'affichage et l'historique
+                            updateDisplay();
+                            updateHistory();
+                        } else {
+                            currentValue = 'Erreur';
+                        }
+                    })
+                    .catch(error => {
+                        currentValue = 'Erreur';
+                    });
+            }
+            
+            // Initialiser l'affichage
+            updateDisplay();
+            updateHistory();
         });
     </script>
 </body>
