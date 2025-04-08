@@ -19,7 +19,7 @@ public:
     static void parseUrlEncoded(const std::string& body, FormData& form_data);
     
     /**
-     * @brief Parse des données multipart/form-data
+     * @brief Parse des données multipart/form-data (TEMPORARILY DISABLED)
      *
      * @param body Corps de la requête
      * @param boundary Boundary séparant les parties
@@ -29,7 +29,7 @@ public:
 
 private:
     /**
-     * @brief Parse une partie multipart
+     * @brief Parse une partie multipart (TEMPORARILY DISABLED)
      *
      * @param part Partie à parser
      * @param form_data Objet FormData à remplir
@@ -37,7 +37,7 @@ private:
     static void parseMultipartPart(const std::string& part, FormData& form_data);
     
     /**
-     * @brief Extrait les headers d'une partie multipart
+     * @brief Extrait les headers d'une partie multipart (TEMPORARILY DISABLED)
      *
      * @param part_headers Headers de la partie
      * @param name Nom du champ (out)

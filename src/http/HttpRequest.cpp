@@ -166,12 +166,9 @@ void HttpRequest::parseFormBody() {
         FormParser::parseUrlEncoded(body, form_data);
     }
     else if (content_type.find("multipart/form-data") != std::string::npos) {
-        // Extraire la boundary
-        size_t boundary_pos = content_type.find("boundary=");
-        if (boundary_pos != std::string::npos) {
-            std::string boundary = content_type.substr(boundary_pos + 9);
-            FormParser::parseMultipart(body, boundary, form_data);
-        }
+        // Multipart/form-data parsing and file upload feature has been temporarily disabled
+        // This will be reimplemented in a future version of the server
+        // No parsing is performed for this content type
     }
 }
 

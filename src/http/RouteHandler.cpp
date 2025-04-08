@@ -10,6 +10,8 @@
 #include <ctime>
 #include <algorithm>
 #include <map>
+#include <cerrno>   // For errno
+#include <iomanip>  // For std::setprecision
 
 /**
  * @brief Constructeur
@@ -145,13 +147,9 @@ HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request) {
         return handleCGIRequest(request, file_path, *location);
     }
     
-    // Vérifier si c'est une requête de téléchargement de fichier
-    if (request.getHeader("content-type").find("multipart/form-data") != std::string::npos) {
-        return handleFileUpload(request);
-    }
-    
-    // Pour les autres types de requêtes POST
-    // Si aucun handler spécifique n'est trouvé, renvoyer une erreur
+    // Pour les autres types de requêtes POST, notamment les téléversements de fichiers
+    // La fonctionnalité de téléversement de fichiers (multipart/form-data) a été temporairement désactivée
+    // Cette fonctionnalité sera réimplémentée dans une future version du serveur
     return HttpResponse::createError(400, "Invalid POST request");
 }
 
@@ -365,102 +363,4 @@ std::string RouteHandler::getFileExtension(const std::string& path) const {
         return "";
     }
     return path.substr(dot_pos);
-}
-
-/**
- * @brief Traite une requête d'upload de fichier
- * @param request La requête HTTP
- * @return La réponse HTTP
- */
-HttpResponse RouteHandler::handleFileUpload(const HttpRequest& request) {
-    HttpResponse response;
-    const std::string uri = request.getUri();
-    
-    // Trouver la configuration de location correspondante
-    const LocationConfig* location = findMatchingLocation(uri);
-    if (!location) {
-        return HttpResponse::createError(404, "Upload location not found");
-    }
-    
-    // Vérifier si les uploads sont autorisés pour cette location
-    if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(), "POST") == location->allowed_methods.end()) {
-        return HttpResponse::createError(405, "Method not allowed for uploads");
-    }
-
-    // Obtenir les fichiers uploadés
-    const std::map<std::string, UploadedFile>& uploaded_files = request.getUploadedFiles();
-    if (uploaded_files.empty()) {
-        return HttpResponse::createError(400, "No files uploaded or invalid multipart form data");
-    }
-    
-    // Créer le répertoire de destination si nécessaire
-    std::string upload_dir = location->upload_directory.empty() ? 
-                              root_directory + "/uploads" : 
-                              location->upload_directory;
-    
-    if (!FileUtils::ensureDirectoryExists(upload_dir)) {
-        return HttpResponse::createError(500, "Failed to create upload directory");
-    }
-    
-    // Sauvegarder chaque fichier uploadé
-    std::stringstream result_html;
-    result_html << "<!DOCTYPE html><html><head><title>Upload Results</title></head><body>"
-               << "<h1>Upload Results</h1><ul>";
-    
-    int success_count = 0;
-    std::map<std::string, UploadedFile>::const_iterator it;
-    for (it = uploaded_files.begin(); it != uploaded_files.end(); ++it) {
-        
-        const UploadedFile& file = it->second;
-        if (file.filename.empty()) continue;
-        
-        // Sanitize filename to prevent directory traversal
-        std::string safe_filename = FileUtils::sanitizeFilename(file.filename);
-        std::string filepath = upload_dir + "/" + safe_filename;
-        
-        // Check file size limit (client_max_body_size)
-        if (location->client_max_body_size > 0 && 
-            static_cast<size_t>(file.data.size()) > location->client_max_body_size) {
-            result_html << "<li>File '" << FileUtils::htmlEscape(file.filename) 
-                        << "' exceeds maximum allowed size</li>";
-            continue;
-        }
-        
-        // Save the file
-        std::ofstream outfile(filepath.c_str(), std::ios::binary);
-        if (!outfile) {
-            result_html << "<li>Failed to save file '" << FileUtils::htmlEscape(file.filename) << "'</li>";
-            continue;
-        }
-        
-        outfile.write(file.data.c_str(), file.data.size());
-        if (!outfile) {
-            result_html << "<li>Error writing file '" << FileUtils::htmlEscape(file.filename) << "'</li>";
-            continue;
-        }
-        
-        outfile.close();
-        success_count++;
-        result_html << "<li>File '" << FileUtils::htmlEscape(file.filename) 
-                    << "' uploaded successfully (" << file.data.size() << " bytes)</li>";
-    }
-    
-    result_html << "</ul>";
-    
-    // Add a link back to the upload page
-    result_html << "<p><a href=\"/pages/file-upload.html\">Back to upload page</a></p>";
-    
-    result_html << "</body></html>";
-    
-    // Set response status based on results
-    if (success_count == 0) {
-        response.setStatus(500);
-    } else if (success_count < static_cast<int>(uploaded_files.size())) {
-        response.setStatus(206); // Partial Content
-    } else {
-        response.setStatus(201); // Created
-    }
-    
-    response.setBody(result_html.str(), "text/html");
-    return response;
 }

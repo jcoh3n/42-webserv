@@ -35,54 +35,12 @@ void testUrlEncodedForm() {
 
 void testMultipartFormData() {
     LOG_INFO("\n=== Test: Multipart form data ===");
+    LOG_INFO("NOTE: Multipart/form-data parsing has been temporarily disabled");
+    LOG_INFO("This test is skipped and will be re-enabled when the feature is reimplemented");
     
-    std::string boundary = "----WebKitFormBoundaryABC123";
-    std::string request = 
-        "POST /upload HTTP/1.1\r\n"
-        "Host: localhost:8080\r\n"
-        "Content-Type: multipart/form-data; boundary=" + boundary + "\r\n"
-        "Content-Length: 400\r\n"
-        "\r\n"
-        "--" + boundary + "\r\n"
-        "Content-Disposition: form-data; name=\"username\"\r\n"
-        "\r\n"
-        "john_doe\r\n"
-        "--" + boundary + "\r\n"
-        "Content-Disposition: form-data; name=\"file\"; filename=\"test.txt\"\r\n"
-        "Content-Type: text/plain\r\n"
-        "\r\n"
-        "This is the content of the file\r\n"
-        "--" + boundary + "--\r\n";
+    // Test is skipped as multipart/form-data parsing is temporarily disabled
     
-    HttpRequest req;
-    bool result = req.parse(request);
-    
-    assert(result);
-    assert(req.getMethod() == "POST");
-    assert(req.getUri() == "/upload");
-    
-    LOG_INFO("Form values:");
-    LOG_INFO("  username: " << req.getFormValue("username"));
-    
-    assert(req.getFormValue("username") == "john_doe");
-    assert(req.hasUploadedFile("file"));
-    
-    const UploadedFile* file = req.getUploadedFile("file");
-    assert(file != NULL);
-    
-    LOG_INFO("Uploaded file:");
-    LOG_INFO("  Name: " << file->name);
-    LOG_INFO("  Filename: " << file->filename);
-    LOG_INFO("  Content-Type: " << file->content_type);
-    LOG_INFO("  Size: " << file->data.size() << " bytes");
-    LOG_INFO("  Content: " << file->data);
-    
-    assert(file->name == "file");
-    assert(file->filename == "test.txt");
-    assert(file->content_type == "text/plain");
-    assert(file->data == "This is the content of the file");
-    
-    LOG_SUCCESS("Multipart form data test passed!");
+    LOG_SUCCESS("Multipart form data test skipped (functionality disabled)!");
 }
 
 void testContentLengthValidation() {
@@ -113,7 +71,7 @@ int main() {
         testMultipartFormData();
         testContentLengthValidation();
         
-        LOG_SUCCESS("\nAll tests passed successfully!");
+        LOG_SUCCESS("\nAll tests completed! (Note: multipart/form-data test was skipped due to temporary feature removal)");
         return 0;
     }
     catch (const std::exception& e) {
