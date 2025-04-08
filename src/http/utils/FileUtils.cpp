@@ -8,6 +8,7 @@
 #include <ctime>
 #include <iomanip>
 #include <cstring>
+#include <cctype>
 
 // Vérifier si un fichier existe
 bool FileUtils::fileExists(const std::string& path) {
@@ -238,4 +239,74 @@ std::string FileUtils::generateDirectoryListing(const std::string& dir_path, con
          << "</html>";
     
     return html.str();
+}
+
+// Assainir un nom de fichier pour l'upload
+std::string FileUtils::sanitizeFilename(const std::string& filename) {
+    std::string result;
+    
+    // Supprimer les caractères dangereux
+    for (size_t i = 0; i < filename.length(); ++i) {
+        char c = filename[i];
+        // N'autoriser que les caractères alphanumériques, points, tirets et underscores
+        if (isalnum(c) || c == '.' || c == '-' || c == '_') {
+            result += c;
+        }
+    }
+    
+    // Si le nom résultant est vide, utiliser un nom par défaut
+    if (result.empty()) {
+        result = "upload";
+    }
+    
+    // Ajouter un timestamp pour éviter les écrasements
+    time_t now = time(NULL);
+    
+    // Convertir le timestamp en string (C++98 compatible)
+    std::stringstream ss;
+    ss << "_" << now;
+    std::string timestamp = ss.str();
+    
+    // Insérer le timestamp avant l'extension
+    size_t dot_pos = result.find_last_of(".");
+    if (dot_pos != std::string::npos) {
+        result = result.substr(0, dot_pos) + timestamp + result.substr(dot_pos);
+    } else {
+        result += timestamp;
+    }
+    
+    return result;
+}
+
+// Echapper les caractères HTML pour l'affichage sécurisé
+std::string FileUtils::htmlEscape(const std::string& text) {
+    std::string result;
+    for (size_t i = 0; i < text.length(); ++i) {
+        char c = text[i];
+        switch (c) {
+            case '&': result += "&amp;"; break;
+            case '<': result += "&lt;"; break;
+            case '>': result += "&gt;"; break;
+            case '"': result += "&quot;"; break;
+            case '\'': result += "&#39;"; break;
+            default: result += c;
+        }
+    }
+    return result;
+}
+
+// S'assurer qu'un répertoire existe, le créer si nécessaire
+bool FileUtils::ensureDirectoryExists(const std::string& path) {
+    // Si le répertoire existe déjà
+    if (isDirectory(path)) {
+        return true;
+    }
+    
+    // Si le chemin existe mais n'est pas un répertoire
+    if (fileExists(path)) {
+        return false;
+    }
+    
+    // Créer le répertoire avec les permissions 0755
+    return (mkdir(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == 0);
 } 
