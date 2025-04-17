@@ -5,6 +5,32 @@
 #include <string>
 #include <map>
 
+// Classe utilitaire pour gérer les boundaries
+class BoundaryExtractor {
+public:
+    static std::string extract(const std::string& content_type);
+    static std::string clean(const std::string& boundary);
+private:
+    static void removeQuotes(std::string& boundary);
+    static void removeSemicolonAndAfter(std::string& boundary);
+    static void trimWhitespace(std::string& boundary);
+};
+
+// Classe utilitaire pour gérer les headers des parties multipart
+class MultipartHeaderParser {
+public:
+    struct HeaderInfo {
+        std::string name;
+        std::string filename;
+        std::string content_type;
+    };
+    
+    static HeaderInfo parse(const std::string& headers);
+private:
+    static void parseContentDisposition(const std::string& header_value, HeaderInfo& info);
+    static void parseContentType(const std::string& header_value, HeaderInfo& info);
+};
+
 /**
  * @brief Classe pour parser différents types de formulaires
  */
@@ -37,17 +63,13 @@ private:
     static void parseMultipartPart(const std::string& part, FormData& form_data);
     
     /**
-     * @brief Extrait les headers d'une partie multipart
+     * @brief Sauvegarde un fichier uploadé
      *
-     * @param part_headers Headers de la partie
-     * @param name Nom du champ (out)
-     * @param filename Nom du fichier (out)
-     * @param content_type Type de contenu (out)
+     * @param file Informations sur le fichier
+     * @param content Contenu du fichier
+     * @return bool Succès de la sauvegarde
      */
-    static void extractPartHeaders(const std::string& part_headers, 
-                           std::string& name, 
-                           std::string& filename, 
-                           std::string& content_type);
+    static bool saveUploadedFile(const UploadedFile& file, const std::string& content);
     
     // Constructeur privé pour empêcher l'instanciation
     FormParser() {}

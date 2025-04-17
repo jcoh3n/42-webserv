@@ -14,7 +14,8 @@
  * de fichier pour poll().
  */
 Server::Server(int port, const ServerConfig& config) 
-    : port(port)
+    : server_socket()
+    , port(port)
     , nfds(1)
     , running(false)
     , server_config(config)

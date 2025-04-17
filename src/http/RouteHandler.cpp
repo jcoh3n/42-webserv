@@ -1,8 +1,11 @@
 #include "http/RouteHandler.hpp"
 #include "http/HttpResponse.hpp"
+#include "http/HttpRequest.hpp"
 #include "http/utils/FileUtils.hpp"
 #include "http/utils/HttpStringUtils.hpp"
 #include "utils/Common.hpp"
+#include "http/CGIHandler.hpp"
+#include "http/parser/FormParser.hpp"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -13,66 +16,22 @@
 #include <cerrno>   // For errno
 #include <iomanip>  // For std::setprecision
 
-/**
- * @brief Constructeur
- * @param root_directory Le répertoire racine pour les fichiers statiques
- * @param server_config La configuration du serveur
- */
-RouteHandler::RouteHandler(const std::string& root_directory, const ServerConfig& server_config)
-    : root_directory(root_directory)
-    , server_config(server_config) {
-}
-
-/**
- * @brief Destructeur
- */
-RouteHandler::~RouteHandler() {
-}
-
-/**
- * @brief Traite une requête HTTP et génère une réponse appropriée
- * @param request La requête HTTP à traiter
- * @return La réponse HTTP à envoyer au client
- */
 HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
-    // Trouver la location correspondante
-    const LocationConfig* location = findMatchingLocation(request.getUri());
-    if (!location) {
-        return serveErrorPage(404, "Location not found");
-    }
-
-    // Vérifier si la méthode est autorisée
-    if (std::find(location->allowed_methods.begin(), 
-                  location->allowed_methods.end(), 
-                  request.getMethod()) == location->allowed_methods.end()) {
-        return serveErrorPage(405, "Method not allowed");
-    }
-
-    // Construire le chemin du fichier
     std::string file_path = getFilePath(request.getUri());
-
-    // Vérifier si c'est une requête CGI
-    if (isCGIRequest(file_path, *location)) {
-        return handleCGIRequest(request, file_path, *location);
-    }
-
-    // Traiter comme une requête normale
+    
     if (request.getMethod() == "GET") {
         return handleGetRequest(request);
-    } else if (request.getMethod() == "POST") {
-        return handlePostRequest(request);
-    } else if (request.getMethod() == "DELETE") {
+    }
+    else if (request.getMethod() == "POST") {
+        return handlePostRequest(request, file_path);
+    }
+    else if (request.getMethod() == "DELETE") {
         return handleDeleteRequest(request);
     }
-
-    return serveErrorPage(501, "Method not implemented");
+    
+    return HttpResponse::createError(405, "Method Not Allowed");
 }
 
-/**
- * @brief Traite une requête GET
- * @param request La requête HTTP
- * @return La réponse HTTP
- */
 HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
     HttpResponse response;
     std::string file_path = getFilePath(request.getUri()); 
@@ -126,104 +85,56 @@ HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
     return response;
 }
 
-/**
- * @brief Traite une requête POST
- * @param request La requête HTTP
- * @return La réponse HTTP
- */
-HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request) {
-    HttpResponse response;
-    const std::string uri = request.getUri();
-    
-    // Vérifier si c'est une requête pour l'API des tâches
-    if (uri == "/api/tasks") {
-        return handleCGIRequest(request, getFilePath("/cgi-bin/tasks.php"), *findMatchingLocation("/cgi-bin/"));
+HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request, const std::string& file_path) {
+    // Si c'est une requête pour l'API tasks
+    if (request.getUri().find("/api/tasks") == 0) {
+        return handleTasksApiRequest(request);
     }
     
-    // Vérifier si c'est un formulaire ou une autre ressource CGI
-    const LocationConfig* location = findMatchingLocation(uri);
-    if (location && !location->cgi_handlers.empty()) {
-        std::string file_path = getFilePath(uri);
-        return handleCGIRequest(request, file_path, *location);
-    }
-    
-    // Vérifier si c'est une requête d'upload vers /upload
-    if (location && uri.find("/upload") == 0) {
-        // Vérifier si c'est bien un POST et si le Content-Type est multipart/form-data
-        std::string content_type = request.getHeader("content-type");
-        
-        LOG_INFO("Content-Type: " << content_type);
-        
-        if (content_type.find("multipart/form-data") != std::string::npos) {
-            // Vérifier si des fichiers ont été uploadés
-            const std::map<std::string, UploadedFile>& files = request.getUploadedFiles();
-            
-            LOG_INFO("Number of uploaded files: " << files.size());
-            
-            if (files.empty()) {
-                return HttpResponse::createError(400, "No files uploaded");
-            }
-            
-            // Créer une réponse de succès
-            HttpResponse response;
-            response.setStatus(201); // Created
-            
-            // Générer un message HTML de confirmation
-            std::stringstream html;
-            html << "<!DOCTYPE html>\n"
-                 << "<html>\n"
-                 << "<head>\n"
-                 << "    <title>Upload Successful</title>\n"
-                 << "    <style>\n"
-                 << "        body { font-family: Arial, sans-serif; margin: 40px; }\n"
-                 << "        h1 { color: #2c3e50; }\n"
-                 << "        .success { color: #27ae60; }\n"
-                 << "        .files { margin: 20px 0; padding: 10px; background: #f9f9f9; border-radius: 5px; }\n"
-                 << "        .file { margin-bottom: 10px; }\n"
-                 << "        .back { display: inline-block; margin-top: 20px; padding: 10px 15px; background: #3498db; color: white; text-decoration: none; border-radius: 4px; }\n"
-                 << "    </style>\n"
-                 << "</head>\n"
-                 << "<body>\n"
-                 << "    <h1>File Upload <span class=\"success\">Successful</span></h1>\n"
-                 << "    <p>" << files.size() << " file(s) uploaded successfully:</p>\n"
-                 << "    <div class=\"files\">\n";
-            
-            // Lister tous les fichiers uploadés
-            for (std::map<std::string, UploadedFile>::const_iterator it = files.begin(); it != files.end(); ++it) {
-                const UploadedFile& file = it->second;
-                html << "        <div class=\"file\">\n"
-                     << "            <strong>Name:</strong> " << file.filename << "<br />\n"
-                     << "            <strong>Size:</strong> " << file.data.size() << " bytes<br />\n"
-                     << "            <strong>Type:</strong> " << file.content_type << "\n"
-                     << "        </div>\n";
-            }
-            
-            html << "    </div>\n"
-                 << "    <a href=\"/\" class=\"back\">Back to Home</a>\n"
-                 << "</body>\n"
-                 << "</html>";
-            
-            response.setBody(html.str(), "text/html");
-            return response;
+    // Si c'est un upload de fichier
+    if (request.getUri() == "/upload") {
+        const std::string& content_type = request.getHeader("content-type");
+        if (content_type.find("multipart/form-data") == std::string::npos) {
+            return HttpResponse::createError(400, "Invalid Content-Type for file upload");
         }
+        
+        const std::map<std::string, UploadedFile>& uploaded_files = request.getFormData().getUploadedFiles();
+        if (uploaded_files.empty()) {
+            return HttpResponse::createError(400, "No files uploaded");
+        }
+        
+        // Créer le gestionnaire d'upload avec la configuration du serveur
+        UploadConfig upload_config("./www/uploads/", 10 * 1024 * 1024);  // 10MB max
+        FileUploadHandler upload_handler(upload_config);
+        
+        // Traiter chaque fichier
+        int success_count = 0;
+        for (std::map<std::string, UploadedFile>::const_iterator it = uploaded_files.begin();
+             it != uploaded_files.end(); ++it) {
+            if (upload_handler.handleFileUpload(it->second)) {
+                success_count++;
+            }
+        }
+        
+        return FileUploadHandler::createUploadResponse(success_count, uploaded_files.size());
     }
     
-    // Pour les autres types de requêtes POST
-    return HttpResponse::createError(400, "Invalid POST request");
+    // Si c'est une ressource CGI
+    if (isCgiResource(file_path)) {
+        return handleCGIRequest(request, file_path);
+    }
+    
+    // Méthode POST non supportée pour cette ressource
+    return HttpResponse::createError(405, "Method Not Allowed");
 }
 
-/**
- * @brief Traite une requête DELETE
- * @param request La requête HTTP
- * @return La réponse HTTP
- */
 HttpResponse RouteHandler::handleDeleteRequest(const HttpRequest& request) {
     HttpResponse response;
     const std::string uri = request.getUri();
     
     // Vérifier si c'est une requête pour l'API des tâches
     if (uri.find("/api/tasks/") == 0) {
-        return handleCGIRequest(request, getFilePath("/cgi-bin/tasks.php"), *findMatchingLocation("/cgi-bin/"));
+        return handleCGIRequest(request, getFilePath("/cgi-bin/tasks.php"));
     }
     
     // Pour les requêtes de suppression de fichier
@@ -249,22 +160,18 @@ HttpResponse RouteHandler::handleDeleteRequest(const HttpRequest& request) {
     return response;
 }
 
-/**
- * @brief Obtient le chemin du fichier correspondant à l'URI
- * @param uri L'URI de la requête
- * @return Le chemin complet du fichier
- */
-std::string RouteHandler::getFilePath(const std::string& uri) {
-    // Normaliser le chemin pour éviter les attaques par traversée de répertoire
-    return FileUtils::normalizePath(root_directory, uri);
+std::string RouteHandler::getFilePath(const std::string& uri) const {
+    // Supprimer les paramètres de l'URL s'il y en a
+    std::string clean_uri = uri;
+    size_t question_mark = clean_uri.find('?');
+    if (question_mark != std::string::npos) {
+        clean_uri = clean_uri.substr(0, question_mark);
+    }
+    
+    // Construire le chemin complet
+    return root_directory + clean_uri;
 }
 
-/**
- * @brief Lit un fichier et le place dans la réponse HTTP
- * @param file_path Le chemin du fichier à servir
- * @param response La réponse HTTP à compléter
- * @return true si le fichier a été servi avec succès, false sinon
- */
 bool RouteHandler::serveStaticFile(const std::string& file_path, HttpResponse& response) {
     // Ouvrir le fichier
     std::ifstream file(file_path.c_str(), std::ios::binary); 
@@ -302,13 +209,6 @@ bool RouteHandler::serveStaticFile(const std::string& file_path, HttpResponse& r
     return true;
 }
 
-/**
- * @brief Vérifie si une ressource a été modifiée depuis la dernière requête
- * @param request La requête HTTP
- * @param file_path Le chemin du fichier
- * @param response La réponse HTTP à compléter
- * @return true si la ressource n'a pas été modifiée, false sinon
- */
 bool RouteHandler::checkNotModified(const HttpRequest& request, const std::string& file_path, HttpResponse& response) {
     // Vérifier si le client a envoyé un ETag
     std::string if_none_match = request.getHeader("If-None-Match");
@@ -398,24 +298,20 @@ bool RouteHandler::isCGIRequest(const std::string& path, const LocationConfig& l
     return it != location.cgi_handlers.end();
 }
 
-HttpResponse RouteHandler::handleCGIRequest(const HttpRequest& request, 
-                                          const std::string& script_path, 
-                                          const LocationConfig& location) {
-    std::string ext = getFileExtension(script_path);
-    std::map<std::string, std::string>::const_iterator it = location.cgi_handlers.find(ext);
-    if (it == location.cgi_handlers.end()) {
-        return HttpResponse::createError(500, "No CGI handler found for extension");
+HttpResponse RouteHandler::handleCGIRequest(const HttpRequest& request, const std::string& scriptPath) {
+    std::string ext = getFileExtension(scriptPath);
+    const LocationConfig* location = findMatchingLocation(request.getUri());
+    if (!location) {
+        return HttpResponse::createError(500, "No matching location for CGI request");
     }
-
-    CGIHandler handler(request, script_path, it->second);
-    return handler.executeCGI();
+    
+    if (isCGIRequest(scriptPath, *location)) {
+        CGIHandler handler(request, scriptPath, location->cgi_handlers.find(ext)->second);
+        return handler.executeCGI();
+    }
+    return HttpResponse::createError(500, "No CGI handler found for extension");
 }
 
-/**
- * @brief Obtient l'extension d'un fichier
- * @param path Le chemin du fichier
- * @return L'extension du fichier (avec le point)
- */
 std::string RouteHandler::getFileExtension(const std::string& path) const {
     size_t dot_pos = path.find_last_of('.');
     if (dot_pos == std::string::npos) {
@@ -423,3 +319,18 @@ std::string RouteHandler::getFileExtension(const std::string& path) const {
     }
     return path.substr(dot_pos);
 }
+
+HttpResponse RouteHandler::handleTasksApiRequest(const HttpRequest& /* request */) {
+    // Implémentation de l'API tasks
+    return HttpResponse::createError(501, "Not Implemented");
+}
+
+bool RouteHandler::isCgiResource(const std::string& path) const {
+    // Vérifier si le fichier a une extension .cgi, .php, etc.
+    size_t dot_pos = path.find_last_of('.');
+    if (dot_pos != std::string::npos) {
+        std::string ext = path.substr(dot_pos);
+        return ext == ".cgi" || ext == ".php" || ext == ".py";
+    }
+    return false;
+} 

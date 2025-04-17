@@ -43,11 +43,12 @@ public:
     }
     
     // Getters pour les formulaires et fichiers (délégués à FormData)
-    const std::map<std::string, std::string>& getFormValues() const;
-    const std::map<std::string, UploadedFile>& getUploadedFiles() const;
-    std::string getFormValue(const std::string& name) const;
-    bool hasUploadedFile(const std::string& name) const;
-    const UploadedFile* getUploadedFile(const std::string& name) const;
+    const FormData& getFormData() const { return form_data; }
+    const std::map<std::string, std::string>& getFormValues() const { return form_data.getFormValues(); }
+    const std::map<std::string, UploadedFile>& getUploadedFiles() const { return form_data.getUploadedFiles(); }
+    std::string getFormValue(const std::string& name) const { return form_data.getFormValue(name); }
+    bool hasUploadedFile(const std::string& name) const { return form_data.hasUploadedFile(name); }
+    const UploadedFile* getUploadedFile(const std::string& name) const { return form_data.getUploadedFile(name); }
 
 private:
     // Méthodes de parsing

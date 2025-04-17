@@ -35,8 +35,13 @@ public:
     std::string buildHeadResponse() const;
 
     // Getters
+    int getStatus() const { return status_code; }
     int getStatusCode() const { return status_code; }
     const std::string& getStatusMessage() const { return status_message; }
+    std::string getHeader(const std::string& name) const {
+        std::map<std::string, std::string>::const_iterator it = headers.find(name);
+        return it != headers.end() ? it->second : "";
+    }
     const std::map<std::string, std::string>& getHeaders() const { return headers; }
     const std::string& getBody() const { return body; }
 

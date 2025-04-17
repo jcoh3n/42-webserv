@@ -13,6 +13,10 @@ HTTP_REQUEST_SRCS = $(SRC_DIR)/http/HttpRequest.cpp \
            $(SRC_DIR)/http/parser/FormData.cpp \
            $(SRC_DIR)/http/parser/FormParser.cpp
 
+# Sources Upload
+UPLOAD_SRCS = $(SRC_DIR)/http/upload/FileUploadHandler.cpp \
+              $(SRC_DIR)/http/upload/UploadConfig.cpp
+
 # Sources HTTP Response
 HTTP_RESPONSE_SRCS = $(SRC_DIR)/http/HttpResponse.cpp \
            $(SRC_DIR)/http/ResponseHandler.cpp \
@@ -30,7 +34,7 @@ CONFIG_SRCS = $(SRC_DIR)/config/ConfigParser.cpp \
               $(SRC_DIR)/config/ConfigSelector.cpp
 
 # Toutes les sources HTTP
-HTTP_SRCS = $(HTTP_REQUEST_SRCS) $(HTTP_RESPONSE_SRCS) $(ROUTE_SRCS)
+HTTP_SRCS = $(HTTP_REQUEST_SRCS) $(HTTP_RESPONSE_SRCS) $(ROUTE_SRCS) $(UPLOAD_SRCS)
 
 # Sources principales
 SRCS = $(wildcard $(SRC_DIR)/*.cpp) \
@@ -49,6 +53,7 @@ TEST_HTTP_INTEGRATION = test_http_integration
 TEST_CGI_UPLOAD = test_cgi_upload
 TEST_CONFIG = test_config
 TEST_CGI_SIMPLE = test_cgi_simple
+TEST_UPLOAD = test_upload
 
 TEST_PARSER_SRC = $(TEST_DIR)/unit/test_parser.cpp
 TEST_FORM_SRC = $(TEST_DIR)/unit/test_form_parser.cpp
@@ -57,6 +62,7 @@ TEST_HTTP_INTEGRATION_SRC = $(TEST_DIR)/integration/http_integration_test.cpp
 TEST_CGI_UPLOAD_SRC = $(TEST_DIR)/integration/cgi_upload_test.cpp
 TEST_CONFIG_SRC = $(TEST_DIR)/unit/test_config.cpp
 TEST_CGI_SIMPLE_SRC = $(TEST_DIR)/test_cgi_simple.cpp
+TEST_UPLOAD_SRC = $(TEST_DIR)/unit/test_upload.cpp
 
 # Règle par défaut : compile uniquement le serveur
 all: $(NAME)
@@ -74,7 +80,7 @@ $(NAME): $(OBJS)
 test: test_unit test_integration test_cgi_simple
 	@echo "\nAll tests completed.\n"
 
-test_unit: test_parser test_form test_response test_config
+test_unit: test_parser test_form test_response test_config test_upload
 	@echo "\nUnit tests completed.\n"
 
 test_integration: test_http_integration test_cgi_upload
@@ -115,6 +121,11 @@ test_config:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(CONFIG_SRCS) $(TEST_CONFIG_SRC) -o $(TEST_CONFIG)
 	./$(TEST_CONFIG)
 
+test_upload:
+	@mkdir -p $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(HTTP_SRCS) $(TEST_UPLOAD_SRC) -o $(TEST_UPLOAD)
+	./$(TEST_UPLOAD)
+
 clean:
 	rm -rf $(OBJ_DIR)
 
@@ -127,8 +138,9 @@ fclean: clean
 	rm -f $(TEST_CGI_UPLOAD)
 	rm -f $(TEST_CONFIG)
 	rm -f $(TEST_CGI_SIMPLE)
+	rm -f $(TEST_UPLOAD)
 
 re: fclean all
 
-.PHONY: all clean fclean re test test_unit test_integration test_parser test_form test_response test_http_integration test_cgi_upload test_config test_cgi_simple
+.PHONY: all clean fclean re test test_unit test_integration test_parser test_form test_response test_http_integration test_cgi_upload test_config test_cgi_simple test_upload
 
