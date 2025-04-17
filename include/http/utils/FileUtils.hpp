@@ -28,6 +28,15 @@ public:
     
     // Lister les fichiers d'un répertoire (pour les index automatiques)
     static std::string generateDirectoryListing(const std::string& dir_path, const std::string& request_uri);
+    
+    // Assainir un nom de fichier pour l'upload
+    static std::string sanitizeFilename(const std::string& filename);
+    
+    // Echapper les caractères HTML pour l'affichage sécurisé
+    static std::string htmlEscape(const std::string& text);
+    
+    // S'assurer qu'un répertoire existe, le créer si nécessaire
+    static bool ensureDirectoryExists(const std::string& path);
 };
 
 #endif // FILE_UTILS_HPP 
