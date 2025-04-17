@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "MultiServerManager.hpp"
 #include "utils/Common.hpp"
 #include "config/ConfigParser.hpp"
 #include <iostream>
@@ -25,16 +26,13 @@ int main(int argc, char* argv[]) {
 			return 1;
 		}
 		
-		// Pour l'instant, nous utilisons seulement le premier serveur configuré
-		// À l'avenir, nous pourrons lancer plusieurs serveurs en parallèle
-		const ServerConfig& server_config = config.servers[0];
-		int port = server_config.port;
 		LOG_INFO("Loaded configuration with " << config.servers.size() << " server(s)");
-		LOG_INFO("Using port " << port << " from configuration");
 		
-		// Créer et démarrer le serveur
-		Server server(port, server_config);
-		server.start();
+		// Initialiser et démarrer les serveurs
+		MultiServerManager manager;
+		manager.initServers(config);
+		manager.startServers();
+		
 	} catch (const std::exception& e) {
 		LOG_ERROR("Error: " << e.what());
 		return 1;

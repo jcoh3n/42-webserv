@@ -1,6 +1,7 @@
 #include "http/HttpRequest.hpp"
 #include "http/utils/HttpUtils.hpp"
 #include "http/parser/FormParser.hpp"
+#include "utils/Common.hpp"
 #include <sstream>
 #include <algorithm>
 
@@ -62,8 +63,30 @@ bool HttpRequest::parse(const std::string& raw_request) {
         return false;
 
     // Extraire le body s'il existe
-    if (headers_end + 4 < raw_request.length())
-        body = raw_request.substr(headers_end + 4);
+    if (headers_end + 4 < raw_request.length()) {
+        // Vérifier le Content-Length
+        std::map<std::string, std::string>::const_iterator it = headers.find("content-length");
+        if (it != headers.end()) {
+            std::stringstream ss(it->second);
+            size_t content_length = 0;
+            ss >> content_length;
+            
+            LOG_INFO("Content-Length: " << content_length);
+            
+            // Vérifier que nous avons assez de données
+            if (headers_end + 4 + content_length <= raw_request.length()) {
+                body = raw_request.substr(headers_end + 4, content_length);
+                LOG_INFO("Body size: " << body.size() << " bytes");
+                LOG_INFO("Body content: '" << body.substr(0, 100) << "...'");
+            } else {
+                LOG_ERROR("Incomplete request body");
+                return false;
+            }
+        } else {
+            body = raw_request.substr(headers_end + 4);
+            LOG_INFO("No Content-Length header, using remaining data: " << body.size() << " bytes");
+        }
+    }
 
     // Parser query string si présent dans l'URI
     parseQueryString();
@@ -166,9 +189,37 @@ void HttpRequest::parseFormBody() {
         FormParser::parseUrlEncoded(body, form_data);
     }
     else if (content_type.find("multipart/form-data") != std::string::npos) {
-        // Multipart/form-data parsing and file upload feature has been temporarily disabled
-        // This will be reimplemented in a future version of the server
-        // No parsing is performed for this content type
+        // Extraire la boundary depuis le Content-Type
+        size_t boundary_pos = content_type.find("boundary=");
+        if (boundary_pos != std::string::npos) {
+            std::string boundary = content_type.substr(boundary_pos + 9); // 9 = taille de "boundary="
+            
+            // Supprimer les espaces au début et à la fin
+            boundary.erase(0, boundary.find_first_not_of(" \t"));
+            boundary.erase(boundary.find_last_not_of(" \t") + 1);
+            
+            // Supprimer les guillemets s'ils existent
+            if (boundary.length() >= 2 && boundary[0] == '"') {
+                boundary = boundary.substr(1);
+            }
+            if (boundary.length() >= 1 && boundary[boundary.length() - 1] == '"') {
+                boundary = boundary.substr(0, boundary.length() - 1);
+            }
+            
+            // Supprimer tout ce qui suit après un point-virgule (autres paramètres)
+            size_t semicolon_pos = boundary.find(';');
+            if (semicolon_pos != std::string::npos) {
+                boundary = boundary.substr(0, semicolon_pos);
+            }
+            
+            LOG_INFO("Extracted boundary: " << boundary);
+            
+            // Parser le formulaire multipart avec la boundary
+            FormParser::parseMultipart(body, boundary, form_data);
+        }
+        else {
+            LOG_ERROR("Multipart form-data without boundary parameter");
+        }
     }
 }
 

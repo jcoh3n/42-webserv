@@ -147,9 +147,68 @@ HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request) {
         return handleCGIRequest(request, file_path, *location);
     }
     
-    // Pour les autres types de requêtes POST, notamment les téléversements de fichiers
-    // La fonctionnalité de téléversement de fichiers (multipart/form-data) a été temporairement désactivée
-    // Cette fonctionnalité sera réimplémentée dans une future version du serveur
+    // Vérifier si c'est une requête d'upload vers /upload
+    if (location && uri.find("/upload") == 0) {
+        // Vérifier si c'est bien un POST et si le Content-Type est multipart/form-data
+        std::string content_type = request.getHeader("content-type");
+        
+        LOG_INFO("Content-Type: " << content_type);
+        
+        if (content_type.find("multipart/form-data") != std::string::npos) {
+            // Vérifier si des fichiers ont été uploadés
+            const std::map<std::string, UploadedFile>& files = request.getUploadedFiles();
+            
+            LOG_INFO("Number of uploaded files: " << files.size());
+            
+            if (files.empty()) {
+                return HttpResponse::createError(400, "No files uploaded");
+            }
+            
+            // Créer une réponse de succès
+            HttpResponse response;
+            response.setStatus(201); // Created
+            
+            // Générer un message HTML de confirmation
+            std::stringstream html;
+            html << "<!DOCTYPE html>\n"
+                 << "<html>\n"
+                 << "<head>\n"
+                 << "    <title>Upload Successful</title>\n"
+                 << "    <style>\n"
+                 << "        body { font-family: Arial, sans-serif; margin: 40px; }\n"
+                 << "        h1 { color: #2c3e50; }\n"
+                 << "        .success { color: #27ae60; }\n"
+                 << "        .files { margin: 20px 0; padding: 10px; background: #f9f9f9; border-radius: 5px; }\n"
+                 << "        .file { margin-bottom: 10px; }\n"
+                 << "        .back { display: inline-block; margin-top: 20px; padding: 10px 15px; background: #3498db; color: white; text-decoration: none; border-radius: 4px; }\n"
+                 << "    </style>\n"
+                 << "</head>\n"
+                 << "<body>\n"
+                 << "    <h1>File Upload <span class=\"success\">Successful</span></h1>\n"
+                 << "    <p>" << files.size() << " file(s) uploaded successfully:</p>\n"
+                 << "    <div class=\"files\">\n";
+            
+            // Lister tous les fichiers uploadés
+            for (std::map<std::string, UploadedFile>::const_iterator it = files.begin(); it != files.end(); ++it) {
+                const UploadedFile& file = it->second;
+                html << "        <div class=\"file\">\n"
+                     << "            <strong>Name:</strong> " << file.filename << "<br />\n"
+                     << "            <strong>Size:</strong> " << file.data.size() << " bytes<br />\n"
+                     << "            <strong>Type:</strong> " << file.content_type << "\n"
+                     << "        </div>\n";
+            }
+            
+            html << "    </div>\n"
+                 << "    <a href=\"/\" class=\"back\">Back to Home</a>\n"
+                 << "</body>\n"
+                 << "</html>";
+            
+            response.setBody(html.str(), "text/html");
+            return response;
+        }
+    }
+    
+    // Pour les autres types de requêtes POST
     return HttpResponse::createError(400, "Invalid POST request");
 }
 

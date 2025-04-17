@@ -23,7 +23,6 @@ class Server
 	RouteHandler route_handler; // Gestionnaire de routes
 
 	// Méthodes privées
-	void setupSignalHandlers();  // Configuration des gestionnaires de signal
 	void cleanupResources();     // Libération des ressources
 	bool handleEvent(int index); // Gestion des événements poll
 	void sendHttpResponse(int client_fd, const HttpRequest& request); // Envoi d'une réponse HTTP
@@ -38,10 +37,9 @@ class Server
 	// Méthodes pour gérer les connections
 	void acceptNewConnection();        // Accepter une nouvelle connexion client
 	void handleClientData(int client_index); // Traiter les données reçues d'un client
-
-	// Gestionnaire de signal statique
-	static void signalHandler(int signal);
-	static Server *instance;  // Instance unique pour le gestionnaire de signal
+    
+    // Accesseur
+    int getPort() const { return port; }
 };
 
 #endif

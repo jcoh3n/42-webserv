@@ -19,6 +19,9 @@ public:
 
     // Méthode principale pour traiter les requêtes
     HttpResponse processRequest(const HttpRequest& request);
+    
+    // Méthode pour trouver la location correspondante à une URI
+    const LocationConfig* findMatchingLocation(const std::string& uri) const;
 
 private:
     // Répertoire racine pour les fichiers statiques
@@ -36,7 +39,6 @@ private:
     // Méthodes utilitaires
     std::string getFilePath(const std::string& uri);
     bool serveStaticFile(const std::string& file_path, HttpResponse& response);
-    const LocationConfig* findMatchingLocation(const std::string& uri) const;
     bool isCGIRequest(const std::string& path, const LocationConfig& location) const;
     std::string getFileExtension(const std::string& path) const;
     

@@ -3,11 +3,7 @@
 #include "http/HttpRequest.hpp"
 #include "http/HttpResponse.hpp"
 #include "utils/Common.hpp"
-#include <csignal>
 #include <cstring>
-
-// Initialisation de la variable statique
-Server* Server::instance = NULL;
 
 /**
  * @brief Constructeur de la classe Server
@@ -15,7 +11,7 @@ Server* Server::instance = NULL;
  * @param config La configuration du serveur
  * 
  * Initialise le serveur avec un port spécifique, prépare les descripteurs
- * de fichier pour poll() et initialise l'instance statique pour le gestionnaire de signal.
+ * de fichier pour poll().
  */
 Server::Server(int port, const ServerConfig& config) 
     : port(port)
@@ -25,9 +21,6 @@ Server::Server(int port, const ServerConfig& config)
     , route_handler(config.root_directory, config) {
 	// Initialiser le tableau fds
 	memset(fds, 0, sizeof(fds));
-	
-	// Enregistrer l'instance pour le gestionnaire de signal
-	instance = this;
 }
 
 /**
@@ -37,36 +30,6 @@ Server::Server(int port, const ServerConfig& config)
  */
 Server::~Server() {
 	cleanupResources();
-}
-
-/**
- * @brief Configure les gestionnaires de signaux
- * 
- * Met en place les handlers pour SIGINT et SIGTERM pour permettre
- * un arrêt propre du serveur lorsqu'il reçoit un de ces signaux.
- */
-void Server::setupSignalHandlers() {
-	struct sigaction sa;
-	sa.sa_handler = signalHandler;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
-	
-	sigaction(SIGINT, &sa, NULL);  // Ctrl+C
-	sigaction(SIGTERM, &sa, NULL); // Signal de terminaison
-}
-
-/**
- * @brief Gestionnaire statique des signaux
- * @param signal Le numéro du signal reçu
- * 
- * Appelé lorsqu'un signal est reçu par le processus,
- * cette fonction arrête proprement le serveur.
- */
-void Server::signalHandler(int signal) {
-	LOG_INFO("Received signal " << signal << ", shutting down gracefully...");
-	if (instance) {
-		instance->stop();
-	}
 }
 
 /**
@@ -110,9 +73,6 @@ void Server::start() {
 		fds[0].events = POLLIN;
 		fds[0].revents = 0;
 		nfds = 1;
-		
-		// Configuration des gestionnaires de signaux
-		setupSignalHandlers();
 		
 		LOG_SUCCESS("Server started successfully on port " << port);
 		LOG_INFO("Server running at " << BLUE << BOLD << "http://localhost:" << port << RESET);
@@ -267,48 +227,119 @@ void Server::acceptNewConnection() {
 void Server::handleClientData(int client_index) {
 	char buffer[BUFFER_SIZE];
 	int client_fd = fds[client_index].fd;
+	std::string raw_request;
+	size_t content_length = 0;
+	bool headers_complete = false;
+	int retry_count = 0;
+	const int MAX_RETRIES = 1000; // Protection contre les boucles infinies
 	
-	// Recevoir les données
-	int nbytes = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-	
-	// Traiter le cas d'erreur ou de déconnexion
-	if (nbytes <= 0) {
-		// Cas: nbytes < 0: une erreur est survenue
-		if (nbytes < 0) {
-			LOG_ERROR("Error reading from client: " << strerror(errno));
-		}
-		// Cas: nbytes = 0: le client a fermé la connexion
-		// Fermer le socket client
-		::close(client_fd);
+	while (true) {
+		// Recevoir les données
+		int nbytes = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
 		
-		// Compacter le tableau fds
+		if (nbytes < 0) {
+			if (errno == EAGAIN || errno == EWOULDBLOCK) {
+				// Données non disponibles, attendre un peu et réessayer
+				retry_count++;
+				if (retry_count > MAX_RETRIES) {
+					LOG_ERROR("Max retries reached while reading from client");
+					break;
+				}
+				usleep(1000); // Attendre 1ms avant de réessayer
+				continue;
+			}
+			LOG_ERROR("Error reading from client: " << strerror(errno));
+			break;
+		} else if (nbytes == 0) {
+			// Client a fermé la connexion
+			LOG_NETWORK("Client closed connection, fd: " << client_fd);
+			break;
+		}
+		
+		retry_count = 0; // Réinitialiser le compteur après une lecture réussie
+		raw_request.append(buffer, nbytes);
+		
+		// Si nous n'avons pas encore trouvé la fin des headers
+		if (!headers_complete) {
+			size_t headers_end = raw_request.find("\r\n\r\n");
+			if (headers_end != std::string::npos) {
+				headers_complete = true;
+				
+				// Chercher Content-Length dans les headers
+				size_t cl_pos = raw_request.find("Content-Length: ");
+				if (cl_pos != std::string::npos) {
+					size_t cl_end = raw_request.find("\r\n", cl_pos);
+					if (cl_end != std::string::npos) {
+						std::string cl_str = raw_request.substr(cl_pos + 16, cl_end - (cl_pos + 16));
+						std::stringstream ss(cl_str);
+						ss >> content_length;
+						
+						LOG_INFO("Found Content-Length: " << content_length);
+						
+						// Extraire l'URI pour vérifier la limite de taille
+						size_t uri_start = raw_request.find(" ") + 1;
+						size_t uri_end = raw_request.find(" ", uri_start);
+						if (uri_start != std::string::npos && uri_end != std::string::npos) {
+							std::string uri = raw_request.substr(uri_start, uri_end - uri_start);
+							const LocationConfig* location = route_handler.findMatchingLocation(uri);
+							size_t max_body_size = location ? location->client_max_body_size : 1024 * 1024; // 1MB par défaut
+							
+							if (content_length > max_body_size) {
+								LOG_ERROR("Content length exceeds maximum allowed size");
+								HttpResponse error_response = HttpResponse::createError(413, "Request Entity Too Large");
+								ResponseHandler::sendResponse(client_fd, error_response, HttpRequest());
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		// Si nous avons les headers complets et toutes les données du body
+		if (headers_complete && content_length > 0) {
+			size_t headers_end = raw_request.find("\r\n\r\n");
+			size_t total_expected = headers_end + 4 + content_length;
+			
+			if (raw_request.length() >= total_expected) {
+				// Nous avons toute la requête
+				break;
+			}
+		} else if (headers_complete && content_length == 0) {
+			// Requête sans body
+			break;
+		}
+	}
+	
+	// Fermer la connexion si une erreur s'est produite
+	if (raw_request.empty()) {
+		::close(client_fd);
 		for (int j = client_index; j < nfds - 1; j++) {
 			fds[j] = fds[j + 1];
 		}
 		nfds--;
-		
 		LOG_NETWORK("Client disconnected, fd: " << client_fd 
-				 << ", remaining clients: " << (nfds-1));
+				  << ", remaining clients: " << (nfds-1));
 		return;
 	}
 	
-	// '\0' -> le buffer pour le traiter comme une chaîne
-	buffer[nbytes] = '\0';
-	
-	// Créer et parser la requête HTTP
-	HttpRequest request;
-	std::string raw_request(buffer, nbytes); // Convertir le buffer en chaîne de caractères
-	
-	if (!request.parse(raw_request)) {
-		// Requête malformée
-		LOG_ERROR("Malformed HTTP request");
-		HttpResponse error_response = HttpResponse::createError(400, "Bad Request");
-		ResponseHandler::sendResponse(client_fd, error_response, request);
-		return;
+	// Traiter la requête
+	try {
+		HttpRequest request;
+		if (request.parse(raw_request)) {
+			LOG_INFO("➜ " << request.getMethod() << " " << request.getUri() << " (Processing)");
+			sendHttpResponse(client_fd, request);
+		} else {
+			LOG_ERROR("Malformed HTTP request");
+			HttpResponse error_response = HttpResponse::createError(400, "Bad Request");
+			ResponseHandler::sendResponse(client_fd, error_response, request);
+		}
+	} catch (const std::exception& e) {
+		LOG_ERROR("Error processing request: " << e.what());
+		HttpRequest dummy_request;
+		HttpResponse error_response = HttpResponse::createError(500, "Internal Server Error");
+		ResponseHandler::sendResponse(client_fd, error_response, dummy_request);
 	}
-	
-	// Envoyer une réponse HTTP
-	sendHttpResponse(client_fd, request);
 }
 
 /**

@@ -1,1 +1,1 @@
-Ce fichier doit etre restreint pour tester l'erreur 403
+fichier restreint
