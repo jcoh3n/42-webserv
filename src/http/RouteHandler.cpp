@@ -46,6 +46,11 @@ HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
         return serveErrorPage(403, "Forbidden");
     }
 
+    // Si c'est une ressource CGI, la traiter comme telle
+    if (isCgiResource(file_path)) {
+        return handleCGIRequest(request, file_path);
+    }
+
     // Traitement des répertoires | Cas: 301 -> Rediriger vers le répertoire
     if (FileUtils::isDirectory(file_path)) {
         std::string uri = request.getUri();
@@ -294,6 +299,7 @@ const LocationConfig* RouteHandler::findMatchingLocation(const std::string& uri)
 
 bool RouteHandler::isCGIRequest(const std::string& path, const LocationConfig& location) const {
     std::string ext = getFileExtension(path);
+    // Vérifier si l'extension est dans les handlers CGI configurés
     std::map<std::string, std::string>::const_iterator it = location.cgi_handlers.find(ext);
     return it != location.cgi_handlers.end();
 }
@@ -305,10 +311,13 @@ HttpResponse RouteHandler::handleCGIRequest(const HttpRequest& request, const st
         return HttpResponse::createError(500, "No matching location for CGI request");
     }
     
-    if (isCGIRequest(scriptPath, *location)) {
-        CGIHandler handler(request, scriptPath, location->cgi_handlers.find(ext)->second);
+    // Vérifier si l'extension est gérée par un handler CGI
+    std::map<std::string, std::string>::const_iterator it = location->cgi_handlers.find(ext);
+    if (it != location->cgi_handlers.end()) {
+        CGIHandler handler(request, scriptPath, it->second);
         return handler.executeCGI();
     }
+    
     return HttpResponse::createError(500, "No CGI handler found for extension");
 }
 
@@ -326,11 +335,31 @@ HttpResponse RouteHandler::handleTasksApiRequest(const HttpRequest& /* request *
 }
 
 bool RouteHandler::isCgiResource(const std::string& path) const {
-    // Vérifier si le fichier a une extension .cgi, .php, etc.
+    // Vérification simple des extensions
     size_t dot_pos = path.find_last_of('.');
     if (dot_pos != std::string::npos) {
         std::string ext = path.substr(dot_pos);
-        return ext == ".cgi" || ext == ".php" || ext == ".py";
+        // Extensions CGI supportées
+        return ext == ".cgi" || ext == ".php" || ext == ".py" || ext == ".pl";
     }
     return false;
+}
+
+std::string RouteHandler::getCGIInterpreter(const std::string& extension) const {
+    static const std::map<std::string, std::string> interpreters = create_interpreter_map();
+    
+    std::map<std::string, std::string>::const_iterator it = interpreters.find(extension);
+    if (it != interpreters.end()) {
+        return it->second;
+    }
+    throw std::runtime_error("No interpreter found for extension: " + extension);
+}
+
+std::map<std::string, std::string> RouteHandler::create_interpreter_map() {
+    std::map<std::string, std::string> m;
+    m[".php"] = "/usr/bin/php-cgi";
+    m[".py"] = "/usr/bin/python3";
+    m[".pl"] = "/usr/bin/perl";
+    m[".cgi"] = "/bin/sh";
+    return m;
 } 

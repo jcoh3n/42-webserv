@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iostream>
 #include <fcntl.h>
+#include <limits.h>  // Pour PATH_MAX
 
 CGIHandler::CGIHandler(const HttpRequest& req, const std::string& script_path, const std::string& interpreter)
     : request_(req), script_path_(script_path), interpreter_(interpreter) {
@@ -176,15 +177,40 @@ std::vector<std::string> CGIHandler::prepareEnvironment() const {
     env.push_back("SERVER_PROTOCOL=HTTP/1.1");
     env.push_back("SERVER_SOFTWARE=webserv/1.0");
     env.push_back("REQUEST_METHOD=" + request_.getMethod());
-    env.push_back("SCRIPT_NAME=" + script_path_);
-    env.push_back("QUERY_STRING=" + request_.getQueryString());
+    
+    // Chemins absolus pour les scripts
+    char real_path[PATH_MAX];
+    if (realpath(script_path_.c_str(), real_path) != NULL) {
+        env.push_back("SCRIPT_FILENAME=" + std::string(real_path));
+        env.push_back("SCRIPT_NAME=" + script_path_);
+    } else {
+        env.push_back("SCRIPT_FILENAME=" + script_path_);
+        env.push_back("SCRIPT_NAME=" + script_path_);
+    }
+
+    // Document root et informations serveur
+    std::string doc_root = "/home/j/Desktop/GITHUB-42/42-webserv/www";
+    if (realpath(doc_root.c_str(), real_path) != NULL) {
+        env.push_back("DOCUMENT_ROOT=" + std::string(real_path));
+    } else {
+        env.push_back("DOCUMENT_ROOT=" + doc_root);
+    }
+
+    // Query string et paramètres de requête
+    std::string query_string = request_.getQueryString();
+    env.push_back("QUERY_STRING=" + query_string);
+    
+    // Variables pour PHP-CGI spécifiquement
     env.push_back("REDIRECT_STATUS=200");
-    env.push_back("SCRIPT_FILENAME=" + script_path_);
-    env.push_back("DOCUMENT_ROOT=/home/j/Desktop/GITHUB-42/42-webserv/www");
+    
+    // Informations serveur
     env.push_back("SERVER_NAME=localhost");
     env.push_back("SERVER_PORT=8080");
+    env.push_back("REMOTE_ADDR=127.0.0.1");
+    
+    // PATH et autres variables système importantes
     env.push_back("PATH=/usr/local/bin:/usr/bin:/bin");
-
+    
     // En-têtes de la requête
     const std::map<std::string, std::string>& headers = request_.getHeaders();
     for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it) {
@@ -197,9 +223,28 @@ std::vector<std::string> CGIHandler::prepareEnvironment() const {
 
     // Content-Length et Content-Type pour les requêtes POST
     if (request_.getMethod() == "POST") {
-        env.push_back("CONTENT_LENGTH=" + request_.getHeader("Content-Length"));
-        env.push_back("CONTENT_TYPE=" + request_.getHeader("Content-Type"));
+        std::string contentLength = request_.getHeader("Content-Length");
+        std::string contentType = request_.getHeader("Content-Type");
+        
+        if (!contentLength.empty()) {
+            env.push_back("CONTENT_LENGTH=" + contentLength);
+        } else {
+            std::stringstream ss;
+            ss << request_.getBody().length();
+            env.push_back("CONTENT_LENGTH=" + ss.str());
+        }
+        
+        if (!contentType.empty()) {
+            env.push_back("CONTENT_TYPE=" + contentType);
+        }
     }
+
+    // Debug: Afficher les variables d'environnement
+    std::cerr << "=== CGI Environment Variables ===" << std::endl;
+    for (std::vector<std::string>::const_iterator it = env.begin(); it != env.end(); ++it) {
+        std::cerr << *it << std::endl;
+    }
+    std::cerr << "===============================" << std::endl;
 
     return env;
 }
@@ -210,6 +255,8 @@ HttpResponse CGIHandler::parseCGIOutput(const std::string& output) {
     std::string line;
     std::string body;
     bool headers_done = false;
+    bool has_status = false;
+    bool has_content_type = false;
 
     // Parse les en-têtes et le corps
     while (std::getline(iss, line)) {
@@ -223,6 +270,7 @@ HttpResponse CGIHandler::parseCGIOutput(const std::string& output) {
                 headers_done = true;
                 continue;
             }
+            
             size_t colon_pos = line.find(':');
             if (colon_pos != std::string::npos) {
                 std::string key = line.substr(0, colon_pos);
@@ -233,6 +281,10 @@ HttpResponse CGIHandler::parseCGIOutput(const std::string& output) {
 
                 if (key == "Status") {
                     response.setStatus(atoi(value.c_str()));
+                    has_status = true;
+                } else if (key == "Content-Type") {
+                    response.setHeader(key, value);
+                    has_content_type = true;
                 } else {
                     response.setHeader(key, value);
                 }
@@ -245,32 +297,50 @@ HttpResponse CGIHandler::parseCGIOutput(const std::string& output) {
         }
     }
 
+    // Si aucun en-tête n'a été trouvé, considérer tout comme le corps
     if (!headers_done) {
-        // Aucun en-tête trouvé, considère tout comme le corps
         body = output;
     }
 
-    // Si aucun Content-Type n'est défini, utilise text/html par défaut
-    std::string content_type = "text/html";
-    std::map<std::string, std::string>::const_iterator it = response.getHeaders().find("Content-Type");
-    if (it != response.getHeaders().end()) {
-        content_type = it->second;
+    // Définir le type de contenu par défaut si non spécifié
+    if (!has_content_type) {
+        // Détecter le type de contenu basé sur le contenu
+        if (body.find("<!DOCTYPE html>") != std::string::npos || 
+            body.find("<html") != std::string::npos) {
+            response.setHeader("Content-Type", "text/html");
+        } else if (body[0] == '{' || body[0] == '[') {
+            response.setHeader("Content-Type", "application/json");
+        } else {
+            response.setHeader("Content-Type", "text/plain");
+        }
     }
 
-    // Supprimer les espaces et retours à la ligne superflus au début et à la fin du corps
-    while (!body.empty() && (body[0] == ' ' || body[0] == '\n' || body[0] == '\r')) {
+    // Définir le code de statut par défaut si non spécifié
+    if (!has_status) {
+        response.setStatus(200);
+    }
+
+    // Nettoyer le corps de la réponse
+    while (!body.empty() && (body[0] == '\n' || body[0] == '\r')) {
         body.erase(0, 1);
     }
-    while (!body.empty() && (body[body.length() - 1] == ' ' || body[body.length() - 1] == '\n' || body[body.length() - 1] == '\r')) {
+    while (!body.empty() && (body[body.length() - 1] == '\n' || body[body.length() - 1] == '\r')) {
         body.erase(body.length() - 1);
     }
 
-    // Définir le corps avec le bon Content-Type
-    response.setBody(body, content_type);
+    // Définir le corps
+    response.setBody(body);
 
-    if (!response.getStatusCode()) {
-        response.setStatus(200);
+    // Debug: Afficher la réponse CGI parsée
+    std::cerr << "=== Parsed CGI Response ===" << std::endl;
+    std::cerr << "Status: " << response.getStatusCode() << std::endl;
+    std::cerr << "Headers:" << std::endl;
+    const std::map<std::string, std::string>& headers = response.getHeaders();
+    for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it) {
+        std::cerr << it->first << ": " << it->second << std::endl;
     }
+    std::cerr << "Body length: " << body.length() << std::endl;
+    std::cerr << "=========================" << std::endl;
 
     return response;
 }

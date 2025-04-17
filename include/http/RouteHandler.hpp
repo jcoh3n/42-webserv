@@ -45,6 +45,7 @@ private:
     HttpResponse handleDeleteRequest(const HttpRequest& request);
     HttpResponse handleCGIRequest(const HttpRequest& request, const std::string& scriptPath);
     HttpResponse handleTasksApiRequest(const HttpRequest& request);
+    std::string getCGIInterpreter(const std::string& extension) const;
     
     // Méthodes utilitaires
     bool isCgiResource(const std::string& path) const;
@@ -56,6 +57,7 @@ private:
     // Méthodes de gestion du cache
     bool checkNotModified(const HttpRequest& request, const std::string& file_path, HttpResponse& response);
     HttpResponse serveErrorPage(int error_code, const std::string& message);
+    static std::map<std::string, std::string> create_interpreter_map();
 };
 
 #endif // ROUTE_HANDLER_HPP 

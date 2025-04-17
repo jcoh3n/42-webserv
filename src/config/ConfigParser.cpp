@@ -214,13 +214,17 @@ void ConfigParser::processLocationDirective(const std::string& key, const std::s
     } else if (key == "client_max_body_size") {
         location.client_max_body_size = parseSize(value);
     } else if (key == "cgi_ext") {
-        location.cgi_extensions.push_back(value);
+        location.cgi_extensions = split(value, ' ');
     } else if (key == "cgi_handler") {
-        // L'extension doit avoir été définie avant
-        if (location.cgi_extensions.empty()) {
-            throw std::runtime_error("cgi_handler defined without cgi_ext");
+        std::vector<std::string> handlers = split(value, ' ');
+        // Vérifier que le nombre de handlers correspond au nombre d'extensions
+        if (handlers.size() != location.cgi_extensions.size()) {
+            throw std::runtime_error("Number of CGI handlers must match number of extensions");
         }
-        location.cgi_handlers[location.cgi_extensions.back()] = value;
+        // Associer chaque extension à son handler
+        for (size_t i = 0; i < location.cgi_extensions.size(); ++i) {
+            location.cgi_handlers[location.cgi_extensions[i]] = handlers[i];
+        }
     } else if (key == "upload_directory") {
         location.upload_directory = value;
     } else if (key == "return") {
