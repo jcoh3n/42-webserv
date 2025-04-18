@@ -3,55 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>500 - Erreur Serveur</title>
+    <title>500 Internal Server Error - Webserv 42</title>
+    <link rel="stylesheet" href="/styles/webserv-modern.css">
     <style>
-        body {
-            font-family: -apple-system, system-ui, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background: #f5f6fa;
-            color: #2c3e50;
-        }
         .error-container {
-            text-align: center;
+            background-color: var(--box-bg);
+            border-radius: var(--border-radius);
             padding: 40px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            margin: 50px auto;
+            border-top: 4px solid #f44336;
+            position: relative;
+            overflow: hidden;
         }
-        h1 {
-            font-size: 120px;
-            margin: 0;
-            color: #9b59b6;
-        }
-        p {
-            font-size: 24px;
+
+        .error-code {
+            font-size: 8rem;
+            color: #f44336;
+            font-weight: bold;
             margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(244, 67, 54, 0.2);
         }
-        .back-button {
+
+        .error-title {
+            font-size: 2rem;
+            color: var(--primary-text);
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            color: var(--secondary-text);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .home-button {
             display: inline-block;
-            padding: 10px 20px;
-            background: #3498db;
+            padding: 12px 30px;
+            background-color: #f44336;
             color: white;
             text-decoration: none;
-            border-radius: 5px;
-            margin-top: 20px;
-            transition: background 0.3s;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
         }
-        .back-button:hover {
-            background: #2980b9;
+
+        .home-button:hover {
+            transform: translateY(-2px);
+            background-color: #e53935;
+        }
+
+        .pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: repeating-linear-gradient(
+                45deg,
+                rgba(244, 67, 54, 0.03) 0px,
+                rgba(244, 67, 54, 0.03) 2px,
+                transparent 2px,
+                transparent 8px
+            );
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <div class="error-container">
-        <h1>500</h1>
-        <p>Oups ! Une erreur est survenue sur le serveur.</p>
-        <a href="/" class="back-button">Retour à l'accueil</a>
+    <div class="container">
+        <header>
+            <h1>Webserv 42</h1>
+            <p>Un serveur HTTP en C++98</p>
+        </header>
+
+        <div class="error-container">
+            <div class="pattern"></div>
+            <div class="error-code">500</div>
+            <h2 class="error-title">Erreur interne du serveur</h2>
+            <p class="error-message">
+                Une erreur inattendue s'est produite sur le serveur.<br>
+                Nous nous excusons pour la gêne occasionnée. Veuillez réessayer plus tard.
+            </p>
+            <a href="/" class="home-button">Retour à l'accueil</a>
+        </div>
     </div>
 </body>
 </html> 
