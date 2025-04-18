@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horloge CGI - Webserv 42</title>
+    <link rel="stylesheet" href="/styles/webserv-modern.css">
+    <style>
+        body {
+            background-color: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .clock-container {
+            background-color: var(--box-bg);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--box-shadow);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            border-top: 4px solid #9C27B0;
+        }
+        
+        .cgi-frame {
+            width: 100%;
+            height: 250px;
+            border: none;
+            margin: 20px 0;
+            overflow: hidden;
+            background-color: transparent;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .button {
+            min-width: 150px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .button.primary {
+            background-color: #9C27B0;
+            color: white;
+        }
+        
+        .button.primary:hover {
+            background-color: #7B1FA2;
+            transform: translateY(-2px);
+        }
+        
+        .button.secondary {
+            background-color: var(--secondary-btn-bg);
+            color: var(--secondary-btn-text);
+        }
+        
+        .button.secondary:hover {
+            background-color: var(--secondary-btn-hover);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="clock-container">
+        <h1 style="color: #9C27B0; margin-bottom: 20px;">Horloge CGI</h1>
+        
+        <iframe id="clockFrame" src="/cgi-bin/clock.pl" class="cgi-frame" title="Horloge CGI"></iframe>
+        
+        <div class="button-container">
+            <button id="refreshBtn" class="button primary">Actualiser</button>
+            <a href="/" class="button secondary">Retour à l'accueil</a>
+        </div>
+    </div>
+    
+    <script>
+        // Fonction pour actualiser l'horloge CGI
+        function refreshClock() {
+            const frame = document.getElementById('clockFrame');
+            
+            // Ajouter un timestamp pour éviter la mise en cache
+            const timestamp = new Date().getTime();
+            const newSrc = `/cgi-bin/clock.pl?t=${timestamp}`;
+            
+            // Animation de chargement
+            frame.style.opacity = '0.5';
+            frame.style.transition = 'opacity 0.2s ease';
+            
+            // Actualiser l'iframe
+            setTimeout(() => {
+                frame.src = newSrc;
+                
+                // Rétablir l'opacité après chargement
+                frame.onload = function() {
+                    frame.style.opacity = '1';
+                    
+                    // Masquer les boutons dans l'iframe après chargement
+                    hideIframeButtons();
+                };
+            }, 200);
+        }
+        
+        // Fonction pour masquer les boutons dans l'iframe
+        function hideIframeButtons() {
+            try {
+                const frame = document.getElementById('clockFrame');
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                
+                // Sélectionner et masquer les boutons dans l'iframe
+                const buttons = frameDoc.querySelectorAll('button, .button-container, input[type="button"]');
+                buttons.forEach(button => {
+                    button.style.display = 'none';
+                });
+                
+            } catch(e) {
+                console.error("Impossible d'accéder au contenu de l'iframe", e);
+            }
+        }
+        
+        // Attachement de l'événement au bouton
+        document.getElementById('refreshBtn').addEventListener('click', refreshClock);
+        
+        // Exécuter après le chargement initial de l'iframe
+        document.getElementById('clockFrame').onload = hideIframeButtons;
+    </script>
+</body>
+</html> 
