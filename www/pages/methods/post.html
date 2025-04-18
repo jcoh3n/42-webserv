@@ -156,7 +156,7 @@
         <div class="form-container">
             <h1>Créer un fichier</h1>
             
-            <form id="createFileForm" action="/api/create-file" method="post">
+            <form id="createFileForm" action="/upload" method="post" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="filename">Nom du fichier :</label>
                     <input type="text" id="filename" name="filename" class="form-control" placeholder="Entrez le nom du fichier (ex: test.txt)" required>
@@ -185,10 +185,16 @@
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
-                const formData = new FormData(this);
-                const filename = formData.get('filename');
+                // Créer un fichier Blob à partir du contenu
+                const filename = document.getElementById('filename').value;
+                const content = document.getElementById('content').value;
+                const file = new Blob([content], { type: 'text/plain' });
                 
-                fetch('/api/create-file', {
+                // Créer un FormData et ajouter le fichier
+                const formData = new FormData();
+                formData.append('file', file, filename);
+                
+                fetch('/upload', {
                     method: 'POST',
                     body: formData
                 })
@@ -201,10 +207,10 @@
                         // Réinitialiser le formulaire
                         form.reset();
                         
-                        // Cacher le popup après 3 secondes
+                        // Cacher le popup après 1.5 secondes
                         setTimeout(() => {
                             successPopup.classList.remove('show');
-                        }, 3000);
+                        }, 1500);
                     } else {
                         throw new Error('Erreur ' + response.status);
                     }
