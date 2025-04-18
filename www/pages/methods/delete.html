@@ -13,12 +13,68 @@
             box-shadow: var(--box-shadow);
             max-width: 600px;
             margin: 50px auto;
-            border-top: 4px solid #ff5722;
+            border-top: 4px solid #f44336;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .delete-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .delete-title {
+            color: #f44336;
+            font-size: 2rem;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        .delete-subtitle {
+            color: rgba(244, 67, 54, 0.7);
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+
+        .command-line {
+            background: rgba(244, 67, 54, 0.1);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+            font-family: monospace;
+            color: #f44336;
+            display: flex;
+            align-items: center;
+            border: 2px solid rgba(244, 67, 54, 0.2);
+        }
+
+        .command-line::before {
+            content: '$ rm';
+            margin-right: 10px;
+            color: rgba(244, 67, 54, 0.7);
+        }
+
+        .command-cursor {
+            width: 8px;
+            height: 20px;
+            background: #f44336;
+            display: inline-block;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
         }
 
         .file-list {
             margin: 20px 0;
-            border: 2px solid rgba(255, 87, 34, 0.2);
+            border: 2px solid rgba(244, 67, 54, 0.2);
             border-radius: var(--border-radius);
             overflow: hidden;
         }
@@ -28,8 +84,10 @@
             align-items: center;
             justify-content: space-between;
             padding: 15px 20px;
-            border-bottom: 1px solid rgba(255, 87, 34, 0.1);
+            border-bottom: 1px solid rgba(244, 67, 54, 0.1);
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .file-item:last-child {
@@ -37,12 +95,42 @@
         }
 
         .file-item:hover {
-            background: rgba(255, 87, 34, 0.05);
+            background: rgba(244, 67, 54, 0.05);
+        }
+
+        .file-item.deleting {
+            animation: deleteAnimation 0.5s ease-out forwards;
+        }
+
+        @keyframes deleteAnimation {
+            0% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            30% {
+                transform: translateX(-10px);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateX(100%);
+                opacity: 0;
+                height: 0;
+                padding: 0;
+                margin: 0;
+                border: none;
+            }
         }
 
         .file-name {
             font-family: monospace;
             color: var(--primary-text);
+            display: flex;
+            align-items: center;
+        }
+
+        .file-name::before {
+            content: '📄';
+            margin-right: 10px;
         }
 
         .delete-btn {
@@ -54,6 +142,13 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .delete-btn::before {
+            content: '🗑️';
         }
 
         .delete-btn:hover {
@@ -75,7 +170,7 @@
             background: var(--box-bg);
             color: var(--primary-text);
             box-shadow: var(--box-shadow);
-            border-top: 3px solid #ff5722;
+            border-top: 3px solid #f44336;
             opacity: 0;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1000;
@@ -100,8 +195,8 @@
             gap: 8px;
             padding: 12px 24px;
             background: var(--box-bg);
-            color: #ff5722;
-            border: 2px solid rgba(255, 87, 34, 0.2);
+            color: #f44336;
+            border: 2px solid rgba(244, 67, 54, 0.2);
             border-radius: var(--border-radius);
             font-size: 1.1rem;
             text-decoration: none;
@@ -111,8 +206,8 @@
 
         .back-button:hover {
             transform: translateY(-2px);
-            border-color: #ff5722;
-            background: rgba(255, 87, 34, 0.05);
+            border-color: #f44336;
+            background: rgba(244, 67, 54, 0.05);
         }
 
         .back-button:active {
@@ -127,26 +222,57 @@
 
         .refresh-btn {
             padding: 12px 24px;
-            background: rgba(255, 87, 34, 0.1);
-            color: #ff5722;
-            border: 2px solid rgba(255, 87, 34, 0.2);
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+            border: 2px solid rgba(244, 67, 54, 0.2);
             border-radius: var(--border-radius);
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 1rem;
             margin-left: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .refresh-btn::before {
+            content: '🔄';
         }
 
         .refresh-btn:hover {
-            background: rgba(255, 87, 34, 0.2);
+            background: rgba(244, 67, 54, 0.2);
             transform: translateY(-2px);
         }
 
         .no-files {
             text-align: center;
             padding: 30px;
-            color: var(--secondary-text);
+            color: rgba(244, 67, 54, 0.7);
             font-style: italic;
+        }
+
+        .delete-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            overflow: hidden;
+        }
+
+        .delete-bg::before {
+            content: 'DELETE';
+            position: absolute;
+            font-size: 150px;
+            font-weight: bold;
+            color: #f44336;
+            transform: rotate(-45deg);
+            top: 50%;
+            left: 50%;
+            transform-origin: center;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -157,7 +283,16 @@
         </header>
 
         <div class="delete-container">
-            <h2 style="text-align: center; margin-bottom: 30px; color: #ff5722;">Test DELETE</h2>
+            <div class="delete-bg"></div>
+            <div class="delete-header">
+                <h2 class="delete-title">DELETE</h2>
+                <p class="delete-subtitle">Supprimez une ressource sur le serveur avec la méthode DELETE</p>
+            </div>
+
+            <div class="command-line">
+                <span id="command-text"></span>
+                <span class="command-cursor"></span>
+            </div>
             
             <div class="file-list" id="fileList">
                 <div class="no-files">Chargement des fichiers...</div>
@@ -175,6 +310,7 @@
     <script>
         const fileList = document.getElementById('fileList');
         const popup = document.getElementById('resultPopup');
+        const commandText = document.getElementById('command-text');
 
         function showPopup(message, isError = false) {
             popup.textContent = message;
@@ -185,24 +321,40 @@
             }, 3000);
         }
 
-        function deleteFile(filename) {
+        function updateCommandLine(filename = '') {
+            if (filename) {
+                commandText.textContent = `/uploads/${filename}`;
+            } else {
+                commandText.textContent = '';
+            }
+        }
+
+        function deleteFile(filename, element) {
+            // Ajouter l'animation de suppression
+            element.classList.add('deleting');
+            updateCommandLine(filename);
+
             fetch(`/uploads/${filename}`, {
                 method: 'DELETE'
             })
             .then(response => {
                 if (response.ok) {
                     showPopup(`Le fichier "${filename}" a été supprimé avec succès`);
-                    loadFiles(); // Recharge la liste après suppression
+                    setTimeout(() => {
+                        loadFiles(); // Recharge la liste après l'animation
+                    }, 500);
                 } else {
                     throw new Error(`Erreur ${response.status}: ${response.statusText}`);
                 }
             })
             .catch(error => {
+                element.classList.remove('deleting');
                 showPopup(`Erreur lors de la suppression: ${error.message}`, true);
             });
         }
 
         function loadFiles() {
+            updateCommandLine();
             fetch('/uploads/')
                 .then(response => response.text())
                 .then(html => {
@@ -221,7 +373,7 @@
                     fileList.innerHTML = links.map(filename => `
                         <div class="file-item">
                             <span class="file-name">${filename}</span>
-                            <button class="delete-btn" onclick="deleteFile('${filename}')">Supprimer</button>
+                            <button class="delete-btn" onclick="deleteFile('${filename}', this.parentElement)">Supprimer</button>
                         </div>
                     `).join('');
                 })
