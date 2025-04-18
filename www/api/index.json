@@ -1,0 +1,13 @@
+{
+    "api_version": "1.0",
+    "endpoints": {
+        "GET /api": "Liste tous les endpoints disponibles",
+        "GET /api/hello": "Retourne un message de bienvenue",
+        "GET /api/time": "Retourne l'heure actuelle du serveur",
+        "POST /api/echo": "Renvoie les données envoyées dans la requête",
+        "GET /api/info": "Retourne les informations sur la configuration du serveur",
+        "POST /api/upload": "Test d'upload de fichier via API",
+        "DELETE /api/test": "Test de la méthode DELETE"
+    },
+    "documentation": "Utilisez ces endpoints pour tester les différentes fonctionnalités du serveur API"
+} 

@@ -1,0 +1,17 @@
+{
+    "server": {
+        "name": "Webserv 42",
+        "version": "1.0",
+        "port": 8081,
+        "host": "api.localhost"
+    },
+    "limits": {
+        "max_body_size": "50M",
+        "allowed_methods": ["GET", "POST", "DELETE"]
+    },
+    "features": {
+        "autoindex": true,
+        "upload_enabled": true,
+        "cgi_enabled": true
+    }
+} 
