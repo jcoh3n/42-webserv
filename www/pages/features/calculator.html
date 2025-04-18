@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculatrice - Webserv 42</title>
+    <link rel="stylesheet" href="/styles/webserv-modern.css">
+    <style>
+        .calculator-container {
+            background-color: var(--box-bg);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--box-shadow);
+            max-width: 400px;
+            margin: 50px auto;
+            border-top: 4px solid #ff5722;
+        }
+
+        .display {
+            background: rgba(255, 87, 34, 0.1);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            text-align: right;
+            font-family: monospace;
+            font-size: 2rem;
+            color: var(--primary-text);
+            border: 2px solid rgba(255, 87, 34, 0.2);
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .display .current {
+            font-size: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .display .previous {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 0.9rem;
+            color: rgba(255, 87, 34, 0.6);
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 20px 15px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: var(--border-radius);
+            background: var(--secondary-btn-bg);
+            color: var(--secondary-btn-text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            background: var(--secondary-btn-hover);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn.operator {
+            background: rgba(255, 87, 34, 0.1);
+            color: #ff5722;
+            font-weight: bold;
+        }
+
+        .btn.operator:hover {
+            background: rgba(255, 87, 34, 0.2);
+        }
+
+        .btn.equals {
+            background: #ff5722;
+            color: white;
+            grid-column: span 2;
+        }
+
+        .btn.equals:hover {
+            background: #f4511e;
+        }
+
+        .btn.clear {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+        }
+
+        .btn.clear:hover {
+            background: rgba(244, 67, 54, 0.2);
+        }
+
+        .result-popup {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 15px 30px;
+            border-radius: var(--border-radius);
+            background: var(--box-bg);
+            color: var(--primary-text);
+            box-shadow: var(--box-shadow);
+            border-top: 3px solid #ff5722;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .result-popup.error {
+            border-color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+        }
+
+        .result-popup.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .btn:focus {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--box-bg);
+            color: #ff5722;
+            border: 2px solid rgba(255, 87, 34, 0.2);
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: var(--box-shadow);
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            border-color: #ff5722;
+            background: rgba(255, 87, 34, 0.05);
+        }
+
+        .back-button:active {
+            transform: translateY(1px);
+        }
+
+        .back-button::before {
+            content: '←';
+            font-size: 1.2em;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Webserv 42</h1>
+        </header>
+
+        <div class="calculator-container">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #ff5722;">Calculatrice CGI</h2>
+            
+            <div class="display">
+                <div class="previous" id="previous"></div>
+                <div class="current" id="current">0</div>
+            </div>
+
+            <div class="buttons">
+                <button class="btn clear" onclick="clearCalc()">C</button>
+                <button class="btn operator" onclick="setOperation('power')">^</button>
+                <button class="btn operator" onclick="setOperation('divide')">/</button>
+                <button class="btn operator" onclick="setOperation('multiply')">×</button>
+                
+                <button class="btn" onclick="appendNumber('7')">7</button>
+                <button class="btn" onclick="appendNumber('8')">8</button>
+                <button class="btn" onclick="appendNumber('9')">9</button>
+                <button class="btn operator" onclick="setOperation('subtract')">-</button>
+                
+                <button class="btn" onclick="appendNumber('4')">4</button>
+                <button class="btn" onclick="appendNumber('5')">5</button>
+                <button class="btn" onclick="appendNumber('6')">6</button>
+                <button class="btn operator" onclick="setOperation('add')">+</button>
+                
+                <button class="btn" onclick="appendNumber('1')">1</button>
+                <button class="btn" onclick="appendNumber('2')">2</button>
+                <button class="btn" onclick="appendNumber('3')">3</button>
+                <button class="btn equals" onclick="calculate()">=</button>
+                
+                <button class="btn" onclick="appendNumber('0')" style="grid-column: span 2;">0</button>
+                <button class="btn" onclick="appendNumber('.')">.</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/" class="back-button">Retour à l'accueil</a>
+        </div>
+
+        <div id="resultPopup" class="result-popup"></div>
+    </div>
+
+    <script>
+        let currentNumber = '0';
+        let previousNumber = null;
+        let currentOperation = null;
+        let shouldResetScreen = false;
+
+        const current = document.getElementById('current');
+        const previous = document.getElementById('previous');
+        const popup = document.getElementById('resultPopup');
+
+        function updateDisplay() {
+            current.textContent = currentNumber;
+            if (previousNumber !== null && currentOperation) {
+                previous.textContent = `${previousNumber} ${getOperationSymbol(currentOperation)}`;
+            } else {
+                previous.textContent = '';
+            }
+        }
+
+        function showPopup(operation, result, isError = false) {
+            popup.innerHTML = `
+                <div>${operation}</div>
+                <div style="color: ${isError ? '#f44336' : '#ff5722'}; font-weight: bold; margin-top: 5px;">
+                    = ${result}
+                </div>
+            `;
+            popup.className = `result-popup ${isError ? 'error' : ''}`;
+            popup.classList.add('show');
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 3000);
+        }
+
+        function getOperationSymbol(op) {
+            const symbols = {
+                'add': '+',
+                'subtract': '-',
+                'multiply': '×',
+                'divide': '÷',
+                'power': '^'
+            };
+            return symbols[op] || op;
+        }
+
+        function appendNumber(num) {
+            if (shouldResetScreen) {
+                currentNumber = num;
+                shouldResetScreen = false;
+            } else {
+                if (currentNumber === '0' && num !== '.') {
+                    currentNumber = num;
+                } else {
+                    currentNumber += num;
+                }
+            }
+            updateDisplay();
+        }
+
+        function setOperation(op) {
+            if (previousNumber === null) {
+                previousNumber = currentNumber;
+                currentOperation = op;
+                shouldResetScreen = true;
+            } else {
+                calculate(op);
+            }
+            updateDisplay();
+        }
+
+        function clearCalc() {
+            currentNumber = '0';
+            previousNumber = null;
+            currentOperation = null;
+            updateDisplay();
+        }
+
+        function calculate(nextOp = null) {
+            if (previousNumber === null || !currentOperation) return;
+
+            const url = new URL('/cgi-bin/calculator.php', window.location.origin);
+            url.searchParams.append('num1', previousNumber);
+            url.searchParams.append('num2', currentNumber);
+            url.searchParams.append('operation', currentOperation);
+
+            const operation = `${previousNumber} ${getOperationSymbol(currentOperation)} ${currentNumber}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        currentNumber = String(data.result);
+                        showPopup(operation, data.result);
+                        if (nextOp) {
+                            previousNumber = currentNumber;
+                            currentOperation = nextOp;
+                            shouldResetScreen = true;
+                        } else {
+                            previousNumber = null;
+                            currentOperation = null;
+                        }
+                    } else {
+                        showPopup(operation, 'Erreur', true);
+                        clearCalc();
+                    }
+                    updateDisplay();
+                })
+                .catch(error => {
+                    showPopup(operation, 'Erreur', true);
+                    clearCalc();
+                });
+        }
+
+        // Gestion du clavier
+        document.addEventListener('keydown', (event) => {
+            if (event.key >= '0' && event.key <= '9' || event.key === '.') {
+                appendNumber(event.key);
+            } else if (event.key === '+') {
+                setOperation('add');
+            } else if (event.key === '-') {
+                setOperation('subtract');
+            } else if (event.key === '*') {
+                setOperation('multiply');
+            } else if (event.key === '/') {
+                setOperation('divide');
+            } else if (event.key === '^') {
+                setOperation('power');
+            } else if (event.key === 'Enter' || event.key === '=') {
+                calculate();
+            } else if (event.key === 'Escape') {
+                clearCalc();
+            }
+        });
+    </script>
+</body>
+</html> 
