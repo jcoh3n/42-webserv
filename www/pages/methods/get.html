@@ -23,76 +23,37 @@
             font-size: 2rem;
             text-align: center;
         }
-
+        
         .request-box {
-            background: rgba(0, 186, 188, 0.05);
+            background: rgba(0, 184, 148, 0.05);
             border: 2px solid var(--border-color);
             border-radius: var(--border-radius);
             padding: 20px;
             margin-bottom: 30px;
-            font-family: monospace;
-            font-size: 1.1rem;
             color: var(--primary-text);
-            line-height: 1.6;
+            font-family: monospace;
             position: relative;
-            overflow: hidden;
             transition: all 0.3s ease;
         }
-
-        .request-box.etag-box {
-            background: rgba(121, 82, 179, 0.05);
-            border-color: #7952b3;
+        
+        .request-box:hover {
+            border-color: var(--get-color);
+            box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.1);
         }
-
-        .request-box code {
+        
+        .request-box h3 {
             color: var(--get-color);
-            font-weight: 600;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: rgba(0, 186, 188, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .request-box.etag-box code {
-            color: #7952b3;
-            background: rgba(121, 82, 179, 0.1);
-        }
-
-        .request-box strong {
-            display: inline-block;
+            margin-top: 0;
             margin-bottom: 15px;
-            color: #7952b3;
             font-size: 1.2rem;
         }
-
-        .request-section {
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: var(--border-radius);
-            background: rgba(255, 255, 255, 0.05);
-            border-left: 3px solid transparent;
-            transition: all 0.3s ease;
+        
+        .request-content {
+            white-space: pre-wrap;
+            line-height: 1.5;
+            font-size: 1rem;
         }
-
-        .request-section.first-request {
-            border-left-color: var(--get-color);
-        }
-
-        .request-section.second-request {
-            border-left-color: #7952b3;
-        }
-
-        .request-section:hover {
-            transform: translateX(5px);
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .request-label {
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: var(--secondary-text);
-        }
-
+        
         .buttons {
             display: flex;
             gap: 20px;
@@ -111,6 +72,9 @@
             transition: all 0.3s ease;
             text-decoration: none;
             text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .button.primary {
@@ -119,7 +83,7 @@
         }
         
         .button.primary:hover {
-            background-color: #008f91;
+            background-color: var(--get-color-hover);
             transform: translateY(-2px);
         }
         
@@ -144,7 +108,7 @@
             border-radius: var(--border-radius);
             text-align: center;
             font-size: 1.2rem;
-            box-shadow: 0 10px 30px rgba(0, 186, 188, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 184, 148, 0.3);
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -168,10 +132,35 @@
             font-weight: 600;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        /* Confetti animation for success popup */
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            overflow: hidden;
+            opacity: 0;
+        }
+        
+        .confetti-container.active {
+            opacity: 1;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: confetti 4s ease-in-out forwards;
         }
     </style>
 </head>
@@ -182,134 +171,113 @@
         </header>
         
         <div class="content-container">
-            <h1>Test de la méthode GET</h1>
+            <h1>La méthode GET</h1>
             
             <div class="request-box">
-                Requête HTTP envoyée au serveur :<br><br>
-                <code>GET</code> /pages/methods/get.html HTTP/1.1<br>
-                Host: localhost:8080<br>
-                Accept: text/html
+                <h3>Exemple de requête HTTP GET</h3>
+                <div class="request-content">GET /index.html HTTP/1.1
+Host: localhost:8080
+Accept: text/html,application/xhtml+xml,application/xml</div>
             </div>
-
+            
             <div class="buttons">
-                <button onclick="testGet()" class="button primary">Tester GET</button>
-                <button onclick="testETag()" class="button primary" style="background-color: #7952b3;">Tester ETag</button>
+                <button id="testGetBtn" class="button primary">Tester GET</button>
+                <button id="testEtagBtn" class="button primary">Tester ETag</button>
                 <a href="/" class="button secondary">Retour à l'accueil</a>
-            </div>
-
-            <div class="request-box etag-box" style="margin-top: 30px;">
-                <strong>Test ETag</strong><br>
-                
-                <div class="request-section first-request">
-                    <div class="request-label">1ère requête :</div>
-                    <code>GET</code> /pages/methods/get.html HTTP/1.1<br>
-                    Host: localhost:8080
-                </div>
-                
-                <div class="request-section second-request">
-                    <div class="request-label">2ème requête avec ETag :</div>
-                    <code>GET</code> /pages/methods/get.html HTTP/1.1<br>
-                    Host: localhost:8080<br>
-                    <code>If-None-Match:</code> "le-etag-recu"
-                </div>
             </div>
         </div>
 
         <div id="successPopup" class="success-popup">
-            Méthode <code>GET</code> exécutée avec succès !
+            Requête GET réussie! Statut: <code>200 OK</code>
         </div>
-
-        <div id="etagPopup" class="success-popup" style="background-color: #7952b3;">
-            Test ETag : <code id="etagStatus"></code>
-        </div>
+        
+        <div id="confettiContainer" class="confetti-container"></div>
     </div>
     
     <script>
-        function testGet() {
-            const popup = document.getElementById('successPopup');
-            
-            // Add timestamp to force a new request
-            const timestamp = new Date().getTime();
-            const url = new URL(window.location.href);
-            url.searchParams.set('_t', timestamp);
-            
-            fetch(url.toString(), {
-                method: 'GET',
-                headers: {
-                    'Accept': 'text/html',
-                    'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache'
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    popup.classList.add('show');
-                    setTimeout(() => {
-                        popup.classList.remove('show');
-                    }, 1500);
-                } else {
-                    throw new Error('Erreur ' + response.status);
-                }
-            })
-            .catch(error => {
-                alert('Erreur : ' + error.message);
-            });
-        }
-
-        function testETag() {
-            const etagPopup = document.getElementById('etagPopup');
-            const etagStatus = document.getElementById('etagStatus');
-            
-            // Première requête pour obtenir l'ETag
-            fetch(window.location.href, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'text/html'
-                }
-            })
-            .then(response => {
-                const etag = response.headers.get('ETag');
-                if (!etag) {
-                    throw new Error('Pas d\'ETag reçu');
-                }
-                
-                // Deuxième requête avec l'ETag
-                return fetch(window.location.href, {
-                    method: 'GET',
-                    headers: {
-                        'If-None-Match': etag,
-                        'Accept': 'text/html'
-                    }
-                });
-            })
-            .then(response => {
-                if (response.status === 304) {
-                    etagStatus.textContent = '304 Not Modified';
-                } else {
-                    etagStatus.textContent = response.status + ' ' + response.statusText;
-                }
-                
-                etagPopup.classList.add('show');
-                setTimeout(() => {
-                    etagPopup.classList.remove('show');
-                }, 1500);
-            })
-            .catch(error => {
-                etagStatus.textContent = error.message;
-                etagPopup.classList.add('show');
-                setTimeout(() => {
-                    etagPopup.classList.remove('show');
-                }, 1500);
-            });
-        }
-
-        // Afficher le popup au chargement de la page
         document.addEventListener('DOMContentLoaded', () => {
-            const popup = document.getElementById('successPopup');
-            popup.classList.add('show');
-            setTimeout(() => {
-                popup.classList.remove('show');
-            }, 1500);
+            const testGetBtn = document.getElementById('testGetBtn');
+            const testEtagBtn = document.getElementById('testEtagBtn');
+            const successPopup = document.getElementById('successPopup');
+            const confettiContainer = document.getElementById('confettiContainer');
+            
+            // Fonction pour créer des confettis
+            function createConfetti() {
+                confettiContainer.innerHTML = '';
+                confettiContainer.classList.add('active');
+                
+                const colors = ['#00B894', '#55efc4', '#81ecec', '#74b9ff', '#a29bfe'];
+                
+                for(let i = 0; i < 100; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = -10 + 'px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 2 + 's';
+                    confettiContainer.appendChild(confetti);
+                }
+                
+                setTimeout(() => {
+                    confettiContainer.classList.remove('active');
+                }, 6000);
+            }
+            
+            // Fonction pour afficher le popup de succès
+            function showSuccessPopup(message) {
+                successPopup.innerHTML = message;
+                successPopup.classList.add('show');
+                createConfetti();
+                
+                setTimeout(() => {
+                    successPopup.classList.remove('show');
+                }, 5000);
+            }
+            
+            // Test GET button
+            testGetBtn.addEventListener('click', () => {
+                fetch('/pages/methods/get.html')
+                    .then(response => {
+                        if(response.ok) {
+                            showSuccessPopup(`Requête GET réussie! Statut: <code>${response.status} ${response.statusText}</code>`);
+                        } else {
+                            throw new Error(`Erreur: ${response.status} ${response.statusText}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur:', error);
+                    });
+            });
+            
+            // Test ETag button
+            testEtagBtn.addEventListener('click', () => {
+                // Première requête pour obtenir l'ETag
+                fetch('/pages/methods/get.html')
+                    .then(response => {
+                        const etag = response.headers.get('ETag');
+                        if(!etag) {
+                            showSuccessPopup('Le serveur n\'a pas renvoyé d\'ETag');
+                            return;
+                        }
+                        
+                        // Deuxième requête avec l'ETag
+                        return fetch('/pages/methods/get.html', {
+                            headers: {
+                                'If-None-Match': etag
+                            }
+                        });
+                    })
+                    .then(response => {
+                        if(response && response.status === 304) {
+                            showSuccessPopup(`ETag fonctionne! Statut: <code>304 Not Modified</code>`);
+                        } else if(response) {
+                            showSuccessPopup(`Réponse reçue: <code>${response.status} ${response.statusText}</code>`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur:', error);
+                    });
+            });
         });
     </script>
 </body>
