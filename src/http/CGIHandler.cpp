@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fcntl.h>
 #include <limits.h>  // Pour PATH_MAX
+#include <cerrno>
 
 CGIHandler::CGIHandler(const HttpRequest& req, const std::string& script_path, const std::string& interpreter)
     : request_(req), script_path_(script_path), interpreter_(interpreter) {
@@ -135,18 +136,11 @@ bool CGIHandler::executeCGIScript(int pipe_in[2], int pipe_out[2]) {
         return false;
     }
 
-    // Change le répertoire de travail vers le répertoire du script
-    std::string script_dir = script_path_.substr(0, script_path_.find_last_of('/'));
-    if (chdir(script_dir.c_str()) < 0) {
-        std::cerr << "Failed to change directory to " << script_dir << std::endl;
-        return false;
-    }
-
-    // Exécute le script
+    // Exécute le script sans changer de répertoire
     execve(interpreter_.c_str(), args, envp);
 
     // Si on arrive ici, c'est que execve a échoué
-    std::cerr << "Failed to execute " << interpreter_ << std::endl;
+    std::cerr << "Failed to execute " << interpreter_ << ": " << strerror(errno) << std::endl;
 
     // Libère la mémoire
     for (size_t i = 0; envp[i] != NULL; ++i) {
