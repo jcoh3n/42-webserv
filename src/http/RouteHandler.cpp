@@ -182,7 +182,16 @@ std::string RouteHandler::getFilePath(const std::string& uri) const {
     }
     
     // Construire le chemin complet
-    return root_directory + clean_uri;
+    std::string path = root_directory;
+    if (path[path.length() - 1] == '/' && clean_uri[0] == '/') {
+        path = path.substr(0, path.length() - 1);
+    }
+    path += clean_uri;
+    
+    // Debug: afficher le chemin pour vérification
+    std::cerr << "[DEBUG] File Path: " << path << std::endl;
+    
+    return path;
 }
 
 bool RouteHandler::serveStaticFile(const std::string& file_path, HttpResponse& response) {
@@ -322,12 +331,30 @@ HttpResponse RouteHandler::handleCGIRequest(const HttpRequest& request, const st
     // Vérifier si l'extension est gérée par un handler CGI
     std::map<std::string, std::string>::const_iterator it = location->cgi_handlers.find(ext);
     if (it != location->cgi_handlers.end()) {
-        // Utiliser directement scriptPath sans ajouter de préfixe supplémentaire
-        std::string finalPath = scriptPath;
-        if (finalPath.substr(0, 2) == "./") {
-            finalPath = finalPath.substr(2);  // Enlever le "./" si présent
+        // Construire le chemin absolu correctement
+        std::string absolutePath = scriptPath;
+        
+        // Si le chemin ne commence pas par le répertoire racine, on l'ajoute
+        if (absolutePath.find(root_directory) != 0) {
+            if (absolutePath.substr(0, 2) == "./") {
+                absolutePath = absolutePath.substr(2);
+            }
+            
+            // Si le chemin commence par /, on supprime ce /
+            if (absolutePath[0] == '/') {
+                absolutePath = absolutePath.substr(1);
+            }
+            
+            // Puis on préfixe avec le répertoire racine
+            absolutePath = root_directory + "/" + absolutePath;
         }
-        CGIHandler handler(request, finalPath, it->second);
+        
+        // Debug: afficher les chemins pour vérification
+        std::cerr << "[DEBUG] Script Path (before): " << scriptPath << std::endl;
+        std::cerr << "[DEBUG] Root Directory: " << root_directory << std::endl;
+        std::cerr << "[DEBUG] Absolute Path: " << absolutePath << std::endl;
+        
+        CGIHandler handler(request, absolutePath, it->second);
         return handler.executeCGI();
     }
     
