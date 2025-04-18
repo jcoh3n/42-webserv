@@ -4,3 +4,26 @@ test_http_integration
 example.conf
 *.o
 
+# Exécutable compilé
+webserv
+
+# Fichiers objets
+*.o
+obj/
+objs/
+
+# Fichiers temporaires
+*~
+*.swp
+*.swo
+.DS_Store
+.vscode/
+.idea/
+
+# Dossiers de données générés
+uploads/
+data/
+logs/
+
+# Fichiers Core dump
+core.*
