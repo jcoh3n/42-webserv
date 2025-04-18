@@ -129,7 +129,7 @@
         }
 
         .file-name::before {
-            content: '📄';
+            content: '';
             margin-right: 10px;
         }
 
@@ -142,13 +142,10 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
 
         .delete-btn::before {
-            content: '🗑️';
+            content: '';
         }
 
         .delete-btn:hover {
@@ -230,18 +227,10 @@
             transition: all 0.3s ease;
             font-size: 1rem;
             margin-left: 10px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
         }
 
         .refresh-btn::before {
-            content: '🔄';
-        }
-
-        .refresh-btn:hover {
-            background: rgba(244, 67, 54, 0.2);
-            transform: translateY(-2px);
+            content: '';
         }
 
         .no-files {
@@ -330,7 +319,6 @@
         }
 
         function deleteFile(filename, element) {
-            // Ajouter l'animation de suppression
             element.classList.add('deleting');
             updateCommandLine(filename);
 
@@ -339,7 +327,6 @@
             })
             .then(response => {
                 if (response.ok) {
-                    showPopup(`Le fichier "${filename}" a été supprimé avec succès`);
                     setTimeout(() => {
                         loadFiles(); // Recharge la liste après l'animation
                     }, 500);
@@ -349,7 +336,7 @@
             })
             .catch(error => {
                 element.classList.remove('deleting');
-                showPopup(`Erreur lors de la suppression: ${error.message}`, true);
+                console.error('Erreur:', error);
             });
         }
 

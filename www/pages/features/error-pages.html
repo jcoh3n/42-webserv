@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pages d'erreur - Webserv 42</title>
+    <link rel="stylesheet" href="/styles/webserv-modern.css">
+    <style>
+        .error-container {
+            background-color: var(--box-bg);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--box-shadow);
+            max-width: 800px;
+            margin: 50px auto;
+            border-top: 4px solid #9c27b0;
+        }
+
+        .error-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .error-card {
+            background: rgba(156, 39, 176, 0.1);
+            border: 2px solid rgba(156, 39, 176, 0.2);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .error-card:hover {
+            background: rgba(156, 39, 176, 0.15);
+            border-color: #9c27b0;
+            transform: translateY(-5px);
+        }
+
+        .error-code {
+            font-size: 3.5rem;
+            color: #9c27b0;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(156, 39, 176, 0.2);
+        }
+
+        .error-name {
+            color: var(--primary-text);
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .error-desc {
+            color: var(--secondary-text);
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--box-bg);
+            color: #9c27b0;
+            border: 2px solid rgba(156, 39, 176, 0.2);
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: var(--box-shadow);
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            border-color: #9c27b0;
+            background: rgba(156, 39, 176, 0.05);
+        }
+
+        .back-button:active {
+            transform: translateY(1px);
+        }
+
+        .back-button::before {
+            content: '←';
+            font-size: 1.2em;
+            line-height: 1;
+        }
+
+        .page-title {
+            color: #9c27b0;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(156, 39, 176, 0.2);
+        }
+
+        .page-subtitle {
+            text-align: center;
+            color: var(--secondary-text);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .error-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Webserv 42</h1>
+        </header>
+
+        <div class="error-container">
+            <h2 class="page-title">Pages d'erreur</h2>
+            <p class="page-subtitle">Cliquez sur une erreur pour voir sa page personnalisée</p>
+
+            <div class="error-grid">
+                <div class="error-card" onclick="window.location.href='/error/404.html'">
+                    <div class="error-code">404</div>
+                    <div class="error-name">Not Found</div>
+                    <div class="error-desc">La ressource demandée n'existe pas sur le serveur</div>
+                </div>
+
+                <div class="error-card" onclick="window.location.href='/error/403.html'">
+                    <div class="error-code">403</div>
+                    <div class="error-name">Forbidden</div>
+                    <div class="error-desc">L'accès à cette ressource est interdit</div>
+                </div>
+
+                <div class="error-card" onclick="window.location.href='/error/500.html'">
+                    <div class="error-code">500</div>
+                    <div class="error-name">Internal Server Error</div>
+                    <div class="error-desc">Une erreur interne s'est produite sur le serveur</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/" class="back-button">Retour à l'accueil</a>
+        </div>
+    </div>
+</body>
+</html> 
