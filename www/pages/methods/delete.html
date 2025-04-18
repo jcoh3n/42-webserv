@@ -3,179 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DELETE Method - Webserv 42</title>
+    <title>Test DELETE - Webserv 42</title>
     <link rel="stylesheet" href="/styles/webserv-modern.css">
     <style>
         .delete-container {
             background-color: var(--box-bg);
             border-radius: var(--border-radius);
-            padding: 30px;
+            padding: 40px;
             box-shadow: var(--box-shadow);
             max-width: 600px;
             margin: 50px auto;
-            border-top: 4px solid var(--delete-color);
-            position: relative;
+            border-top: 4px solid #ff5722;
+        }
+
+        .file-list {
+            margin: 20px 0;
+            border: 2px solid rgba(255, 87, 34, 0.2);
+            border-radius: var(--border-radius);
             overflow: hidden;
         }
-        
-        .delete-container h1 {
-            color: var(--delete-color);
-            margin-top: 0;
-            margin-bottom: 30px;
-            font-size: 2rem;
-        }
-        
-        .resource-selector {
-            background-color: #1a1a1a;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .resource-selector h3 {
-            margin-top: 0;
-            color: var(--primary-text);
-            margin-bottom: 15px;
-        }
-        
-        .resource-list {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #333;
-            border-radius: 6px;
-            padding: 10px;
-            background-color: #0f0f0f;
-        }
-        
-        .resource-item {
-            padding: 8px 12px;
-            margin-bottom: 5px;
-            border-radius: 4px;
-            background-color: #1e1e1e;
-            cursor: pointer;
-            transition: all 0.2s ease;
+
+        .file-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 87, 34, 0.1);
+            transition: all 0.3s ease;
         }
-        
-        .resource-item:hover {
-            background-color: #2a2a2a;
+
+        .file-item:last-child {
+            border-bottom: none;
         }
-        
-        .resource-item.selected {
-            background-color: rgba(255, 71, 87, 0.2);
-            border-left: 3px solid var(--delete-color);
+
+        .file-item:hover {
+            background: rgba(255, 87, 34, 0.05);
         }
-        
-        .resource-name {
-            font-weight: 500;
-        }
-        
-        .resource-type {
-            font-size: 0.8rem;
-            color: var(--secondary-text);
-            padding: 2px 6px;
-            background-color: #2a2a2a;
-            border-radius: 4px;
-        }
-        
-        .delete-form {
-            margin-top: 20px;
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #333;
-            border-radius: 6px;
-            background-color: #1a1a1a;
+
+        .file-name {
+            font-family: monospace;
             color: var(--primary-text);
-            font-size: 1rem;
-            margin-bottom: 15px;
         }
-        
-        .form-input:focus {
-            border-color: var(--delete-color);
-            outline: none;
-        }
-        
+
         .delete-btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: var(--delete-color);
-            color: white;
+            padding: 8px 16px;
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
             border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
+            border-radius: var(--border-radius);
             cursor: pointer;
             transition: all 0.3s ease;
-            width: 100%;
+            font-size: 0.9rem;
         }
-        
+
         .delete-btn:hover {
-            background-color: #e3364f;
+            background: rgba(244, 67, 54, 0.2);
             transform: translateY(-2px);
         }
-        
-        .delete-btn:disabled {
-            background-color: #555;
-            cursor: not-allowed;
-            transform: none;
+
+        .delete-btn:active {
+            transform: translateY(1px);
         }
-        
-        .result-panel {
-            background-color: #1a1a1a;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 30px;
-            border-left: 4px solid var(--delete-color);
-            display: none;
-        }
-        
-        .result-panel h3 {
-            margin-top: 0;
-            color: var(--delete-color);
-        }
-        
-        .result-content {
-            background-color: #121212;
-            padding: 10px;
-            border-radius: 6px;
-            color: #ddd;
-        }
-        
-        .back-link {
-            display: block;
+
+        .result-popup {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 15px 30px;
+            border-radius: var(--border-radius);
+            background: var(--box-bg);
+            color: var(--primary-text);
+            box-shadow: var(--box-shadow);
+            border-top: 3px solid #ff5722;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
             text-align: center;
-            margin-top: 20px;
-            color: var(--secondary-text);
+            font-size: 1.1rem;
+        }
+
+        .result-popup.error {
+            border-color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+        }
+
+        .result-popup.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--box-bg);
+            color: #ff5722;
+            border: 2px solid rgba(255, 87, 34, 0.2);
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
             text-decoration: none;
             transition: all 0.3s ease;
+            box-shadow: var(--box-shadow);
         }
-        
-        .back-link:hover {
-            color: var(--primary-text);
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            border-color: #ff5722;
+            background: rgba(255, 87, 34, 0.05);
         }
-        
-        /* Animation des X rouges en background */
-        .bg-crosses {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 0;
-            opacity: 0.1;
+
+        .back-button:active {
+            transform: translateY(1px);
         }
-        
-        .cross {
-            position: absolute;
-            color: var(--delete-color);
-            font-size: 24px;
-            transform: rotate(45deg);
+
+        .back-button::before {
+            content: '←';
+            font-size: 1.2em;
+            line-height: 1;
+        }
+
+        .refresh-btn {
+            padding: 12px 24px;
+            background: rgba(255, 87, 34, 0.1);
+            color: #ff5722;
+            border: 2px solid rgba(255, 87, 34, 0.2);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            margin-left: 10px;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255, 87, 34, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .no-files {
+            text-align: center;
+            padding: 30px;
+            color: var(--secondary-text);
+            font-style: italic;
         }
     </style>
 </head>
@@ -183,166 +154,85 @@
     <div class="container">
         <header>
             <h1>Webserv 42</h1>
-            <p>Un serveur HTTP en C++98</p>
         </header>
-        
+
         <div class="delete-container">
-            <div class="bg-crosses" id="bg-crosses"></div>
+            <h2 style="text-align: center; margin-bottom: 30px; color: #ff5722;">Test DELETE</h2>
             
-            <h1>Delete a Resource</h1>
-            
-            <div class="resource-selector">
-                <h3>Sélectionnez une ressource à supprimer :</h3>
-                
-                <div class="resource-list" id="resource-list">
-                    <!-- Les ressources seront chargées dynamiquement -->
-                    <div class="resource-item">
-                        <span class="resource-name">Chargement des ressources...</span>
-                    </div>
-                </div>
+            <div class="file-list" id="fileList">
+                <div class="no-files">Chargement des fichiers...</div>
             </div>
-            
-            <form id="delete-form" class="delete-form">
-                <input type="text" id="resource-path" name="resource" class="form-input" placeholder="Path de la ressource à supprimer" readonly>
-                
-                <button type="submit" id="delete-btn" class="delete-btn" disabled>Supprimer</button>
-            </form>
-            
-            <div id="result" class="result-panel">
-                <h3>Résultat de la requête DELETE</h3>
-                <div id="result-content" class="result-content"></div>
-            </div>
-            
-            <a href="/" class="back-link">Retour à l'accueil</a>
         </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/" class="back-button">Retour à l'accueil</a>
+            <button class="refresh-btn" onclick="loadFiles()">Rafraîchir la liste</button>
+        </div>
+
+        <div id="resultPopup" class="result-popup"></div>
     </div>
-    
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const resourceList = document.getElementById('resource-list');
-            const resourcePath = document.getElementById('resource-path');
-            const deleteBtn = document.getElementById('delete-btn');
-            const deleteForm = document.getElementById('delete-form');
-            const resultPanel = document.getElementById('result');
-            const resultContent = document.getElementById('result-content');
-            const bgCrosses = document.getElementById('bg-crosses');
-            
-            // Créer des croix en arrière-plan
-            for (let i = 0; i < 15; i++) {
-                const cross = document.createElement('div');
-                cross.className = 'cross';
-                cross.textContent = '✕';
-                
-                // Position aléatoire
-                const posX = Math.random() * 100;
-                const posY = Math.random() * 100;
-                
-                // Style des croix
-                cross.style.left = `${posX}%`;
-                cross.style.top = `${posY}%`;
-                cross.style.opacity = Math.random() * 0.8 + 0.2;
-                
-                bgCrosses.appendChild(cross);
-            }
-            
-            // Charger les ressources
-            loadResources();
-            
-            // Fonction pour charger les ressources
-            async function loadResources() {
-                try {
-                    // Simuler un chargement des ressources (à remplacer par une vraie requête API)
-                    // Pour l'exemple, nous utilisons des données fictives
-                    const resources = [
-                        { name: 'tata.txt', type: 'Fichier texte' },
-                        { name: 'salut1.txt', type: 'Fichier texte' },
-                        { name: 'salut2.txt', type: 'Fichier texte' },
-                        { name: 'salut3.txt', type: 'Fichier texte' },
-                        { name: 'image.jpg', type: 'Image' },
-                        { name: 'document.pdf', type: 'Document' }
-                    ];
-                    
-                    // Vider la liste
-                    resourceList.innerHTML = '';
-                    
-                    // Ajouter les ressources à la liste
-                    resources.forEach(resource => {
-                        const item = document.createElement('div');
-                        item.className = 'resource-item';
-                        item.innerHTML = `
-                            <span class="resource-name">${resource.name}</span>
-                            <span class="resource-type">${resource.type}</span>
-                        `;
-                        
-                        // Ajouter un événement de clic pour sélectionner la ressource
-                        item.addEventListener('click', () => {
-                            // Désélectionner tous les items
-                            document.querySelectorAll('.resource-item').forEach(el => {
-                                el.classList.remove('selected');
-                            });
-                            
-                            // Sélectionner l'item actuel
-                            item.classList.add('selected');
-                            
-                            // Mettre à jour le champ de formulaire
-                            resourcePath.value = resource.name;
-                            
-                            // Activer le bouton de suppression
-                            deleteBtn.disabled = false;
-                        });
-                        
-                        resourceList.appendChild(item);
-                    });
-                    
-                } catch (error) {
-                    resourceList.innerHTML = `<div class="resource-item">Erreur lors du chargement des ressources: ${error.message}</div>`;
+        const fileList = document.getElementById('fileList');
+        const popup = document.getElementById('resultPopup');
+
+        function showPopup(message, isError = false) {
+            popup.textContent = message;
+            popup.className = `result-popup ${isError ? 'error' : ''}`;
+            popup.classList.add('show');
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 3000);
+        }
+
+        function deleteFile(filename) {
+            fetch(`/uploads/${filename}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    showPopup(`Le fichier "${filename}" a été supprimé avec succès`);
+                    loadFiles(); // Recharge la liste après suppression
+                } else {
+                    throw new Error(`Erreur ${response.status}: ${response.statusText}`);
                 }
-            }
-            
-            // Gestionnaire de soumission du formulaire
-            deleteForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const resource = resourcePath.value;
-                
-                if (!resource) {
-                    alert('Veuillez sélectionner une ressource à supprimer.');
-                    return;
-                }
-                
-                // Afficher le panneau de résultat
-                resultPanel.style.display = 'block';
-                resultContent.textContent = `Suppression de la ressource "${resource}" en cours...`;
-                
-                try {
-                    // Envoyer la requête DELETE
-                    const response = await fetch(`/${resource}`, {
-                        method: 'DELETE'
-                    });
-                    
-                    // Traiter la réponse
-                    if (response.ok) {
-                        resultContent.innerHTML = `✅ La ressource <strong>${resource}</strong> a été supprimée avec succès.`;
-                        
-                        // Rafraîchir la liste des ressources
-                        setTimeout(loadResources, 1000);
-                        
-                        // Réinitialiser le formulaire
-                        resourcePath.value = '';
-                        deleteBtn.disabled = true;
-                        
-                        // Désélectionner tous les items
-                        document.querySelectorAll('.resource-item').forEach(el => {
-                            el.classList.remove('selected');
-                        });
-                    } else {
-                        resultContent.innerHTML = `❌ Erreur lors de la suppression de <strong>${resource}</strong>.<br>Status: ${response.status} ${response.statusText}`;
-                    }
-                } catch (error) {
-                    resultContent.innerHTML = `❌ Erreur lors de l'envoi de la requête DELETE: ${error.message}`;
-                }
+            })
+            .catch(error => {
+                showPopup(`Erreur lors de la suppression: ${error.message}`, true);
             });
-        });
+        }
+
+        function loadFiles() {
+            fetch('/uploads/')
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const links = Array.from(doc.querySelectorAll('a'))
+                        .filter(a => a.href.includes('/uploads/'))
+                        .map(a => a.textContent.trim())
+                        .filter(name => name !== '..' && name !== '.');
+
+                    if (links.length === 0) {
+                        fileList.innerHTML = '<div class="no-files">Aucun fichier trouvé dans le dossier uploads</div>';
+                        return;
+                    }
+
+                    fileList.innerHTML = links.map(filename => `
+                        <div class="file-item">
+                            <span class="file-name">${filename}</span>
+                            <button class="delete-btn" onclick="deleteFile('${filename}')">Supprimer</button>
+                        </div>
+                    `).join('');
+                })
+                .catch(error => {
+                    fileList.innerHTML = '<div class="no-files">Erreur lors du chargement des fichiers</div>';
+                    console.error('Erreur:', error);
+                });
+        }
+
+        // Charge la liste des fichiers au chargement de la page
+        loadFiles();
     </script>
 </body>
 </html> 
