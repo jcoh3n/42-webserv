@@ -53,6 +53,7 @@
         .redirect-box { border-color: #ff9800; }
         .error-box { border-color: #e74c3c; }
         .alias-box { border-color: #9c27b0; }
+        .cgi-box { border-color: #ff5722; }
         
         .particles {
             position: absolute;
@@ -89,7 +90,6 @@
     <div class="container">
         <header>
             <h1>Webserv 42</h1>
-            <p>Un serveur HTTP en C++98</p>
         </header>
 
         <div class="test-grid">
@@ -151,6 +151,15 @@
             <a href="/pages/features/alias.html" class="test-box alias-box">
                 <h2>Alias</h2>
                 <p>Utilisez des alias pour accéder à des ressources via des chemins alternatifs, comme banana.html.</p>
+            </a>
+        </div>
+
+        <h2 style="text-align: center; margin: 50px 0 30px; color: var(--primary-text);">Tests CGI</h2>
+        <div class="test-grid">
+            <!-- Calculatrice CGI -->
+            <a href="/pages/features/calculator.html" class="test-box cgi-box">
+                <h2>Calculatrice PHP</h2>
+                <p>Une calculatrice interactive en PHP-CGI avec une interface moderne et des animations fluides.</p>
             </a>
         </div>
 
