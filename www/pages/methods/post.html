@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POST Method - Webserv 42</title>
+    <link rel="stylesheet" href="/styles/webserv-modern.css">
+    <style>
+        .form-container {
+            background-color: var(--box-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            max-width: 600px;
+            margin: 50px auto;
+            border-top: 4px solid var(--post-color);
+        }
+        
+        .form-container h1 {
+            color: var(--post-color);
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-text);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #333;
+            border-radius: 6px;
+            background-color: #1a1a1a;
+            color: var(--primary-text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--post-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(98, 0, 234, 0.2);
+        }
+        
+        .form-control::placeholder {
+            color: #666;
+        }
+        
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--post-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .submit-btn:hover {
+            background-color: #4a00b0;
+            transform: translateY(-2px);
+        }
+        
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--secondary-text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-link:hover {
+            color: var(--primary-text);
+        }
+        
+        .result-panel {
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 30px;
+            border-left: 4px solid var(--post-color);
+            display: none;
+        }
+        
+        .result-panel h3 {
+            margin-top: 0;
+            color: var(--post-color);
+        }
+        
+        .result-panel pre {
+            background-color: #121212;
+            padding: 10px;
+            border-radius: 6px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #ddd;
+        }
+
+        /* Animation de succès */
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .success-animation {
+            animation: successPulse 0.5s ease-in-out;
+        }
+        
+        /* Info-bulle POST */
+        .post-info {
+            background-color: rgba(98, 0, 234, 0.1);
+            border-left: 4px solid var(--post-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+        }
+        
+        .post-info h3 {
+            color: var(--post-color);
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        
+        .post-info p {
+            margin: 0;
+            color: var(--secondary-text);
+        }
+        
+        .post-info code {
+            background-color: rgba(98, 0, 234, 0.2);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: var(--primary-text);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Webserv 42</h1>
+            <p>Un serveur HTTP en C++98</p>
+        </header>
+        
+        <div class="form-container">
+            <h1>Créer un fichier avec POST</h1>
+            
+            <div class="post-info">
+                <h3>À propos de la méthode POST</h3>
+                <p>La méthode <code>POST</code> est utilisée pour envoyer des données au serveur afin de créer une ressource.</p>
+                <p>Dans cet exemple, vous allez créer un fichier texte sur le serveur.</p>
+            </div>
+            
+            <form id="post-form">
+                <div class="form-group">
+                    <label for="filename">Nom du fichier :</label>
+                    <input type="text" id="filename" name="filename" class="form-control" placeholder="Entrez le nom du fichier (ex: document.txt)" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">Contenu du fichier :</label>
+                    <textarea id="content" name="content" class="form-control" placeholder="Entrez le contenu du fichier..." required></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Créer le fichier via POST</button>
+            </form>
+            
+            <a href="/" class="back-link">Retour à l'accueil</a>
+            
+            <div id="result" class="result-panel">
+                <h3>Résultat de la requête POST</h3>
+                <pre id="result-content"></pre>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('post-form');
+            const resultPanel = document.getElementById('result');
+            const resultContent = document.getElementById('result-content');
+            const formContainer = document.querySelector('.form-container');
+            
+            // Pré-remplir le formulaire avec des valeurs par défaut
+            document.getElementById('filename').value = `test_${Date.now()}.txt`;
+            document.getElementById('content').value = `Ceci est un test de la méthode POST.\nCréé le: ${new Date().toLocaleString()}\nWebserv 42 - Démonstration`;
+            
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const filename = document.getElementById('filename').value;
+                const content = document.getElementById('content').value;
+                
+                // Afficher un message de chargement
+                resultPanel.style.display = 'block';
+                resultContent.textContent = 'Envoi de la requête POST en cours...';
+                
+                try {
+                    // Créer les données du formulaire
+                    const formData = new FormData();
+                    formData.append('filename', filename);
+                    formData.append('content', content);
+                    
+                    // Envoyer la requête POST
+                    const response = await fetch('/api/create-file', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    // Traiter la réponse
+                    const data = await response.text();
+                    
+                    if (response.ok) {
+                        resultContent.textContent = `✅ Fichier "${filename}" créé avec succès !\n\nContenu :\n${content}\n\nRéponse du serveur :\n${data}`;
+                        
+                        // Ajouter une animation de succès
+                        formContainer.classList.add('success-animation');
+                        setTimeout(() => {
+                            formContainer.classList.remove('success-animation');
+                        }, 500);
+                        
+                        // Réinitialiser le formulaire pour un nouveau test
+                        document.getElementById('filename').value = `test_${Date.now()}.txt`;
+                    } else {
+                        resultContent.textContent = `❌ Erreur lors de la création du fichier.\nStatus: ${response.status} ${response.statusText}\n\nRéponse du serveur :\n${data}`;
+                    }
+                } catch (error) {
+                    resultContent.textContent = `❌ Erreur lors de l'envoi de la requête : ${error.message}`;
+                }
+            });
+            
+            // Ajouter des écouteurs d'événements pour améliorer l'UX
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    input.style.borderColor = 'var(--post-color)';
+                });
+                
+                input.addEventListener('blur', () => {
+                    input.style.borderColor = '';
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

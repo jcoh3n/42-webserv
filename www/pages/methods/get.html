@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GET Method - Webserv 42</title>
+    <link rel="stylesheet" href="/styles/webserv-modern.css">
+    <style>
+        .success-message {
+            background-color: #121212;
+            color: #fff;
+            text-align: center;
+            padding: 50px;
+            margin: 50px auto;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            border-top: 4px solid var(--get-color);
+        }
+        
+        .success-message h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: var(--get-color);
+        }
+        
+        .success-message p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #00babc;
+            animation: confetti 5s ease-in-out infinite;
+            opacity: 0.6;
+        }
+        
+        @keyframes confetti {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(600px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--get-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .back-btn:hover {
+            background-color: #008f91;
+            transform: translateY(-2px);
+        }
+
+        /* Nouveaux styles pour l'explication GET */
+        .get-details {
+            background-color: rgba(0, 186, 188, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: left;
+            margin: 40px 0;
+            border-left: 4px solid var(--get-color);
+        }
+        
+        .get-details h2 {
+            color: var(--get-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .get-details p {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        
+        .get-details code {
+            background-color: rgba(0, 186, 188, 0.2);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #eee;
+        }
+        
+        .http-request {
+            background-color: #1a1a1a;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: monospace;
+            color: #eee;
+            text-align: left;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        
+        .highlight {
+            color: var(--get-color);
+            font-weight: bold;
+        }
+
+        /* Styles pour les boutons interactifs */
+        .interactive-box {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        .interactive-btn {
+            padding: 12px 24px;
+            background-color: #1a1a1a;
+            border: 2px solid var(--get-color);
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .interactive-btn:hover {
+            background-color: var(--get-color);
+            transform: translateY(-2px);
+        }
+        
+        /* Animation pour la page */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
+        }
+        
+        .delay-1 {
+            animation-delay: 0.2s;
+        }
+        
+        .delay-2 {
+            animation-delay: 0.4s;
+        }
+        
+        .delay-3 {
+            animation-delay: 0.6s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Webserv 42</h1>
+            <p>Un serveur HTTP en C++98</p>
+        </header>
+        
+        <div class="success-message">
+            <h1 class="fade-in">Bravo, vous avez réussi à afficher cette page en utilisant la méthode GET !</h1>
+            <p class="fade-in delay-1">La méthode GET est utilisée pour récupérer des données depuis le serveur. Dans ce cas, vous avez récupéré cette page HTML.</p>
+            
+            <div class="get-details fade-in delay-2">
+                <h2>Comment fonctionne la méthode GET ?</h2>
+                <p>Lorsque vous cliquez sur un lien ou que vous entrez une URL dans votre navigateur, une requête HTTP utilisant la méthode <code>GET</code> est envoyée au serveur.</p>
+                
+                <p>Voici à quoi ressemble une requête HTTP GET simple :</p>
+                <div class="http-request">
+<span class="highlight">GET</span> /GET.html HTTP/1.1
+Host: webserv.com:3434
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+Accept: text/html,application/xhtml+xml,application/xml
+Connection: keep-alive</div>
+
+                <p>Le serveur traite cette requête et renvoie une réponse contenant cette page HTML :</p>
+                <div class="http-request">
+HTTP/1.1 <span class="highlight">200 OK</span>
+Content-Type: text/html
+Content-Length: 5732
+Date: Wed, 18 Apr 2023 14:28:53 GMT
+Server: Webserv 42
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GET Method - Webserv 42</title>
+    ...
+</div>
+            </div>
+            
+            <p class="fade-in delay-3">Explorez d'autres aspects de la méthode GET :</p>
+            
+            <div class="interactive-box fade-in delay-3">
+                <button class="interactive-btn" id="get-query-btn">GET avec paramètres</button>
+                <button class="interactive-btn" id="get-header-btn">Voir les en-têtes</button>
+                <button class="interactive-btn" id="get-status-btn">Autres codes d'état</button>
+            </div>
+            
+            <a href="/" class="back-btn fade-in delay-3">Retour à l'accueil</a>
+            
+            <!-- Éléments de confetti pour l'animation -->
+            <div id="confetti-container"></div>
+        </div>
+        
+        <!-- Popup pour afficher des informations supplémentaires -->
+        <div id="info-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1a1a1a; border-radius: 12px; padding: 30px; max-width: 500px; width: 90%; z-index: 1000; box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3); border-top: 4px solid var(--get-color); text-align: left;">
+            <h3 style="color: var(--get-color); margin-top: 0;" id="popup-title">Titre</h3>
+            <div id="popup-content" style="margin: 15px 0; color: var(--secondary-text);"></div>
+            <button style="background-color: var(--get-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; float: right;" onclick="document.getElementById('info-popup').style.display = 'none';">Fermer</button>
+            <div style="clear: both;"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Créer les éléments de confetti
+        document.addEventListener('DOMContentLoaded', () => {
+            const confettiContainer = document.getElementById('confetti-container');
+            const colors = ['#00babc', '#6200ea', '#ff4757', '#2ed573', '#1e90ff', '#ffa502'];
+            
+            // Créer 50 éléments de confetti
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                // Position aléatoire
+                const posX = Math.random() * 100;
+                
+                // Couleur aléatoire
+                const colorIndex = Math.floor(Math.random() * colors.length);
+                
+                // Style des confetti
+                confetti.style.left = `${posX}%`;
+                confetti.style.backgroundColor = colors[colorIndex];
+                confetti.style.animationDelay = `${Math.random() * 5}s`;
+                confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                
+                confettiContainer.appendChild(confetti);
+            }
+            
+            // Ajouter des écouteurs pour les boutons interactifs
+            document.getElementById('get-query-btn').addEventListener('click', () => {
+                showPopup(
+                    "GET avec paramètres d'URL",
+                    `<p>La méthode GET peut inclure des paramètres dans l'URL après un point d'interrogation (?).</p>
+                    <div class="http-request">GET /search<span class="highlight">?query=webserv&page=1</span> HTTP/1.1
+Host: webserv.com:3434</div>
+                    <p>Ces paramètres sont utilisés pour filtrer ou spécifier les ressources demandées. Par exemple :</p>
+                    <ul>
+                        <li><code>/search?query=webserv</code> - Recherche le terme "webserv"</li>
+                        <li><code>/users?sort=name&order=asc</code> - Liste des utilisateurs triés par nom</li>
+                        <li><code>/products?category=electronics&max_price=500</code> - Filtre des produits</li>
+                    </ul>
+                    <p>Les paramètres GET sont visibles dans l'URL et ne doivent pas être utilisés pour des données sensibles.</p>`
+                );
+            });
+            
+            document.getElementById('get-header-btn').addEventListener('click', () => {
+                showPopup(
+                    "En-têtes HTTP communs",
+                    `<p>Une requête GET contient des en-têtes qui fournissent des informations supplémentaires au serveur :</p>
+                    <ul>
+                        <li><code>User-Agent</code> - Identifie le navigateur et le système d'exploitation</li>
+                        <li><code>Accept</code> - Types de contenus que le client peut traiter</li>
+                        <li><code>Accept-Language</code> - Langues préférées du client</li>
+                        <li><code>If-Modified-Since</code> - Vérifie si la ressource a été modifiée depuis une date</li>
+                        <li><code>Cookie</code> - Envoie des cookies stockés pour ce domaine</li>
+                    </ul>
+                    <p>Le serveur renvoie également des en-têtes dans sa réponse :</p>
+                    <ul>
+                        <li><code>Content-Type</code> - Type de contenu (text/html, image/jpeg, etc.)</li>
+                        <li><code>Content-Length</code> - Taille du contenu en octets</li>
+                        <li><code>Last-Modified</code> - Date de dernière modification</li>
+                        <li><code>ETag</code> - Identifiant unique pour la version de la ressource</li>
+                        <li><code>Cache-Control</code> - Directives pour la mise en cache</li>
+                    </ul>`
+                );
+            });
+            
+            document.getElementById('get-status-btn').addEventListener('click', () => {
+                showPopup(
+                    "Codes d'état HTTP",
+                    `<p>Le serveur répond à une requête GET avec un code d'état HTTP :</p>
+                    <ul>
+                        <li><code>200 OK</code> - La requête a réussi</li>
+                        <li><code>301 Moved Permanently</code> - La ressource a été déplacée définitivement</li>
+                        <li><code>304 Not Modified</code> - La ressource n'a pas été modifiée depuis la dernière requête</li>
+                        <li><code>400 Bad Request</code> - La requête est mal formée</li>
+                        <li><code>403 Forbidden</code> - Accès refusé</li>
+                        <li><code>404 Not Found</code> - La ressource demandée n'existe pas</li>
+                        <li><code>500 Internal Server Error</code> - Erreur interne du serveur</li>
+                    </ul>
+                    <p>Ces codes sont essentiels pour le débogage et la compréhension du comportement du serveur.</p>`
+                );
+            });
+        });
+        
+        // Fonction pour afficher la popup
+        function showPopup(title, content) {
+            document.getElementById('popup-title').textContent = title;
+            document.getElementById('popup-content').innerHTML = content;
+            document.getElementById('info-popup').style.display = 'block';
+        }
+    </script>
+</body>
+</html> 

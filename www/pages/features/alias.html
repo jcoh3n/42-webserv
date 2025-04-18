@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alias Test - Webserv 42</title>
+    <link rel="stylesheet" href="/styles/webserv-modern.css">
+    <style>
+        .banana-container {
+            background-color: #121212;
+            color: #fff;
+            text-align: center;
+            padding: 50px;
+            margin: 50px auto;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            border-top: 4px solid #ffeb3b;
+        }
+        
+        .banana-container h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #ffeb3b;
+        }
+        
+        .banana-container p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #ffeb3b;
+            color: #121212;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .back-btn:hover {
+            background-color: #ffd600;
+            transform: translateY(-2px);
+        }
+        
+        .banana {
+            font-size: 100px;
+            margin: 30px 0;
+            animation: swing 2s ease-in-out infinite;
+            display: inline-block;
+        }
+        
+        @keyframes swing {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(15deg);
+            }
+            75% {
+                transform: rotate(-15deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Webserv 42</h1>
+            <p>Un serveur HTTP en C++98</p>
+        </header>
+        
+        <div class="banana-container">
+            <h1>Display banana.html with alias</h1>
+            
+            <div class="banana">🍌</div>
+            
+            <p>Cette page est accessible via un alias configuré sur le serveur.<br>Un alias permet d'accéder à une ressource par un chemin alternatif.</p>
+            
+            <p>Dans la configuration du serveur, <code>/banana.html</code> est un alias qui pointe vers un autre fichier.</p>
+            
+            <a href="/" class="back-btn">Retour à l'accueil</a>
+        </div>
+    </div>
+</body>
+</html> 

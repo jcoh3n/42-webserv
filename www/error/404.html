@@ -3,102 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Page Non Trouvée</title>
+    <title>404 Not Found - Webserv 42</title>
+    <link rel="stylesheet" href="/styles/webserv-modern.css">
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f9f9f9;
-        }
         .error-container {
-            background-color: white;
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 10px 25px rgba(0, 188, 188, 0.1);
-            width: 100%;
-            max-width: 500px;
+            background-color: var(--box-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+            border-top: 4px solid var(--error-color);
             position: relative;
             overflow: hidden;
         }
+        
         .error-code {
-            font-size: 120px;
+            font-size: 8rem;
             font-weight: 800;
             margin: 0;
-            background: linear-gradient(135deg, #00babc 0%, #6200ea 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            line-height: 1;
-            margin-bottom: 10px;
+            color: var(--error-color);
+            opacity: 0.8;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
-        .error-title {
-            margin-top: 0;
-            color: #444;
-            font-weight: 600;
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
+        
         .error-message {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 18px;
+            font-size: 1.8rem;
+            margin: 20px 0 30px;
+            color: var(--primary-text);
         }
-        .back-button {
+        
+        .error-description {
+            color: var(--secondary-text);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .back-btn {
             display: inline-block;
-            background: linear-gradient(135deg, #00babc 0%, #008f91 100%);
+            padding: 12px 24px;
+            background-color: var(--error-color);
             color: white;
             text-decoration: none;
-            padding: 14px 28px;
-            border-radius: 50px;
+            border-radius: 8px;
             font-weight: 600;
-            font-size: 16px;
             transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 186, 188, 0.2);
         }
-        .back-button:hover {
+        
+        .back-btn:hover {
+            background-color: #e04d32;
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 186, 188, 0.3);
         }
-        .decoration {
+        
+        .bg-pattern {
             position: absolute;
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(0, 186, 188, 0.1) 0%, rgba(98, 0, 234, 0.1) 100%);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: 0;
+            opacity: 0.05;
+            pointer-events: none;
         }
-        .decoration-1 {
-            top: -75px;
-            right: -75px;
-        }
-        .decoration-2 {
-            bottom: -75px;
-            left: -75px;
-        }
-        .error-container > * {
+        
+        .error-content {
             position: relative;
             z-index: 1;
+        }
+        
+        /* Animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .shake {
+            animation: shake 0.8s ease-in-out;
         }
     </style>
 </head>
 <body>
-    <div class="error-container">
-        <div class="decoration decoration-1"></div>
-        <div class="decoration decoration-2"></div>
-        <h1 class="error-code">404</h1>
-        <h2 class="error-title">Page Non Trouvée</h2>
-        <p class="error-message">La page que vous avez demandée n'existe pas ou a été déplacée.</p>
-        <a href="/" class="back-button">Retour à l'accueil</a>
+    <div class="container">
+        <header>
+            <h1>Webserv 42</h1>
+            <p>Un serveur HTTP en C++98</p>
+        </header>
+        
+        <div class="error-container" id="error-container">
+            <div class="bg-pattern">
+                <!-- Pattern de fond avec des X -->
+                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                    <pattern id="pattern-x" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M0,0 L10,10 M10,0 L0,10" stroke="currentColor" stroke-width="2"/>
+                    </pattern>
+                    <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern-x)" />
+                </svg>
+            </div>
+            
+            <div class="error-content">
+                <h1 class="error-code">404</h1>
+                <h2 class="error-message">Page non trouvée</h2>
+                <p class="error-description">
+                    La ressource que vous recherchez n'existe pas ou a été déplacée.<br>
+                    Vérifiez l'URL ou utilisez le lien ci-dessous pour revenir à l'accueil.
+                </p>
+                <a href="/" class="back-btn">Retour à l'accueil</a>
+            </div>
+        </div>
     </div>
+    
+    <script>
+        // Ajouter une animation de tremblement à l'apparition de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.classList.add('shake');
+            
+            // Retirer la classe après l'animation pour permettre de la réappliquer
+            setTimeout(() => {
+                errorContainer.classList.remove('shake');
+            }, 800);
+            
+            // Ajouter l'animation de tremblement quand on clique sur le code d'erreur
+            const errorCode = document.querySelector('.error-code');
+            errorCode.addEventListener('click', () => {
+                errorContainer.classList.add('shake');
+                setTimeout(() => {
+                    errorContainer.classList.remove('shake');
+                }, 800);
+            });
+        });
+    </script>
 </body>
 </html> 

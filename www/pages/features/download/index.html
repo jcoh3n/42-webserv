@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Files - Webserv 42</title>
+    <link rel="stylesheet" href="/styles/webserv-modern.css">
+    <style>
+        .download-container {
+            background-color: var(--box-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            max-width: 800px;
+            margin: 50px auto;
+            border-top: 4px solid var(--download-color);
+        }
+        
+        .download-container h1 {
+            color: var(--download-color);
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        
+        .download-list {
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .download-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #252525;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .download-item:hover {
+            background-color: #2f2f2f;
+            transform: translateY(-2px);
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .file-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            color: var(--download-color);
+        }
+        
+        .file-name {
+            font-weight: 600;
+            color: var(--primary-text);
+        }
+        
+        .file-size {
+            color: var(--secondary-text);
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+        
+        .download-btn {
+            padding: 8px 16px;
+            background-color: var(--download-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            background-color: #e09400;
+            transform: translateY(-2px);
+        }
+        
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--secondary-text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-link:hover {
+            color: var(--primary-text);
+        }
+        
+        /* Info-bulle download */
+        .download-info {
+            background-color: rgba(255, 165, 2, 0.1);
+            border-left: 4px solid var(--download-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+        }
+        
+        .download-info h3 {
+            color: var(--download-color);
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        
+        .download-info p {
+            margin: 0;
+            color: var(--secondary-text);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Webserv 42</h1>
+            <p>Un serveur HTTP en C++98</p>
+        </header>
+        
+        <div class="download-container">
+            <h1>Télécharger des fichiers</h1>
+            
+            <div class="download-info">
+                <h3>Liste des fichiers disponibles</h3>
+                <p>Vous pouvez télécharger les fichiers qui ont été précédemment uploadés sur le serveur.</p>
+            </div>
+            
+            <div class="download-list">
+                <div class="download-item">
+                    <div class="file-info">
+                        <div class="file-icon">📄</div>
+                        <div class="file-name">test_document.txt</div>
+                        <div class="file-size">2 KB</div>
+                    </div>
+                    <a href="#" class="download-btn">Télécharger</a>
+                </div>
+                <div class="download-item">
+                    <div class="file-info">
+                        <div class="file-icon">🖼️</div>
+                        <div class="file-name">image.jpg</div>
+                        <div class="file-size">524 KB</div>
+                    </div>
+                    <a href="#" class="download-btn">Télécharger</a>
+                </div>
+                <div class="download-item">
+                    <div class="file-info">
+                        <div class="file-icon">📊</div>
+                        <div class="file-name">data.json</div>
+                        <div class="file-size">8 KB</div>
+                    </div>
+                    <a href="#" class="download-btn">Télécharger</a>
+                </div>
+            </div>
+            
+            <a href="/" class="back-link">Retour à l'accueil</a>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Simulation de téléchargement
+            const downloadButtons = document.querySelectorAll('.download-btn');
+            downloadButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const fileName = e.target.closest('.download-item').querySelector('.file-name').textContent;
+                    alert(`Téléchargement de "${fileName}" démarré!`);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directory Listing - Webserv 42</title>
+    <link rel="stylesheet" href="/styles/webserv-modern.css">
+    <style>
+        .listing-container {
+            background-color: var(--box-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            max-width: 900px;
+            margin: 50px auto;
+            border-top: 4px solid var(--list-color);
+        }
+        
+        .listing-container h1 {
+            color: var(--list-color);
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        
+        .path-display {
+            background-color: #1a1a1a;
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .path-icon {
+            margin-right: 10px;
+            color: var(--list-color);
+        }
+        
+        .path-component {
+            display: inline-block;
+            padding: 0 5px;
+            color: var(--secondary-text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .path-component:hover {
+            color: var(--primary-text);
+        }
+        
+        .path-separator {
+            color: var(--secondary-text);
+            margin: 0 5px;
+        }
+        
+        .path-current {
+            color: var(--list-color);
+            font-weight: 600;
+        }
+        
+        .listing-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .listing-table th, .listing-table td {
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .listing-table th {
+            background-color: #1a1a1a;
+            color: var(--secondary-text);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .listing-table th:first-child {
+            padding-left: 20px;
+        }
+        
+        .listing-table th:last-child {
+            padding-right: 20px;
+        }
+        
+        .listing-table tbody tr {
+            border-bottom: 1px solid #2a2a2a;
+            transition: all 0.3s ease;
+        }
+        
+        .listing-table tbody tr:last-child {
+            border-bottom: none;
+        }
+        
+        .listing-table tbody tr:hover {
+            background-color: #252525;
+        }
+        
+        .listing-table td {
+            color: var(--primary-text);
+        }
+        
+        .listing-table td:first-child {
+            padding-left: 20px;
+        }
+        
+        .listing-table td:last-child {
+            padding-right: 20px;
+        }
+        
+        .file-icon {
+            font-size: 18px;
+            margin-right: 10px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        .directory-icon {
+            color: var(--list-color);
+        }
+        
+        .file-icon-generic {
+            color: var(--secondary-text);
+        }
+        
+        .file-icon-image {
+            color: #e91e63;
+        }
+        
+        .file-icon-document {
+            color: #2196f3;
+        }
+        
+        .file-icon-archive {
+            color: #ff9800;
+        }
+        
+        .file-icon-audio {
+            color: #9c27b0;
+        }
+        
+        .file-icon-video {
+            color: #4caf50;
+        }
+        
+        .file-name {
+            display: inline-block;
+            vertical-align: middle;
+            text-decoration: none;
+            color: var(--primary-text);
+            transition: all 0.3s ease;
+        }
+        
+        .file-name:hover {
+            color: var(--list-color);
+        }
+        
+        .directory-name {
+            font-weight: 600;
+        }
+        
+        .file-size, .file-date {
+            color: var(--secondary-text);
+            font-size: 0.9rem;
+        }
+        
+        .up-directory {
+            background-color: rgba(0, 186, 188, 0.05);
+        }
+        
+        .up-directory:hover {
+            background-color: rgba(0, 186, 188, 0.1);
+        }
+        
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--secondary-text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-link:hover {
+            color: var(--primary-text);
+        }
+        
+        .empty-directory {
+            text-align: center;
+            padding: 50px 0;
+            color: var(--secondary-text);
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--list-color);
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Webserv 42</h1>
+            <p>Un serveur HTTP en C++98</p>
+        </header>
+        
+        <div class="listing-container">
+            <h1>Directory Listing</h1>
+            
+            <div class="path-display">
+                <div class="path-icon">📂</div>
+                <a href="/" class="path-component">home</a>
+                <span class="path-separator">/</span>
+                <a href="/list" class="path-component">list</a>
+                <span class="path-separator">/</span>
+                <span class="path-current">documents</span>
+            </div>
+            
+            <table class="listing-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Size</th>
+                        <th>Last Modified</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="up-directory">
+                        <td>
+                            <span class="file-icon directory-icon">📂</span>
+                            <a href="/list" class="file-name directory-name">..</a>
+                        </td>
+                        <td class="file-size">-</td>
+                        <td class="file-date">-</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="file-icon directory-icon">📂</span>
+                            <a href="/list/documents/images" class="file-name directory-name">images</a>
+                        </td>
+                        <td class="file-size">-</td>
+                        <td class="file-date">Jan 20, 2023 14:30</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="file-icon directory-icon">📂</span>
+                            <a href="/list/documents/reports" class="file-name directory-name">reports</a>
+                        </td>
+                        <td class="file-size">-</td>
+                        <td class="file-date">Feb 15, 2023 09:45</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="file-icon file-icon-document">📄</span>
+                            <a href="/list/documents/readme.txt" class="file-name">readme.txt</a>
+                        </td>
+                        <td class="file-size">2.4 KB</td>
+                        <td class="file-date">Mar 10, 2023 11:20</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="file-icon file-icon-document">📄</span>
+                            <a href="/list/documents/notes.md" class="file-name">notes.md</a>
+                        </td>
+                        <td class="file-size">8.7 KB</td>
+                        <td class="file-date">Mar 12, 2023 16:05</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="file-icon file-icon-image">🖼️</span>
+                            <a href="/list/documents/diagram.png" class="file-name">diagram.png</a>
+                        </td>
+                        <td class="file-size">386 KB</td>
+                        <td class="file-date">Mar 15, 2023 10:12</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="file-icon file-icon-archive">🗃️</span>
+                            <a href="/list/documents/archive.zip" class="file-name">archive.zip</a>
+                        </td>
+                        <td class="file-size">1.2 MB</td>
+                        <td class="file-date">Mar 18, 2023 13:40</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="file-icon file-icon-video">🎬</span>
+                            <a href="/list/documents/presentation.mp4" class="file-name">presentation.mp4</a>
+                        </td>
+                        <td class="file-size">24.5 MB</td>
+                        <td class="file-date">Mar 20, 2023 09:18</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <a href="/" class="back-link">Retour à l'accueil</a>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Sample code to handle empty directories
+            const tableBody = document.querySelector('.listing-table tbody');
+            
+            // If no files (just the parent directory link)
+            if (tableBody.children.length <= 1) {
+                const listingTable = document.querySelector('.listing-table');
+                listingTable.style.display = 'none';
+                
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = 'empty-directory';
+                emptyMessage.innerHTML = `
+                    <div class="empty-icon">📂</div>
+                    <p>Ce dossier est vide</p>
+                `;
+                
+                const listingContainer = document.querySelector('.listing-container');
+                listingContainer.insertBefore(emptyMessage, listingTable.nextSibling);
+            }
+            
+            // Function to get file icons based on extension
+            function updateFileIcons() {
+                const fileItems = document.querySelectorAll('.file-name:not(.directory-name)');
+                
+                fileItems.forEach(fileItem => {
+                    const fileName = fileItem.textContent.toLowerCase();
+                    const fileIconElement = fileItem.previousElementSibling;
+                    
+                    if (fileName.match(/\.(jpg|jpeg|png|gif|svg|webp)$/)) {
+                        fileIconElement.textContent = '🖼️';
+                        fileIconElement.className = 'file-icon file-icon-image';
+                    } else if (fileName.match(/\.(pdf|doc|docx|txt|rtf|md)$/)) {
+                        fileIconElement.textContent = '📄';
+                        fileIconElement.className = 'file-icon file-icon-document';
+                    } else if (fileName.match(/\.(xls|xlsx|csv)$/)) {
+                        fileIconElement.textContent = '📊';
+                        fileIconElement.className = 'file-icon file-icon-document';
+                    } else if (fileName.match(/\.(zip|rar|7z|tar|gz)$/)) {
+                        fileIconElement.textContent = '🗃️';
+                        fileIconElement.className = 'file-icon file-icon-archive';
+                    } else if (fileName.match(/\.(mp3|wav|ogg|flac)$/)) {
+                        fileIconElement.textContent = '🎵';
+                        fileIconElement.className = 'file-icon file-icon-audio';
+                    } else if (fileName.match(/\.(mp4|avi|mov|wmv|mkv)$/)) {
+                        fileIconElement.textContent = '🎬';
+                        fileIconElement.className = 'file-icon file-icon-video';
+                    }
+                });
+            }
+            
+            updateFileIcons();
+        });
+    </script>
+</body>
+</html> 

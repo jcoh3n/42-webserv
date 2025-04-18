@@ -1,0 +1,1 @@
+Cette page devrait rediriger vers youtube.com avec un code 301. 
