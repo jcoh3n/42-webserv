@@ -108,8 +108,16 @@ HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request, const s
             return HttpResponse::createError(400, "No files uploaded");
         }
         
-        // Créer le gestionnaire d'upload avec la configuration du serveur
-        UploadConfig upload_config("./www/uploads/", 10 * 1024 * 1024);  // 10MB max
+        // Utiliser le chemin d'upload configuré
+        std::string upload_dir = server_config.root_directory + "/uploads/";
+        
+        // Trouver la configuration de location correspondante
+        std::map<std::string, LocationConfig>::const_iterator it = server_config.locations.find("/upload");
+        if (it == server_config.locations.end()) {
+            return HttpResponse::createError(500, "Upload location not configured");
+        }
+        
+        UploadConfig upload_config(upload_dir, it->second.client_max_body_size);
         FileUploadHandler upload_handler(upload_config);
         
         // Traiter chaque fichier
