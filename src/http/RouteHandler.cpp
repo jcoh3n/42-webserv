@@ -322,7 +322,12 @@ HttpResponse RouteHandler::handleCGIRequest(const HttpRequest& request, const st
     // Vérifier si l'extension est gérée par un handler CGI
     std::map<std::string, std::string>::const_iterator it = location->cgi_handlers.find(ext);
     if (it != location->cgi_handlers.end()) {
-        CGIHandler handler(request, scriptPath, it->second);
+        // Utiliser directement scriptPath sans ajouter de préfixe supplémentaire
+        std::string finalPath = scriptPath;
+        if (finalPath.substr(0, 2) == "./") {
+            finalPath = finalPath.substr(2);  // Enlever le "./" si présent
+        }
+        CGIHandler handler(request, finalPath, it->second);
         return handler.executeCGI();
     }
     
