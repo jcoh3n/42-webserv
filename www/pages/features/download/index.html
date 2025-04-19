@@ -361,7 +361,7 @@
                     <div class="loading-spinner"></div>
                     <p>Chargement des fichiers...</p>
                 </div>
-            </div>
+                    </div>
             
             <div id="test-result" class="test-result"></div>
 
@@ -510,11 +510,11 @@
                             
                             // Ajouter des écouteurs d'événements pour les boutons de téléchargement
                             document.querySelectorAll('.download-btn').forEach(btn => {
-                                btn.addEventListener('click', (e) => {
+                btn.addEventListener('click', (e) => {
                                     const fileName = e.currentTarget.closest('.file-item').querySelector('.file-name').textContent;
                                     showMessage(`Téléchargement de "${fileName}" démarré`, "success");
-                                });
-                            });
+                });
+            });
                         }
                     })
                     .catch(error => {
