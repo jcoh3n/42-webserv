@@ -62,18 +62,20 @@
             max-width: 80%;
             font-weight: 500;
             text-align: center;
+            font-size: 1.1rem;
+            border-left: 5px solid transparent;
         }
         
         .test-result.success {
             background: rgba(39, 174, 96, 0.15);
-            border: none;
+            border-left-color: #2ecc71;
             color: #2ecc71;
             display: block;
         }
         
         .test-result.error {
             background: rgba(231, 76, 60, 0.15);
-            border: none;
+            border-left-color: #e74c3c;
             color: #e74c3c;
             display: block;
         }
@@ -169,19 +171,22 @@
         }
 
         .back-link {
-            display: block;
-            text-align: center;
-            padding: 10px 20px;
-            margin: 0 auto 20px;
-            color: var(--secondary-text);
-            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--box-bg);
+            border-radius: 30px;
+            box-shadow: var(--box-shadow);
+            margin: 30px auto 10px 30px;
+            position: relative;
+            left: 0;
             transition: all 0.3s ease;
-            width: fit-content;
         }
         
         .back-link:hover {
-            color: var(--primary-text);
             transform: translateX(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         @keyframes fadeIn {
@@ -226,21 +231,53 @@
         .loading-circle {
             animation: rotate 1s linear infinite;
         }
+        
+        /* Amélioration du descriptif d'upload */
+        .upload-path-container {
+            margin: 20px auto;
+            text-align: center;
+        }
+        
+        .upload-path {
+            background: rgba(76, 175, 80, 0.08);
+            padding: 12px 20px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .path-arrow {
+            color: var(--upload-color);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .path-description {
+            display: block;
+            margin-top: 10px;
+            color: var(--secondary-text);
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <a href="/" class="back-link">
-            <span>←</span> Retour à l'accueil
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Retour à l'accueil
         </a>
         
         <div class="upload-container">
             <h1>Upload de Fichiers</h1>
             
-            <div class="upload-info">
+            <div class="upload-path-container">
                 <span class="upload-path">
-                    <code>/upload</code> → <code>www/uploads/</code>
+                    <code>/upload</code> <span class="path-arrow">→</span> <code>www/uploads/</code>
                 </span>
+                <span class="path-description">Les fichiers uploadés seront stockés dans le dossier <code>uploads</code> du serveur et accessibles depuis <code>/uploads/nom-du-fichier</code></span>
             </div>
 
             <form class="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
@@ -318,14 +355,18 @@
             testResult.textContent = message;
             testResult.className = `test-result ${type}`;
             
-            // Faire disparaître le message après 3 secondes
+            // Réinitialiser l'affichage et l'animation pour permettre de réafficher le message
+            testResult.style.display = 'block';
+            testResult.classList.remove('fadeOut');
+            
+            // Faire disparaître le message après 4 secondes
             setTimeout(() => {
                 testResult.classList.add('fadeOut');
                 setTimeout(() => {
                     testResult.style.display = 'none';
                     testResult.classList.remove('fadeOut');
                 }, 400);
-            }, 3000);
+            }, 4000);
         }
         
         fileInput.addEventListener('change', () => {
