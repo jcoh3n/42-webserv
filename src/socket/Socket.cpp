@@ -1,11 +1,11 @@
 #include "../include/socket/Socket.hpp"
 
-Socket::Socket() : fd(-1), is_non_blocking(false) {}
+Socket::Socket() : fd(-1), is_non_blocking(false), is_closed(true) {}
 
-Socket::Socket(int existing_fd) : fd(existing_fd), is_non_blocking(false) {}
+Socket::Socket(int existing_fd) : fd(existing_fd), is_non_blocking(false), is_closed(false) {}
 
 Socket::~Socket() {
-    if (fd >= 0) {
+    if (fd >= 0 && !is_closed) {
         this->close();
     }
 }
@@ -15,6 +15,7 @@ void Socket::create() {
     if (fd < 0) {
         throw std::runtime_error("Socket creation failed: " + std::string(strerror(errno)));
     }
+    is_closed = false;
 }
 
 void Socket::bind(int port) {
@@ -85,10 +86,15 @@ ssize_t Socket::receive(char* buffer, size_t size) {
 }
 
 void Socket::close() {
-    if (fd >= 0) {
+    if (fd >= 0 && !is_closed) {
         ::close(fd);
         fd = -1;
+        is_closed = true;
     }
+}
+
+bool Socket::isClosed() const {
+    return is_closed;
 }
 
 int Socket::getFd() const {

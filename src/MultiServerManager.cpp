@@ -9,15 +9,20 @@ MultiServerManager* MultiServerManager::instance = NULL;
 /**
  * @brief Constructeur de la classe MultiServerManager
  */
-MultiServerManager::MultiServerManager() {
+MultiServerManager::MultiServerManager() 
+    : poll_fds(NULL)
+    , nfds(0)
+    , running(false) {
     // Enregistrer l'instance pour le gestionnaire de signal
     instance = this;
+    
+    // Allouer de la mémoire pour le tableau poll
+    poll_fds = new struct pollfd[MAX_POLL_SIZE];
+    memset(poll_fds, 0, sizeof(struct pollfd) * MAX_POLL_SIZE);
 }
 
 /**
  * @brief Destructeur de la classe MultiServerManager
- * 
- * Nettoie les ressources avant de détruire l'objet.
  */
 MultiServerManager::~MultiServerManager() {
     stopServers();
@@ -28,13 +33,17 @@ MultiServerManager::~MultiServerManager() {
     }
     servers.clear();
     port_to_server_index.clear();
+    fd_to_server.clear();
+    
+    // Libérer la mémoire du tableau poll
+    if (poll_fds) {
+        delete[] poll_fds;
+        poll_fds = NULL;
+    }
 }
 
 /**
  * @brief Configure les gestionnaires de signaux
- * 
- * Met en place les handlers pour SIGINT et SIGTERM pour permettre
- * un arrêt propre des serveurs lorsqu'ils reçoivent un de ces signaux.
  */
 void MultiServerManager::setupSignalHandlers() {
     struct sigaction sa;
@@ -48,13 +57,9 @@ void MultiServerManager::setupSignalHandlers() {
 
 /**
  * @brief Gestionnaire statique des signaux
- * @param signal Le numéro du signal reçu
- * 
- * Appelé lorsqu'un signal est reçu par le processus,
- * cette fonction arrête proprement tous les serveurs.
  */
 void MultiServerManager::signalHandler(int signal) {
-    LOG_INFO("Received signal " << signal << ", shutting down all servers gracefully...");
+    LOG_INFO("Signal " << signal << " reçu, arrêt en cours...");
     if (instance) {
         instance->stopServers();
     }
@@ -62,9 +67,6 @@ void MultiServerManager::signalHandler(int signal) {
 
 /**
  * @brief Initialise les serveurs à partir de la configuration
- * @param config La configuration globale contenant tous les serveurs
- * 
- * Crée une instance de Server pour chaque configuration de serveur.
  */
 void MultiServerManager::initServers(const WebservConfig& config) {
     if (config.servers.empty()) {
@@ -98,44 +100,186 @@ void MultiServerManager::initServers(const WebservConfig& config) {
 }
 
 /**
+ * @brief Ajoute un descripteur de fichier au tableau poll
+ */
+void MultiServerManager::addFdToPoll(int fd, Server* server) {
+    if (nfds >= MAX_POLL_SIZE) {
+        LOG_WARNING("Maximum poll size reached, cannot add more descriptors");
+        return;
+    }
+    
+    poll_fds[nfds].fd = fd;
+    poll_fds[nfds].events = POLLIN;
+    poll_fds[nfds].revents = 0;
+    
+    fd_to_server[fd] = server;
+    nfds++;
+}
+
+/**
+ * @brief Supprime un descripteur de fichier du tableau poll
+ */
+void MultiServerManager::removeFdFromPoll(int fd_index) {
+    if (fd_index < 0 || fd_index >= nfds) {
+        return;
+    }
+    
+    int fd = poll_fds[fd_index].fd;
+    fd_to_server.erase(fd);
+    
+    // Compacter le tableau en déplaçant le dernier fd à cette position
+    if (fd_index < nfds - 1) {
+        poll_fds[fd_index] = poll_fds[nfds - 1];
+    }
+    
+    nfds--;
+}
+
+/**
+ * @brief Récupère le serveur associé à un fd
+ */
+Server* MultiServerManager::getServerByFd(int fd) const {
+    std::map<int, Server*>::const_iterator it = fd_to_server.find(fd);
+    if (it != fd_to_server.end()) {
+        return it->second;
+    }
+    return NULL;
+}
+
+/**
+ * @brief Gère un événement de poll
+ */
+bool MultiServerManager::handleEvent(int index) {
+    int fd = poll_fds[index].fd;
+    Server* server = getServerByFd(fd);
+    
+    if (!server) {
+        LOG_ERROR("No server associated with fd: " << fd);
+        removeFdFromPoll(index);
+        return false;
+    }
+    
+    // Vérifier si c'est un socket serveur ou client
+    if (server->matchesSocketFd(fd)) {
+        // C'est un socket serveur, accepter la nouvelle connexion
+        int client_fd = server->acceptNewConnection();
+        if (client_fd >= 0) {
+            // Ajouter le nouveau client au poll
+            addFdToPoll(client_fd, server);
+        }
+    } else {
+        // C'est un socket client, traiter les données
+        bool keep_connection = server->handleClientData(fd);
+        if (!keep_connection) {
+            // Fermer la connexion si nécessaire
+            server->closeClientConnection(fd);
+            removeFdFromPoll(index);
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+/**
  * @brief Démarre tous les serveurs
- * 
- * Lance chaque serveur dans ce même thread puisque nous 
- * n'utilisons pas de threads en C++98.
  */
 void MultiServerManager::startServers() {
     if (servers.empty()) {
         throw std::runtime_error("No servers initialized");
     }
     
-    // C++98 n'a pas de support pour les threads
-    // Donc nous pouvons seulement exécuter les serveurs séquentiellement
-    // ou utiliser des processus enfants
-    
-    // Pour éviter l'utilisation de threads, on démarre chaque serveur l'un après l'autre
-    // Cela signifie que seul le premier serveur sera vraiment actif
-    LOG_INFO("Starting " << servers.size() << " servers sequentially...");
-    LOG_WARNING("Note: Only the first server will actually handle requests in C++98 mode.");
-    
-    // Démarrer le premier serveur (il bloquera cette thread)
-    if (!servers.empty()) {
+    // Initialiser tous les serveurs et ajouter leurs sockets au poll
+    for (size_t i = 0; i < servers.size(); i++) {
         try {
-            servers[0]->start();
+            servers[i]->initialize();
+            int server_fd = servers[i]->getSocketFd();
+            addFdToPoll(server_fd, servers[i]);
+            LOG_SUCCESS("Server listening on " << BLUE << BOLD << "http://localhost:" << servers[i]->getPort() << RESET);
         } catch (const std::exception& e) {
-            LOG_ERROR("Error in server: " << e.what());
+            LOG_ERROR("Failed to initialize server on port " << servers[i]->getPort() << ": " << e.what());
+        }
+    }
+    
+    if (nfds == 0) {
+        throw std::runtime_error("No valid server sockets to listen on");
+    }
+    
+    running = true;
+    
+    // Boucle principale
+    while (running) {
+        int ret = poll(poll_fds, nfds, -1);
+        if (ret < 0) {
+            if (errno == EINTR) {
+                // Interruption par un signal
+                continue;
+            }
+            LOG_ERROR("Poll failed: " << strerror(errno));
+            break;
+        }
+        
+        // Traitement des événements
+        for (int i = 0; i < nfds; i++) {
+            if (poll_fds[i].revents == 0) {
+                continue;
+            }
+            
+            if (poll_fds[i].revents & POLLIN) {
+                if (handleEvent(i) == false) {
+                    i--; // Ajuster l'index si un fd a été supprimé
+                }
+            }
+            
+            if (poll_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL)) {
+                int fd = poll_fds[i].fd;
+                Server* server = getServerByFd(fd);
+                
+                if (server && !server->matchesSocketFd(fd)) {
+                    // Socket client en erreur
+                    server->closeClientConnection(fd);
+                    removeFdFromPoll(i);
+                    i--;
+                } else if (server && server->matchesSocketFd(fd)) {
+                    // Erreur critique sur socket serveur
+                    LOG_ERROR("Error on server socket for port " << server->getPort());
+                    running = false;
+                    break;
+                }
+            }
         }
     }
 }
 
 /**
  * @brief Arrête tous les serveurs
- * 
- * Envoie un signal d'arrêt à chaque serveur.
  */
 void MultiServerManager::stopServers() {
-    LOG_INFO("Stopping all servers...");
-    for (size_t i = 0; i < servers.size(); i++) {
-        servers[i]->stop();
+    static bool already_stopping = false;
+    if (!already_stopping) {
+        already_stopping = true;
+        LOG_INFO("Arrêt des serveurs...");
+        
+        running = false;
+        
+        // Fermer toutes les connexions clients
+        for (int i = 0; i < nfds; i++) {
+            int fd = poll_fds[i].fd;
+            Server* server = getServerByFd(fd);
+            
+            if (server && !server->matchesSocketFd(fd)) {
+                server->closeClientConnection(fd);
+            }
+        }
+        
+        // Arrêter tous les serveurs
+        for (size_t i = 0; i < servers.size(); i++) {
+            servers[i]->stop();
+        }
+        
+        nfds = 0;
+        fd_to_server.clear();
+        
+        LOG_SUCCESS("Tous les serveurs ont été arrêtés");
     }
-    LOG_SUCCESS("All servers stopped");
 } 

@@ -3,10 +3,17 @@
 
 # include "../utils/Common.hpp"
 
+/**
+ * @brief Classe encapsulant un socket TCP
+ * 
+ * Cette classe fournit une interface orientée objet pour les opérations de socket,
+ * avec une gestion appropriée des ressources et des erreurs.
+ */
 class Socket {
 private:
-    int fd;
-    bool is_non_blocking;
+    int fd;              // Descripteur de fichier du socket
+    bool is_non_blocking;// État du mode non-bloquant
+    bool is_closed;      // État de fermeture du socket
 
 public:
     Socket();
@@ -29,6 +36,7 @@ public:
 
     // Opérations de fermeture
     void close();
+    bool isClosed() const;
 
     // Getters
     int getFd() const;
