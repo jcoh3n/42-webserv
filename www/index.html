@@ -6,92 +6,6 @@
     <title>Webserv 42 - Démonstration</title>
     <link rel="stylesheet" href="/styles/webserv-modern.css">
     <style>
-        .main-header {
-            text-align: center;
-            margin-bottom: 50px;
-            padding: 40px 0;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .main-title {
-            font-size: 4.5rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin: 0;
-            position: relative;
-            display: inline-block;
-            background: linear-gradient(135deg, #00BABC 0%, #6200ea 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 5px 15px rgba(0, 186, 188, 0.2);
-            animation: titlePulse 3s ease-in-out infinite;
-        }
-        
-        .main-title span {
-            position: relative;
-        }
-        
-        .main-title span::after {
-            content: '';
-            position: absolute;
-            bottom: 5px;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, #00BABC, #6200ea);
-            border-radius: 10px;
-            transform: scaleX(0);
-            transform-origin: right;
-            animation: lineReveal 3s ease-in-out infinite;
-        }
-        
-        @keyframes titlePulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-        
-        @keyframes lineReveal {
-            0% { transform: scaleX(0); transform-origin: right; }
-            50% { transform: scaleX(1); transform-origin: right; }
-            51% { transform: scaleX(1); transform-origin: left; }
-            100% { transform: scaleX(0); transform-origin: left; }
-        }
-        
-        .main-subtitle {
-            font-size: 1.3rem;
-            margin-top: 15px;
-            color: var(--secondary-text);
-            font-weight: 400;
-            opacity: 0.8;
-        }
-        
-        .header-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-        
-        .header-bg::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(0, 186, 188, 0.05) 0%, rgba(98, 0, 234, 0.02) 50%, transparent 70%);
-            animation: rotateBg 20s linear infinite;
-        }
-        
-        @keyframes rotateBg {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
         .test-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -232,12 +146,6 @@
 </head>
 <body>
     <div class="container">
-        <header class="main-header">
-            <div class="header-bg"></div>
-            <h1 class="main-title"><span>WEBSERV 42</span></h1>
-            <p class="main-subtitle">Un serveur HTTP performant réalisé en C++98</p>
-        </header>
-
         <div class="test-grid">
             <!-- GET Method -->
             <a href="/pages/methods/get.html" class="test-box get-box">
