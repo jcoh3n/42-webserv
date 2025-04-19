@@ -3,173 +3,528 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download Files - Webserv 42</title>
+    <title>Téléchargement de fichiers - 42 Webserv</title>
     <link rel="stylesheet" href="/styles/webserv-modern.css">
     <style>
         .download-container {
             background-color: var(--box-bg);
             border-radius: var(--border-radius);
-            padding: 30px;
+            padding: 40px;
             box-shadow: var(--box-shadow);
             max-width: 800px;
-            margin: 30px auto;
-            border-top: 4px solid var(--download-color);
+            margin: 40px auto;
+            text-align: center;
+            border-top: 4px solid var(--download-color, #2196F3);
         }
         
         .download-container h1 {
-            color: var(--download-color);
-            margin-top: 0;
-            margin-bottom: 30px;
-            font-size: 2rem;
+            color: var(--download-color, #2196F3);
+            margin: 0 0 30px;
+            font-size: 2.2rem;
+        }
+
+        .download-info {
+            margin: 20px auto;
+            text-align: center;
         }
         
-        .download-list {
-            background-color: #1a1a1a;
-            border-radius: 8px;
+        .download-path {
+            background: rgba(33, 150, 243, 0.08);
+            padding: 12px 20px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .path-arrow {
+            color: var(--download-color, #2196F3);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .path-description {
+            display: block;
+            margin-top: 10px;
+            color: var(--secondary-text);
+            font-size: 0.9rem;
+        }
+        
+        .download-path code {
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--primary-text);
+            padding: 0.2em 0.5em;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        
+        .file-list {
+            background-color: rgba(33, 150, 243, 0.05);
+            border-radius: 12px;
             padding: 20px;
-            margin-bottom: 30px;
+            margin: 30px auto;
+            max-width: 90%;
+            border: 2px dashed rgba(33, 150, 243, 0.2);
         }
         
-        .download-item {
+        .file-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 15px;
+            padding: 15px 20px;
             margin-bottom: 10px;
-            background-color: #252525;
-            border-radius: 6px;
+            background-color: var(--box-bg);
+            border-radius: 10px;
             transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
         
-        .download-item:hover {
-            background-color: #2f2f2f;
+        .file-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .file-item:hover {
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         
         .file-info {
             display: flex;
             align-items: center;
+            flex: 1;
+            overflow: hidden;
+            text-align: left;
         }
         
         .file-icon {
-            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
             margin-right: 15px;
-            color: var(--download-color);
+            border-radius: 8px;
+            background-color: rgba(33, 150, 243, 0.1);
+            color: var(--download-color, #2196F3);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .file-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--download-color, #2196F3);
+            fill: none;
+            stroke-width: 2;
+        }
+        
+        .file-details {
+            min-width: 0;
+            flex: 1;
         }
         
         .file-name {
             font-weight: 600;
             color: var(--primary-text);
+            margin: 0 0 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 350px;
         }
         
         .file-size {
             color: var(--secondary-text);
             font-size: 0.9rem;
-            margin-left: 10px;
         }
         
         .download-btn {
-            padding: 8px 16px;
-            background-color: var(--download-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background-color: var(--download-color, #2196F3);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 30px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
         }
         
         .download-btn:hover {
-            background-color: #1a7bd1;
-            transform: translateY(-2px);
+            background-color: #1976D2;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(33, 150, 243, 0.4);
+        }
+        
+        .download-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .download-btn svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
         }
         
         .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: var(--secondary-text);
-            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--box-bg);
+            border-radius: 30px;
+            box-shadow: var(--box-shadow);
+            margin: 30px auto 10px 30px;
+            position: relative;
+            left: 0;
             transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--secondary-text);
         }
         
         .back-link:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             color: var(--primary-text);
         }
         
-        /* Info-bulle download */
-        .download-info {
-            background-color: rgba(255, 165, 2, 0.1);
-            border-left: 4px solid var(--download-color);
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 6px;
+        .back-link svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
         }
         
-        .download-info h3 {
-            color: var(--download-color);
-            margin-top: 0;
-            margin-bottom: 10px;
-        }
-        
-        .download-info p {
-            margin: 0;
+        .no-files {
+            padding: 40px 20px;
+            text-align: center;
             color: var(--secondary-text);
+            font-style: italic;
+        }
+        
+        .loading {
+            padding: 30px;
+            text-align: center;
+            color: var(--secondary-text);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            margin-bottom: 15px;
+            border: 4px solid rgba(33, 150, 243, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--download-color, #2196F3);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .test-result {
+            display: none;
+        }
+        
+        .test-result.success,
+        .test-result.error {
+            display: none;
+        }
+        
+        /* Nouvel élément pour améliorer le popup */
+        .download-notification {
+            position: absolute;
+            bottom: auto;
+            top: calc(100% + 20px);
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2196F3;
+            border-radius: 10px;
+            padding: 14px 20px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            min-width: 350px;
+            opacity: 0;
+            animation: slideUp 0.4s ease forwards;
+            color: white;
+            border: none;
+        }
+        
+        .download-notification.hide {
+            animation: slideDown 0.4s ease forwards;
+        }
+        
+        .download-notification-icon {
+            margin-right: 15px;
+            width: 32px;
+            height: 32px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .download-notification-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2;
+        }
+        
+        .download-notification-content {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .download-notification-title {
+            font-weight: 600;
+            margin: 0 0 2px;
+            color: white;
+            font-size: 0.95rem;
+        }
+        
+        .download-notification-text {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.85rem;
+        }
+        
+        @keyframes slideUp {
+            0% { opacity: 0; transform: translate(-50%, 20px); }
+            100% { opacity: 1; transform: translate(-50%, 0); }
+        }
+        
+        @keyframes slideDown {
+            0% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, 20px); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .file-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .file-info {
+                margin-bottom: 15px;
+                width: 100%;
+            }
+            
+            .download-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .file-name {
+                max-width: none;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="download-container">
-            <h1>Télécharger des fichiers</h1>
+        <a href="/" class="back-link">
+            <svg viewBox="0 0 24 24">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Retour à l'accueil
+        </a>
+        
+        <div class="download-container" style="position: relative;">
+            <h1>Téléchargement de Fichiers</h1>
             
             <div class="download-info">
-                <h3>Liste des fichiers disponibles</h3>
-                <p>Vous pouvez télécharger les fichiers qui ont été précédemment uploadés sur le serveur.</p>
+                <span class="download-path">
+                    <code>/uploads/</code> <span class="path-arrow">→</span> <code>www/uploads/</code>
+                </span>
+                <span class="path-description">Accédez aux fichiers précédemment uploadés sur le serveur depuis le dossier <code>uploads</code></span>
             </div>
             
-            <div class="download-list">
-                <div class="download-item">
-                    <div class="file-info">
-                        <div class="file-icon">📄</div>
-                        <div class="file-name">test_document.txt</div>
-                        <div class="file-size">2 KB</div>
-                    </div>
-                    <a href="#" class="download-btn">Télécharger</a>
-                </div>
-                <div class="download-item">
-                    <div class="file-info">
-                        <div class="file-icon">🖼️</div>
-                        <div class="file-name">image.jpg</div>
-                        <div class="file-size">524 KB</div>
-                    </div>
-                    <a href="#" class="download-btn">Télécharger</a>
-                </div>
-                <div class="download-item">
-                    <div class="file-info">
-                        <div class="file-icon">📊</div>
-                        <div class="file-name">data.json</div>
-                        <div class="file-size">8 KB</div>
-                    </div>
-                    <a href="#" class="download-btn">Télécharger</a>
+            <div class="file-list" id="fileList">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Chargement des fichiers...</p>
                 </div>
             </div>
             
-            <a href="/" class="back-link">Retour à l'accueil</a>
+            <div id="test-result" class="test-result"></div>
+
+            <!-- Nouveau popup de notification repositionné -->
+            <div id="download-notification" class="download-notification" style="display: none;">
+                <div class="download-notification-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path>
+                    </svg>
+                </div>
+                <div class="download-notification-content">
+                    <div class="download-notification-title">Téléchargement démarré</div>
+                    <div class="download-notification-text" id="download-notification-text"></div>
+                </div>
+            </div>
         </div>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Simulation de téléchargement
-            const downloadButtons = document.querySelectorAll('.download-btn');
-            downloadButtons.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const fileName = e.target.closest('.download-item').querySelector('.file-name').textContent;
-                    alert(`Téléchargement de "${fileName}" démarré!`);
-                });
-            });
+            const fileList = document.getElementById('fileList');
+            const testResult = document.getElementById('test-result');
+            
+            // Fonction pour afficher uniquement le message du haut
+            function showMessage(message, type) {
+                // Nouvelle notification améliorée (uniquement celle-ci)
+                const notification = document.getElementById('download-notification');
+                const notificationText = document.getElementById('download-notification-text');
+                
+                notificationText.textContent = message;
+                notification.style.display = 'flex';
+                notification.classList.remove('hide');
+                
+                // Faire disparaître le message après 4 secondes
+                setTimeout(() => {
+                    notification.classList.add('hide');
+                    setTimeout(() => {
+                        notification.style.display = 'none';
+                        notification.classList.remove('hide');
+                    }, 400);
+                }, 4000);
+            }
+            
+            // Formater la taille du fichier
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // Déterminer l'icône selon le type de fichier
+            function getFileIcon(filename) {
+                const ext = filename.split('.').pop().toLowerCase();
+                
+                const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'];
+                const docExts = ['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt'];
+                const archiveExts = ['zip', 'rar', 'tar', 'gz', '7z'];
+                const videoExts = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'];
+                const audioExts = ['mp3', 'wav', 'ogg', 'flac', 'aac'];
+                
+                if (imageExts.includes(ext)) {
+                    return '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
+                } else if (docExts.includes(ext)) {
+                    return '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>';
+                } else if (archiveExts.includes(ext)) {
+                    return '<svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>';
+                } else if (videoExts.includes(ext)) {
+                    return '<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>';
+                } else if (audioExts.includes(ext)) {
+                    return '<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>';
+                } else {
+                    return '<svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>';
+                }
+            }
+            
+            // Charger la liste des fichiers
+            function loadFiles() {
+                fetch('/uploads/')
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        
+                        // Trouver les liens de fichiers dans le HTML retourné
+                        const fileTable = doc.querySelector('table');
+                        
+                        // S'il n'y a pas de tableau de fichiers ou pas de fichiers
+                        if (!fileTable) {
+                            fileList.innerHTML = '<div class="no-files">Aucun fichier disponible dans le dossier uploads.</div>';
+                            return;
+                        }
+                        
+                        const fileRows = Array.from(fileTable.querySelectorAll('tr')).slice(1); // Ignorer l'en-tête
+                        
+                        if (fileRows.length <= 1) { // Généralement la première ligne après l'en-tête est "Parent Directory"
+                            fileList.innerHTML = '<div class="no-files">Aucun fichier disponible dans le dossier uploads.</div>';
+                            return;
+                        }
+                        
+                        // Filtrer et transformer les lignes en objets de fichier
+                        const files = fileRows
+                            .filter(row => {
+                                const link = row.querySelector('a');
+                                // On ignore "Parent Directory" et les dossiers
+                                return link && link.textContent !== 'Parent Directory' && !link.textContent.endsWith('/');
+                            })
+                            .map(row => {
+                                const columns = row.querySelectorAll('td');
+                                const link = columns[0]?.querySelector('a');
+                                const size = columns[2]?.textContent || '';
+                                const date = columns[3]?.textContent || '';
+                                
+                                return {
+                                    name: link ? link.textContent : '',
+                                    url: link ? link.getAttribute('href') : '',
+                                    size: size,
+                                    date: date
+                                };
+                            });
+                        
+                        // Afficher les fichiers
+                        if (files.length === 0) {
+                            fileList.innerHTML = '<div class="no-files">Aucun fichier disponible dans le dossier uploads.</div>';
+                        } else {
+                            const filesHTML = files.map(file => `
+                                <div class="file-item">
+                                    <div class="file-info">
+                                        <div class="file-icon">${getFileIcon(file.name)}</div>
+                                        <div class="file-details">
+                                            <div class="file-name" title="${file.name}">${file.name}</div>
+                                            <div class="file-size">${file.size} | ${file.date}</div>
+                                        </div>
+                                    </div>
+                                    <a href="${file.url}" class="download-btn" download>
+                                        <svg viewBox="0 0 24 24">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path>
+                                        </svg>
+                                        Télécharger
+                                    </a>
+                                </div>
+                            `).join('');
+                            
+                            fileList.innerHTML = filesHTML;
+                            
+                            // Ajouter des écouteurs d'événements pour les boutons de téléchargement
+                            document.querySelectorAll('.download-btn').forEach(btn => {
+                                btn.addEventListener('click', (e) => {
+                                    const fileName = e.currentTarget.closest('.file-item').querySelector('.file-name').textContent;
+                                    showMessage(`Téléchargement de "${fileName}" démarré`, "success");
+                                });
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors du chargement des fichiers:', error);
+                        fileList.innerHTML = '<div class="no-files">Erreur lors du chargement des fichiers. Veuillez réessayer.</div>';
+                    });
+            }
+            
+            // Charger les fichiers au chargement de la page
+            loadFiles();
         });
     </script>
 </body>
