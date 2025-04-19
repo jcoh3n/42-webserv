@@ -6,6 +6,92 @@
     <title>Webserv 42 - Démonstration</title>
     <link rel="stylesheet" href="/styles/webserv-modern.css">
     <style>
+        .main-header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .main-title {
+            font-size: 4.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin: 0;
+            position: relative;
+            display: inline-block;
+            background: linear-gradient(135deg, #00BABC 0%, #6200ea 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 5px 15px rgba(0, 186, 188, 0.2);
+            animation: titlePulse 3s ease-in-out infinite;
+        }
+        
+        .main-title span {
+            position: relative;
+        }
+        
+        .main-title span::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #00BABC, #6200ea);
+            border-radius: 10px;
+            transform: scaleX(0);
+            transform-origin: right;
+            animation: lineReveal 3s ease-in-out infinite;
+        }
+        
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        @keyframes lineReveal {
+            0% { transform: scaleX(0); transform-origin: right; }
+            50% { transform: scaleX(1); transform-origin: right; }
+            51% { transform: scaleX(1); transform-origin: left; }
+            100% { transform: scaleX(0); transform-origin: left; }
+        }
+        
+        .main-subtitle {
+            font-size: 1.3rem;
+            margin-top: 15px;
+            color: var(--secondary-text);
+            font-weight: 400;
+            opacity: 0.8;
+        }
+        
+        .header-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .header-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 186, 188, 0.05) 0%, rgba(98, 0, 234, 0.02) 50%, transparent 70%);
+            animation: rotateBg 20s linear infinite;
+        }
+        
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         .test-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -36,6 +122,7 @@
         .test-box h2 {
             margin-bottom: 15px;
             font-size: 1.5rem;
+            color: var(--primary-text);
         }
         
         .test-box p {
@@ -43,17 +130,74 @@
             margin-bottom: 0;
         }
         
-        .get-box { border-color: #00BABC; }
-        .post-box { border-color: #6200ea; }
-        .delete-box { border-color: #e74c3c; }
-        .upload-box { border-color: #4caf50; }
-        .download-box { border-color: #2196f3; }
-        .filetransfer-box { border-color: #00BABC; }
-        .list-box { border-color: #00BABC; }
-        .redirect-box { border-color: #ff9800; }
-        .error-box { border-color: #e74c3c; }
-        .alias-box { border-color: #9c27b0; }
-        .cgi-box { border-color: #ff5722; }
+        .get-box { border-color: var(--get-color); }
+        .get-box h2 { color: var(--get-color); }
+        
+        .post-box { border-color: var(--post-color); }
+        .post-box h2 { color: var(--post-color); }
+        
+        .delete-box { border-color: var(--delete-color); }
+        .delete-box h2 { color: var(--delete-color); }
+        
+        .upload-box { border-color: var(--upload-color); }
+        .upload-box h2 { color: var(--upload-color); }
+        
+        .download-box { border-color: var(--download-color); }
+        .download-box h2 { color: var(--download-color); }
+        
+        .filetransfer-box { border-color: var(--accent-color); }
+        .filetransfer-box h2 { color: var(--accent-color); }
+        
+        .list-box { border-color: var(--list-color); }
+        .list-box h2 { color: var(--list-color); }
+        
+        .redirect-box { border-color: var(--redirect-color); }
+        .redirect-box h2 { color: var(--redirect-color); }
+        
+        .error-box { border-color: var(--error-color); }
+        .error-box h2 { color: var(--error-color); }
+        
+        .alias-box { border-color: var(--alias-color); }
+        .alias-box h2 { color: var(--alias-color); }
+        
+        /* Style spécial pour les CGI boxes */
+        .cgi-box { 
+            border-top: none;
+            border-radius: var(--border-radius);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .cgi-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            background-color: currentColor;
+            border-radius: var(--border-radius);
+        }
+        
+        .cgi-php {
+            color: #ff5722;
+        }
+        
+        .cgi-perl {
+            color: #9C27B0;
+        }
+        
+        .cgi-box h2 {
+            color: currentColor;
+            font-weight: 600;
+        }
+        
+        .cgi-box p {
+            color: var(--primary-text);
+            opacity: 0.9;
+        }
         
         .particles {
             position: absolute;
@@ -88,8 +232,10 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Webserv 42</h1>
+        <header class="main-header">
+            <div class="header-bg"></div>
+            <h1 class="main-title"><span>WEBSERV 42</span></h1>
+            <p class="main-subtitle">Un serveur HTTP performant réalisé en C++98</p>
         </header>
 
         <div class="test-grid">
@@ -157,20 +303,20 @@
         <h2 style="text-align: center; margin: 50px 0 30px; color: var(--primary-text);">Tests CGI</h2>
         <div class="test-grid">
             <!-- Calculatrice CGI -->
-            <a href="/pages/features/calculator.html" class="test-box cgi-box" style="border-color: #ff5722;">
+            <a href="/pages/features/calculator.html" class="test-box cgi-box cgi-php">
                 <h2>Calculatrice PHP</h2>
                 <p>Une calculatrice interactive utilisant PHP-CGI avec une interface moderne.</p>
             </a>
 
             <!-- Horloge Perl -->
-            <a href="/pages/features/clock.html" class="test-box cgi-box" style="border-color: #9C27B0;">
+            <a href="/pages/features/clock.html" class="test-box cgi-box cgi-perl">
                 <h2>Horloge Perl</h2>
                 <p>Une horloge dynamique générée par un script Perl-CGI, montrant l'heure et la date du serveur.</p>
             </a>
         </div>
 
         <footer>
-            <p>Webserv 42 © 2023-2024 - Un projet développé par des étudiants de 42</p>
+            <p>Webserv 42 © 2025</p>
         </footer>
     </div>
 

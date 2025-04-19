@@ -56,6 +56,7 @@ private:
     bool parseHeaders(const std::string& headers_section);
     void parseQueryString();
     void parseFormBody();
+    std::string extractBoundary(const std::string& content_type) const; // Extraire le boundary d'un content-type multipart
     
     // Méthodes de validation
     bool validateRequest() const;

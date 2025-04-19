@@ -42,6 +42,7 @@ class MultiServerManager
     
     // Initialisation et démarrage des serveurs
     void initServers(const WebservConfig& config); // Initialiser les serveurs depuis la configuration
+    void initializeServers();                      // Nouvelle méthode d'initialisation des serveurs
     void startServers();                           // Démarrer tous les serveurs avec un poll centralisé
     void stopServers();                            // Arrêter tous les serveurs
 };

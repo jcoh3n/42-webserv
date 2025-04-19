@@ -43,23 +43,32 @@
 # define DIM     "\033[2m"
 # define UNDERLINE "\033[4m"
 
-// Macros de logging (système)
-# define LOG_INFO(x)    std::cout << CYAN << "[INFO] " << x << RESET << std::endl
-# define LOG_SUCCESS(x) std::cout << GREEN << "[SUCCESS] " << x << RESET << std::endl
-# define LOG_WARNING(x) std::cerr << YELLOW << "[WARN] " << x << RESET << std::endl
-# define LOG_ERROR(x)   std::cerr << RED << "[ERROR] " << x << RESET << std::endl
-# define LOG_DEBUG(x)   std::cerr << MAGENTA << "[DEBUG] " << x << RESET << std::endl
+// Couleurs personnalisées pour les méthodes HTTP (correspondant aux couleurs du site)
+# define COLOR_GET    "\033[38;2;0;186;188m"     // #00babc - couleur turquoise pour GET
+# define COLOR_POST   "\033[38;2;98;0;234m"      // #6200ea - couleur violette pour POST
+# define COLOR_DELETE "\033[38;2;255;71;87m"     // #ff4757 - couleur rouge pour DELETE
 
-// Macros de logging (réseau et HTTP)
-# define LOG_NETWORK(x) std::cout << BLUE << "⇄ " << x << RESET << std::endl
-# define LOG_REQUEST(method, uri, code) std::cout << YELLOW << "➜ " << method << RESET << " " << uri << " " << DIM << "(" << code << ")" << RESET << std::endl
-# define LOG_RESPONSE(code, bytes) \
-    std::cout << (code >= 200 && code < 300 ? GREEN : (code >= 300 && code < 400 ? BLUE : RED)) \
-              << "← HTTP " << code << RESET << " " << bytes << " bytes" << std::endl
-# define LOG_HTTP(x) std::cout << CYAN << "► " << x << RESET << std::endl
+// Macros de logging (système) - simplifiées
+# define LOG_INFO(x)    std::cout << "[*] " << x << RESET << std::endl
+# define LOG_SUCCESS(x) std::cout << GREEN << "[+] " << x << RESET << std::endl
+# define LOG_WARNING(x) std::cerr << YELLOW << "[!] " << x << RESET << std::endl
+# define LOG_ERROR(x)   std::cerr << RED << "[-] " << x << RESET << std::endl
+# define LOG_DEBUG(x)   ((void)0) // Désactive les logs de debug
+# define LOG_UPLOAD(x)  std::cout << GREEN << "[+] " << x << RESET << std::endl
+
+// Macros de logging (réseau et HTTP) - simplifiées
+# define LOG_NETWORK(x) std::cout << BLUE << "→ " << x << RESET << std::endl
+# define LOG_REQUEST(method, uri, code) \
+    std::cout << \
+    (method == "GET" ? COLOR_GET : \
+     method == "POST" ? COLOR_POST : \
+     method == "DELETE" ? COLOR_DELETE : YELLOW) \
+    << method << RESET << " " << uri << RESET << std::endl
+# define LOG_RESPONSE(code, bytes) ((void)0) // Désactive les logs de réponse
+# define LOG_HTTP(x) ((void)0) // Désactive les logs HTTP détaillés
 
 // Rétrocompatibilité
-# define DEBUG(x) LOG_DEBUG(x)
+# define DEBUG(x) ((void)0) // Désactive les logs de debug
 
 // Macros d'aide
 # define UNUSED(x) (void)(x)

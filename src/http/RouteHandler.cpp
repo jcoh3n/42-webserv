@@ -188,8 +188,8 @@ std::string RouteHandler::getFilePath(const std::string& uri) const {
     }
     path += clean_uri;
     
-    // Debug: afficher le chemin pour vérification
-    std::cerr << "[DEBUG] File Path: " << path << std::endl;
+    // Suppression des logs de debug
+    // std::cerr << "[DEBUG] File Path: " << path << std::endl;
     
     return path;
 }
@@ -349,10 +349,10 @@ HttpResponse RouteHandler::handleCGIRequest(const HttpRequest& request, const st
             absolutePath = root_directory + "/" + absolutePath;
         }
         
-        // Debug: afficher les chemins pour vérification
-        std::cerr << "[DEBUG] Script Path (before): " << scriptPath << std::endl;
-        std::cerr << "[DEBUG] Root Directory: " << root_directory << std::endl;
-        std::cerr << "[DEBUG] Absolute Path: " << absolutePath << std::endl;
+        // Suppression des logs de debug
+        // std::cerr << "[DEBUG] Script Path (before): " << scriptPath << std::endl;
+        // std::cerr << "[DEBUG] Root Directory: " << root_directory << std::endl;
+        // std::cerr << "[DEBUG] Absolute Path: " << absolutePath << std::endl;
         
         CGIHandler handler(request, absolutePath, it->second);
         return handler.executeCGI();

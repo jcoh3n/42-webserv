@@ -15,7 +15,7 @@ bool FileUploadHandler::handleFileUpload(const UploadedFile& file) {
     }
     
     if (saveFile(file.filename, file.data)) {
-        LOG_SUCCESS("File uploaded successfully: " << file.filename);
+        LOG_UPLOAD("File uploaded successfully: " << file.filename);
         return true;
     }
     
@@ -71,6 +71,6 @@ bool FileUploadHandler::saveFile(const std::string& filename, const std::string&
     }
     
     file_out.close();
-    LOG_SUCCESS("File saved successfully: " << file_path);
+    LOG_UPLOAD("File saved successfully: " << file_path);
     return true;
 } 

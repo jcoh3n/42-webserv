@@ -206,100 +206,105 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Webserv 42</h1>
-            <p>Un serveur HTTP en C++98</p>
-        </header>
-        
-        <div class="listing-container">
-            <h1>Directory Listing</h1>
-            
-            <div class="path-display">
-                <div class="path-icon">📂</div>
-                <a href="/" class="path-component">home</a>
-                <span class="path-separator">/</span>
-                <a href="/list" class="path-component">list</a>
-                <span class="path-separator">/</span>
-                <span class="path-current">documents</span>
+        <div class="directory-container">
+            <div class="directory-header">
+                <div class="breadcrumb">
+                    <a href="/" class="breadcrumb-item">Accueil</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item current">Liste des fichiers</span>
+                </div>
             </div>
             
-            <table class="listing-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Size</th>
-                        <th>Last Modified</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="up-directory">
-                        <td>
-                            <span class="file-icon directory-icon">📂</span>
-                            <a href="/list" class="file-name directory-name">..</a>
-                        </td>
-                        <td class="file-size">-</td>
-                        <td class="file-date">-</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <span class="file-icon directory-icon">📂</span>
-                            <a href="/list/documents/images" class="file-name directory-name">images</a>
-                        </td>
-                        <td class="file-size">-</td>
-                        <td class="file-date">Jan 20, 2023 14:30</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <span class="file-icon directory-icon">📂</span>
-                            <a href="/list/documents/reports" class="file-name directory-name">reports</a>
-                        </td>
-                        <td class="file-size">-</td>
-                        <td class="file-date">Feb 15, 2023 09:45</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <span class="file-icon file-icon-document">📄</span>
-                            <a href="/list/documents/readme.txt" class="file-name">readme.txt</a>
-                        </td>
-                        <td class="file-size">2.4 KB</td>
-                        <td class="file-date">Mar 10, 2023 11:20</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <span class="file-icon file-icon-document">📄</span>
-                            <a href="/list/documents/notes.md" class="file-name">notes.md</a>
-                        </td>
-                        <td class="file-size">8.7 KB</td>
-                        <td class="file-date">Mar 12, 2023 16:05</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <span class="file-icon file-icon-image">🖼️</span>
-                            <a href="/list/documents/diagram.png" class="file-name">diagram.png</a>
-                        </td>
-                        <td class="file-size">386 KB</td>
-                        <td class="file-date">Mar 15, 2023 10:12</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <span class="file-icon file-icon-archive">🗃️</span>
-                            <a href="/list/documents/archive.zip" class="file-name">archive.zip</a>
-                        </td>
-                        <td class="file-size">1.2 MB</td>
-                        <td class="file-date">Mar 18, 2023 13:40</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <span class="file-icon file-icon-video">🎬</span>
-                            <a href="/list/documents/presentation.mp4" class="file-name">presentation.mp4</a>
-                        </td>
-                        <td class="file-size">24.5 MB</td>
-                        <td class="file-date">Mar 20, 2023 09:18</td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <a href="/" class="back-link">Retour à l'accueil</a>
+            <div class="listing-container">
+                <h1>Directory Listing</h1>
+                
+                <div class="path-display">
+                    <div class="path-icon">📂</div>
+                    <a href="/" class="path-component">home</a>
+                    <span class="path-separator">/</span>
+                    <a href="/list" class="path-component">list</a>
+                    <span class="path-separator">/</span>
+                    <span class="path-current">documents</span>
+                </div>
+                
+                <table class="listing-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Last Modified</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="up-directory">
+                            <td>
+                                <span class="file-icon directory-icon">📂</span>
+                                <a href="/list" class="file-name directory-name">..</a>
+                            </td>
+                            <td class="file-size">-</td>
+                            <td class="file-date">-</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="file-icon directory-icon">📂</span>
+                                <a href="/list/documents/images" class="file-name directory-name">images</a>
+                            </td>
+                            <td class="file-size">-</td>
+                            <td class="file-date">Jan 20, 2023 14:30</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="file-icon directory-icon">📂</span>
+                                <a href="/list/documents/reports" class="file-name directory-name">reports</a>
+                            </td>
+                            <td class="file-size">-</td>
+                            <td class="file-date">Feb 15, 2023 09:45</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="file-icon file-icon-document">📄</span>
+                                <a href="/list/documents/readme.txt" class="file-name">readme.txt</a>
+                            </td>
+                            <td class="file-size">2.4 KB</td>
+                            <td class="file-date">Mar 10, 2023 11:20</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="file-icon file-icon-document">📄</span>
+                                <a href="/list/documents/notes.md" class="file-name">notes.md</a>
+                            </td>
+                            <td class="file-size">8.7 KB</td>
+                            <td class="file-date">Mar 12, 2023 16:05</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="file-icon file-icon-image">🖼️</span>
+                                <a href="/list/documents/diagram.png" class="file-name">diagram.png</a>
+                            </td>
+                            <td class="file-size">386 KB</td>
+                            <td class="file-date">Mar 15, 2023 10:12</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="file-icon file-icon-archive">🗃️</span>
+                                <a href="/list/documents/archive.zip" class="file-name">archive.zip</a>
+                            </td>
+                            <td class="file-size">1.2 MB</td>
+                            <td class="file-date">Mar 18, 2023 13:40</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="file-icon file-icon-video">🎬</span>
+                                <a href="/list/documents/presentation.mp4" class="file-name">presentation.mp4</a>
+                            </td>
+                            <td class="file-size">24.5 MB</td>
+                            <td class="file-date">Mar 20, 2023 09:18</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <a href="/" class="back-link">Retour à l'accueil</a>
+            </div>
         </div>
     </div>
     

@@ -57,46 +57,29 @@ void Server::stop() {
  * @return Le descripteur du nouveau client ou -1 en cas d'erreur
  */
 int Server::acceptNewConnection() {
-    try {
-        struct sockaddr_in client_addr;
-        socklen_t client_len = sizeof(client_addr);
-        
-        int client_fd = ::accept(server_socket.getFd(), (struct sockaddr*)&client_addr, &client_len);
-        
-        if (client_fd < 0) {
-            if (errno != EAGAIN && errno != EWOULDBLOCK) {
-                throw std::runtime_error("Accept failed: " + std::string(strerror(errno)));
-            }
-            return -1;
+    struct sockaddr_in client_addr;
+    socklen_t client_addr_len = sizeof(client_addr);
+    
+    int client_fd = accept(server_socket.getFd(), (struct sockaddr*)&client_addr, &client_addr_len);
+    if (client_fd < 0) {
+        if (errno != EAGAIN && errno != EWOULDBLOCK) {
+            perror("accept");
         }
-        
-        // Configuration non-bloquante pour le client
-        int flags = fcntl(client_fd, F_GETFL, 0);
-        if (flags < 0) {
-            ::close(client_fd);
-            throw std::runtime_error("Failed to get socket flags: " + std::string(strerror(errno)));
-        }
-        
-        flags |= O_NONBLOCK;
-        if (fcntl(client_fd, F_SETFL, flags) < 0) {
-            ::close(client_fd);
-            throw std::runtime_error("Failed to set socket flags: " + std::string(strerror(errno)));
-        }
-        
-        // Obtenir l'adresse IP du client pour les logs
-        char client_ip[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET, &(client_addr.sin_addr), client_ip, INET_ADDRSTRLEN);
-        
-        LOG_NETWORK("New client connected from " << client_ip << ", fd: " << client_fd);
-        
-        // Initialiser la requête pour ce client
-        client_requests[client_fd] = "";
-        
-        return client_fd;
-    } catch (const std::exception& e) {
-        LOG_ERROR("Error accepting connection: " << e.what());
         return -1;
     }
+    
+    // Configurer le socket client comme non-bloquant
+    fcntl(client_fd, F_SETFL, O_NONBLOCK);
+    
+    // Obtenir et afficher l'adresse IP du client
+    char client_ip[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &(client_addr.sin_addr), client_ip, INET_ADDRSTRLEN);
+    LOG_NETWORK("Client " << client_ip << " [" << client_fd << "]");
+    
+    // Initialiser la requête pour ce client
+    client_requests[client_fd] = "";
+    
+    return client_fd;
 }
 
 /**
@@ -104,9 +87,9 @@ int Server::acceptNewConnection() {
  */
 void Server::closeClientConnection(int client_fd) {
     if (client_fd >= 0) {
-        ::close(client_fd);
+        close(client_fd);
         client_requests.erase(client_fd);
-        LOG_NETWORK("Client connection closed, fd: " << client_fd);
+        // Pas besoin de log quand un client se déconnecte
     }
 }
 

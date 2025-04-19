@@ -164,3 +164,23 @@ void HttpRequest::parseFormBody() {
         }
     }
 }
+
+std::string HttpRequest::extractBoundary(const std::string& content_type) const {
+    if (content_type.find("multipart/form-data") == std::string::npos) {
+        return "";
+    }
+    
+    size_t pos = content_type.find("boundary=");
+    if (pos == std::string::npos) {
+        return "";
+    }
+    
+    std::string boundary = content_type.substr(pos + 9); // "boundary=" a 9 caractères
+    
+    // Supprimer les guillemets si présents
+    if (boundary.size() > 0 && boundary[0] == '"') {
+        boundary = boundary.substr(1, boundary.size() - 2);
+    }
+    
+    return boundary;
+}

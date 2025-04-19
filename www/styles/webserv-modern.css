@@ -7,14 +7,22 @@
     --primary-text: #ffffff;
     --secondary-text: #b3b3b3;
     --accent: #00BABC;
+    --accent-color: #00babc;
+    --accent-hover: #008f91;
+    --get-color: #00babc;
+    --post-color: #6200ea;
+    --delete-color: #ff4757;
     --upload-color: #4caf50;
     --download-color: #2196f3;
-    --delete-color: #f44336;
-    --list-color: #00BABC;
+    --list-color: #1e90ff;
+    --redirect-color: #ff6b81;
+    --error-color: #ff6348;
+    --alias-color: #a55eea;
     
     /* Styling */
-    --border-radius: 8px;
-    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    --primary-bg: #121212;
+    --border-radius: 12px;
+    --box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     --transition: all 0.3s ease;
 }
 
@@ -250,27 +258,6 @@ button:active {
 }
 
 /* Webserv Modern Design - Style général */
-:root {
-  --primary-bg: #121212;
-  --box-bg: #1e1e1e;
-  --primary-text: #ffffff;
-  --secondary-text: #b0b0b0;
-  --accent-color: #00babc;
-  --accent-hover: #008f91;
-  --get-color: #00babc;
-  --post-color: #6200ea;
-  --delete-color: #ff4757;
-  --upload-color: #2ed573;
-  --download-color: #ffa502;
-  --list-color: #1e90ff;
-  --redirect-color: #ff6b81;
-  --error-color: #ff6348;
-  --alias-color: #a55eea;
-  --box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-  --border-radius: 12px;
-  --transition: all 0.3s ease;
-}
-
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   background-color: var(--primary-bg);
@@ -460,7 +447,7 @@ header p {
 }
 
 .download-box .btn:hover {
-  background-color: #e09400;
+  background-color: #1a7bd1;
 }
 
 .filetransfer-box {
