@@ -25,13 +25,20 @@ MultiServerManager::MultiServerManager()
  * @brief Destructeur de la classe MultiServerManager
  */
 MultiServerManager::~MultiServerManager() {
-    stopServers();
+    // Ne pas appeler stopServers() ici car il est déjà appelé explicitement dans main.cpp
+    // Cela évite de double-libérer des ressources
     
     // Nettoyer les ressources
-    for (size_t i = 0; i < servers.size(); i++) {
-        delete servers[i];
+    if (servers.size() > 0) {
+        for (size_t i = 0; i < servers.size(); i++) {
+            if (servers[i]) {
+                delete servers[i];
+                servers[i] = NULL;
+            }
+        }
+        servers.clear();
     }
-    servers.clear();
+    
     port_to_server_index.clear();
     fd_to_server.clear();
     
@@ -40,6 +47,9 @@ MultiServerManager::~MultiServerManager() {
         delete[] poll_fds;
         poll_fds = NULL;
     }
+    
+    // Ne pas mettre instance à NULL ici car cela pourrait causer des problèmes
+    // si un signal arrive pendant la destruction
 }
 
 /**
@@ -61,7 +71,9 @@ void MultiServerManager::setupSignalHandlers() {
 void MultiServerManager::signalHandler(int signal) {
     LOG_INFO("Signal " << signal << " reçu, arrêt en cours...");
     if (instance) {
-        instance->stopServers();
+        // Plutôt que d'appeler stopServers() qui pourrait causer des problèmes dans un handler de signal,
+        // on arrête simplement la boucle principale pour permettre une sortie propre
+        instance->running = false;
     }
 }
 
@@ -263,22 +275,27 @@ void MultiServerManager::stopServers() {
         running = false;
         
         // Fermer toutes les connexions clients
-        for (int i = 0; i < nfds; i++) {
-            int fd = poll_fds[i].fd;
-            Server* server = getServerByFd(fd);
-            
-            if (server && !server->matchesSocketFd(fd)) {
-                server->closeClientConnection(fd);
+        if (poll_fds && nfds > 0) {
+            for (int i = 0; i < nfds; i++) {
+                if (poll_fds[i].fd >= 0) {
+                    Server* server = getServerByFd(poll_fds[i].fd);
+                    if (server && !server->matchesSocketFd(poll_fds[i].fd)) {
+                        server->closeClientConnection(poll_fds[i].fd);
+                    }
+                }
             }
         }
         
         // Arrêter tous les serveurs
         for (size_t i = 0; i < servers.size(); i++) {
-            servers[i]->stop();
+            if (servers[i]) {
+                servers[i]->stop();
+            }
         }
         
-        nfds = 0;
+        // Vider les structures de données
         fd_to_server.clear();
+        nfds = 0;
         
         LOG_SUCCESS("Tous les serveurs ont été arrêtés");
     }

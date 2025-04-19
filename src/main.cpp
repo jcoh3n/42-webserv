@@ -33,6 +33,9 @@ int main(int argc, char* argv[]) {
 		manager.initServers(config);
 		manager.startServers();
 		
+		// Assurer un nettoyage propre - cet appel est crucial pour éviter le segfault
+		manager.stopServers();
+		
 	} catch (const std::exception& e) {
 		LOG_ERROR("Error: " << e.what());
 		return 1;
