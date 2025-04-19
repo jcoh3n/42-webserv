@@ -69,7 +69,7 @@ void MultiServerManager::setupSignalHandlers() {
  * @brief Gestionnaire statique des signaux
  */
 void MultiServerManager::signalHandler(int signal) {
-    LOG_INFO("Signal " << signal << " reçu, arrêt en cours...");
+    (void)signal; // Marquer le paramètre comme utilisé pour éviter l'avertissement
     if (instance) {
         // Plutôt que d'appeler stopServers() qui pourrait causer des problèmes dans un handler de signal,
         // on arrête simplement la boucle principale pour permettre une sortie propre
@@ -299,4 +299,21 @@ void MultiServerManager::stopServers() {
         
         LOG_SUCCESS("Tous les serveurs ont été arrêtés");
     }
+}
+
+void MultiServerManager::initializeServers() {
+    for (size_t i = 0; i < servers.size(); ++i) {
+        int port = servers[i]->getPort();
+        LOG_INFO("Server at port " << port);
+        
+        try {
+            servers[i]->initialize();
+            LOG_INFO("Listening on port " << port);
+        } catch (const std::exception& e) {
+            LOG_ERROR("Failed to initialize server on port " << port << ": " << e.what());
+            throw; // Propager l'exception
+        }
+    }
+    
+    LOG_INFO("All servers ready");
 } 

@@ -5,39 +5,34 @@
 #include <iostream>
 #include <cstdlib>
 
-int main(int argc, char* argv[]) {
-	// Vérifier qu'un fichier de configuration a été fourni
-	if (argc < 2) {
-		LOG_ERROR("Usage: " << argv[0] << " <config_file>");
-		LOG_ERROR("Configuration file required");
+int main(int argc, char *argv[]) {
+	std::string config_file = "config.conf";
+
+	if (argc > 1) {
+		config_file = argv[1];
+	}
+	
+	// Charger la configuration
+	LOG_INFO("Config: " << config_file);
+	WebservConfig config;
+	try {
+		ConfigParser parser;
+		config = parser.parseFile(config_file);
+	} catch (const std::exception& e) {
+		LOG_ERROR("Configuration error: " << e.what());
 		return 1;
 	}
 	
-	std::string config_file = argv[1];
-	LOG_INFO("Using config file: " << config_file);
+	LOG_INFO("Loaded " << config.servers.size() << " server(s)");
 	
-	// Charger la configuration
+	// Initialiser et gérer les serveurs
+	MultiServerManager server_manager;
+	
 	try {
-		ConfigParser parser;
-		WebservConfig config = parser.parseFile(config_file);
-		
-		if (config.servers.empty()) {
-			LOG_ERROR("No server configured in " << config_file);
-			return 1;
-		}
-		
-		LOG_INFO("Loaded configuration with " << config.servers.size() << " server(s)");
-		
-		// Initialiser et démarrer les serveurs
-		MultiServerManager manager;
-		manager.initServers(config);
-		manager.startServers();
-		
-		// Assurer un nettoyage propre - cet appel est crucial pour éviter le segfault
-		manager.stopServers();
-		
+		server_manager.initServers(config);
+		server_manager.startServers();
 	} catch (const std::exception& e) {
-		LOG_ERROR("Error: " << e.what());
+		LOG_ERROR("Server error: " << e.what());
 		return 1;
 	}
 	
