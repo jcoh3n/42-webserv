@@ -156,7 +156,6 @@ void HttpRequest::parseFormBody() {
     else if (content_type.find("multipart/form-data") != std::string::npos) {
         std::string boundary = BoundaryExtractor::extract(content_type);
         if (!boundary.empty()) {
-            LOG_INFO("Extracted boundary: " << boundary);
             FormParser::parseMultipart(body, boundary, form_data);
         }
         else {

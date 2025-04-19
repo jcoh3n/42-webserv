@@ -95,7 +95,6 @@ void MultiServerManager::initServers(const WebservConfig& config) {
             continue;
         }
         
-        LOG_INFO("Initializing server on port " << port);
         Server* server = new Server(port, server_config);
         servers.push_back(server);
         port_to_server_index[port] = servers.size() - 1;
@@ -105,7 +104,7 @@ void MultiServerManager::initServers(const WebservConfig& config) {
         throw std::runtime_error("No valid server configured");
     }
     
-    LOG_SUCCESS("Initialized " << servers.size() << " server(s)");
+    LOG_SUCCESS("Initialized " << servers.size() << " server(s) successfully");
     
     // Configuration des gestionnaires de signaux
     setupSignalHandlers();

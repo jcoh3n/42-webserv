@@ -121,8 +121,6 @@ void FormParser::parseMultipart(const std::string& body, const std::string& boun
     std::string full_boundary = "--" + boundary;
     std::string end_boundary = full_boundary + "--";
     
-    LOG_INFO("Using boundary: '" << full_boundary << "'");
-    
     size_t pos = 0;
     size_t boundary_pos;
     
@@ -187,7 +185,7 @@ void FormParser::parseMultipartPart(const std::string& part, FormData& form_data
         
         if (saveUploadedFile(file, content)) {
             form_data.addUploadedFile(info.name, file);
-            LOG_SUCCESS("File saved: " << info.filename);
+            LOG_UPLOAD("File saved: " << info.filename);
         }
     }
     else if (!info.name.empty()) {

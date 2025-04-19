@@ -38,7 +38,6 @@ void Server::initialize() {
         server_socket.setNonBlocking(true);
         
         running = true;
-        LOG_SUCCESS("Server initialized on port " << port);
     } catch (const std::exception& e) {
         LOG_ERROR("Server initialization error: " << e.what());
         throw;
@@ -189,6 +188,9 @@ bool Server::handleClientData(int client_fd) {
         std::string error_body = "<html><body><h1>400 Bad Request</h1></body></html>";
         response.setBody(error_body);
         
+        // Journaliser la réponse d'erreur
+        LOG_REQUEST("ERROR", "Invalid Request", 400);
+        
         // Envoyer la réponse d'erreur
         try {
             std::string http_response = response.build();
@@ -242,6 +244,9 @@ void Server::sendHttpResponse(int client_fd, const HttpRequest& request) {
         
         std::string error_body = "<html><body><h1>500 Internal Server Error</h1></body></html>";
         error_response.setBody(error_body);
+        
+        // Journaliser la réponse d'erreur
+        LOG_REQUEST(request.getMethod(), request.getUri(), 500);
         
         // Envoyer la réponse d'erreur
         std::string http_response = error_response.build();

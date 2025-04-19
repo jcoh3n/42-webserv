@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	// Charger la configuration
-	LOG_INFO("Config: " << config_file);
+	LOG_INFO("Starting webserv with config: " << config_file);
 	WebservConfig config;
 	try {
 		ConfigParser parser;
@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	
-	LOG_INFO("Loaded " << config.servers.size() << " server(s)");
+	// No need for detailed log about number of servers
 	
 	// Initialiser et gérer les serveurs
 	MultiServerManager server_manager;
