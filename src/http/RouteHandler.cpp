@@ -15,6 +15,7 @@
 #include <map>
 #include <cerrno>   // For errno
 #include <iomanip>  // For std::setprecision
+#include "http/utils/HttpUtils.hpp"
 
 HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
     std::string file_path = getFilePath(request.getUri());
@@ -151,7 +152,9 @@ HttpResponse RouteHandler::handleDeleteRequest(const HttpRequest& request) {
     }
     
     // Pour les requêtes de suppression de fichier
-    std::string file_path = getFilePath(uri);
+    // Décoder l'URI avant de chercher le fichier
+    std::string decoded_uri = HttpUtils::urlDecode(uri);
+    std::string file_path = getFilePath(decoded_uri);
     
     // Vérifier si le fichier existe
     if (!FileUtils::fileExists(file_path)) {
