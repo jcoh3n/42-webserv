@@ -46,6 +46,7 @@ HttpResponse CGIHandler::executeCGI() {
     }
 
     if (pid == 0) {
+        alarm(10);
         if (!executeCGIScript(pipe_in, pipe_out)) {
             exit(1);
         }
@@ -83,6 +84,12 @@ HttpResponse CGIHandler::executeCGI() {
             std::cerr << "[CGI] Error: Script exited with status " << exit_status << std::endl;
             return HttpResponse::createError(500, "CGI script execution failed");
         }
+    else if (WIFSIGNALED(status)) {
+        int signal = WTERMSIG(status);
+        if (signal == SIGALRM) {
+            return HttpResponse::createError(504, "CGI script timed out");
+        }
+    }
     } else {
         std::cerr << "[CGI] Error: Script terminated abnormally" << std::endl;
         return HttpResponse::createError(500, "CGI script terminated abnormally");

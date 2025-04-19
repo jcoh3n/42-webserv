@@ -6,93 +6,129 @@
     <title>Pages d'erreur - Webserv 42</title>
     <link rel="stylesheet" href="/styles/webserv-modern.css">
     <style>
+        body {
+            background-color: var(--background);
+            color: var(--primary-text);
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
         .error-demo-container {
             background-color: var(--box-bg);
             border-radius: var(--border-radius);
-            padding: 30px;
+            padding: 40px;
             box-shadow: var(--box-shadow);
-            max-width: 800px;
+            max-width: 900px;
             margin: 30px auto;
-            border-top: 4px solid var(--error-color);
+            border-top: 4px solid rgba(255, 99, 72, 0.7);
+        }
+        
+        .error-demo-header {
+            text-align: center;
+            margin-bottom: 40px;
         }
         
         .error-demo-container h1 {
-            color: var(--error-color);
+            color: rgba(255, 99, 72, 0.9);
             margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 2rem;
+            margin-bottom: 15px;
+            font-size: 2.2rem;
+            font-weight: 700;
         }
         
         .error-demo-container p {
             color: var(--secondary-text);
             line-height: 1.6;
             margin-bottom: 20px;
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
         }
         
         .error-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
             margin-top: 30px;
         }
         
         .error-card {
-            background-color: rgba(0, 0, 0, 0.2);
+            background: rgba(255, 99, 72, 0.8);
             border-radius: var(--border-radius);
-            padding: 20px;
-            transition: all 0.3s ease;
+            padding: 35px 20px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-decoration: none;
-            color: var(--primary-text);
-            border-left: 3px solid var(--error-color);
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(255, 99, 72, 0.15);
+            border: none;
         }
         
         .error-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(255, 99, 72, 0.25);
+            filter: brightness(1.05);
         }
         
-        .error-card h3 {
-            margin-top: 0;
-            color: var(--error-color);
-            font-size: 1.5rem;
-            margin-bottom: 10px;
+        .error-card::before {
+            content: attr(data-code);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 7rem;
+            font-weight: 900;
+            opacity: 0.15;
+            line-height: 1;
+            z-index: 0;
+            color: rgba(255, 255, 255, 0.8);
         }
         
         .error-card p {
             margin: 0;
-            color: var(--secondary-text);
-            font-size: 0.9rem;
+            color: white;
+            font-size: 1.3rem;
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 90%;
+            font-weight: 600;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-        
-        .error-404 { border-color: #f44336; }
-        .error-404 h3 { color: #f44336; }
-        
-        .error-403 { border-color: #ff9800; }
-        .error-403 h3 { color: #ff9800; }
-        
-        .error-500 { border-color: #9c27b0; }
-        .error-500 h3 { color: #9c27b0; }
         
         .back-button {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 10px;
             padding: 12px 24px;
-            background: var(--box-bg);
-            color: var(--error-color);
-            border: 2px solid rgba(244, 67, 54, 0.2);
+            background: rgba(255, 99, 72, 0.75);
+            color: white;
+            border: none;
             border-radius: var(--border-radius);
-            font-size: 1.1rem;
+            font-size: 1rem;
             text-decoration: none;
             transition: all 0.3s ease;
-            box-shadow: var(--box-shadow);
+            box-shadow: 0 5px 15px rgba(255, 99, 72, 0.2);
             margin-bottom: 20px;
+            font-weight: 500;
         }
 
         .back-button:hover {
-            transform: translateY(-2px);
-            border-color: var(--error-color);
-            background: rgba(244, 67, 54, 0.05);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 99, 72, 0.3);
+            background: rgba(255, 99, 72, 0.85);
         }
 
         .back-button::before {
@@ -100,32 +136,39 @@
             font-size: 1.2em;
             line-height: 1;
         }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--secondary-text);
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="/" class="back-button">Retour à l'accueil</a>
-        
         <div class="error-demo-container">
-            <h1>Pages d'erreur personnalisées</h1>
-            
-            <p>Notre serveur web offre des pages d'erreur personnalisées pour améliorer l'expérience utilisateur. Voici les pages d'erreur que vous pouvez tester :</p>
+            <div class="error-demo-header">
+                <h1>Pages d'erreur personnalisées</h1>
+                <p>Notre serveur web offre des pages d'erreur élégantes pour une meilleure expérience utilisateur. Cliquez sur une carte pour voir chaque page d'erreur.</p>
+            </div>
             
             <div class="error-cards">
-                <a href="/this-page-does-not-exist" class="error-card error-404">
-                    <h3>Erreur 404</h3>
-                    <p>Page non trouvée. Cette erreur s'affiche lorsque vous tentez d'accéder à une ressource qui n'existe pas sur le serveur.</p>
+                <a href="/error/404.html" class="error-card" data-code="404">
+                    <p>Page non trouvée</p>
                 </a>
                 
-                <a href="/cgi-bin" class="error-card error-403">
-                    <h3>Erreur 403</h3>
-                    <p>Accès interdit. Cette erreur s'affiche lorsque vous n'avez pas les droits nécessaires pour accéder à une ressource.</p>
+                <a href="/error/403.html" class="error-card" data-code="403">
+                    <p>Accès interdit</p>
                 </a>
                 
-                <a href="/cgi-bin/error.pl" class="error-card error-500">
-                    <h3>Erreur 500</h3>
-                    <p>Erreur interne du serveur. Cette erreur s'affiche lorsqu'une erreur se produit lors du traitement de votre requête.</p>
+                <a href="/error/500.html" class="error-card" data-code="500">
+                    <p>Erreur interne</p>
                 </a>
+            </div>
+            
+            <div class="footer">
+                <a href="/" class="back-button">Retour à l'accueil</a>
             </div>
         </div>
     </div>
