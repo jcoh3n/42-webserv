@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <cstring>
 #include <cctype>
+#include "utils/Common.hpp"
 
 // Vérifier si un fichier existe
 bool FileUtils::fileExists(const std::string& path) {
@@ -115,32 +116,220 @@ std::string FileUtils::generateDirectoryListing(const std::string& dir_path, con
     std::sort(directories.begin(), directories.end());
     std::sort(files.begin(), files.end());
     
-    // Générer le HTML
+    // Générer le HTML avec un design mode sombre inspiré d'Apple
     std::stringstream html;
     html << "<!DOCTYPE html>\n"
          << "<html>\n"
          << "<head>\n"
+         << "    <meta charset=\"UTF-8\">\n"
+         << "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
          << "    <title>Index of " << request_uri << "</title>\n"
          << "    <style>\n"
-         << "        body { font-family: Arial, sans-serif; margin: 20px; }\n"
-         << "        h1 { border-bottom: 1px solid #ddd; padding-bottom: 10px; }\n"
-         << "        table { border-collapse: collapse; width: 100%; }\n"
-         << "        th, td { text-align: left; padding: 8px; }\n"
-         << "        tr:nth-child(even) { background-color: #f2f2f2; }\n"
-         << "        th { background-color: #4CAF50; color: white; }\n"
-         << "        a { text-decoration: none; color: #2196F3; }\n"
-         << "        a:hover { text-decoration: underline; }\n"
+         << "        :root {\n"
+         << "            --bg-color: #1e1e1e;\n"
+         << "            --text-color: #ffffff;\n"
+         << "            --secondary-text: #aaaaaa;\n"
+         << "            --accent-color: #0a84ff;\n"
+         << "            --hover-color: #2c2c2e;\n"
+         << "            --border-color: #38383a;\n"
+         << "            --header-color: #2c2c2e;\n"
+         << "            --dir-color: #0a84ff;\n"
+         << "        }\n"
+         << "        body {\n"
+         << "            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;\n"
+         << "            margin: 0;\n"
+         << "            padding: 0;\n"
+         << "            background-color: var(--bg-color);\n"
+         << "            color: var(--text-color);\n"
+         << "            font-size: 14px;\n"
+         << "            line-height: 1.5;\n"
+         << "        }\n"
+         << "        .container {\n"
+         << "            max-width: 960px;\n"
+         << "            margin: 0 auto;\n"
+         << "            padding: 24px;\n"
+         << "        }\n"
+         << "        .header {\n"
+         << "            border-bottom: 1px solid var(--border-color);\n"
+         << "            padding: 0 0 12px 0;\n"
+         << "            margin-bottom: 24px;\n"
+         << "            display: flex;\n"
+         << "            align-items: center;\n"
+         << "            justify-content: space-between;\n"
+         << "        }\n"
+         << "        .header h1 {\n"
+         << "            margin: 0;\n"
+         << "            font-size: 20px;\n"
+         << "            font-weight: 500;\n"
+         << "            color: var(--text-color);\n"
+         << "        }\n"
+         << "        .breadcrumb {\n"
+         << "            display: flex;\n"
+         << "            flex-wrap: wrap;\n"
+         << "            align-items: center;\n"
+         << "            margin-bottom: 24px;\n"
+         << "            font-size: 13px;\n"
+         << "        }\n"
+         << "        .breadcrumb a {\n"
+         << "            color: var(--accent-color);\n"
+         << "            text-decoration: none;\n"
+         << "        }\n"
+         << "        .breadcrumb a:hover {\n"
+         << "            text-decoration: underline;\n"
+         << "        }\n"
+         << "        .breadcrumb-separator {\n"
+         << "            margin: 0 6px;\n"
+         << "            color: var(--secondary-text);\n"
+         << "        }\n"
+         << "        .listing {\n"
+         << "            border: 1px solid var(--border-color);\n"
+         << "            border-radius: 8px;\n"
+         << "            overflow: hidden;\n"
+         << "        }\n"
+         << "        .listing-header {\n"
+         << "            display: grid;\n"
+         << "            grid-template-columns: minmax(200px, 1fr) 100px 170px;\n"
+         << "            gap: 10px;\n"
+         << "            padding: 12px 16px;\n"
+         << "            background-color: var(--header-color);\n"
+         << "            border-bottom: 1px solid var(--border-color);\n"
+         << "            font-weight: 500;\n"
+         << "            font-size: 13px;\n"
+         << "            color: var(--secondary-text);\n"
+         << "        }\n"
+         << "        .listing-item {\n"
+         << "            display: grid;\n"
+         << "            grid-template-columns: minmax(200px, 1fr) 100px 170px;\n"
+         << "            gap: 10px;\n"
+         << "            padding: 10px 16px;\n"
+         << "            border-bottom: 1px solid var(--border-color);\n"
+         << "            transition: background-color 0.15s ease;\n"
+         << "        }\n"
+         << "        .listing-item:last-child {\n"
+         << "            border-bottom: none;\n"
+         << "        }\n"
+         << "        .listing-item:hover {\n"
+         << "            background-color: var(--hover-color);\n"
+         << "        }\n"
+         << "        .listing-item a {\n"
+         << "            color: var(--text-color);\n"
+         << "            text-decoration: none;\n"
+         << "            display: block;\n"
+         << "            overflow: hidden;\n"
+         << "            text-overflow: ellipsis;\n"
+         << "            white-space: nowrap;\n"
+         << "        }\n"
+         << "        .listing-item.directory a {\n"
+         << "            color: var(--dir-color);\n"
+         << "            font-weight: 500;\n"
+         << "        }\n"
+         << "        .listing-item.text-file a {\n"
+         << "            color: #34c759;\n"
+         << "        }\n"
+         << "        .listing-item.image-file a {\n"
+         << "            color: #ff9f0a;\n"
+         << "        }\n"
+         << "        .listing-item.code-file a {\n"
+         << "            color: #5e5ce6;\n"
+         << "        }\n"
+         << "        .listing-item a:hover {\n"
+         << "            text-decoration: underline;\n"
+         << "        }\n"
+         << "        .parent-dir {\n"
+         << "            background-color: var(--header-color);\n"
+         << "        }\n"
+         << "        .file-size, .file-date {\n"
+         << "            color: var(--secondary-text);\n"
+         << "            font-size: 13px;\n"
+         << "        }\n"
+         << "        .server-info {\n"
+         << "            margin-top: 16px;\n"
+         << "            text-align: center;\n"
+         << "            font-size: 12px;\n"
+         << "            color: var(--secondary-text);\n"
+         << "        }\n"
+         << "        @media (max-width: 768px) {\n"
+         << "            .listing-header, .listing-item {\n"
+         << "                grid-template-columns: 1fr 100px;\n"
+         << "            }\n"
+         << "            .file-date {\n"
+         << "                display: none;\n"
+         << "            }\n"
+         << "        }\n"
+         << "        @media (max-width: 480px) {\n"
+         << "            .listing-header, .listing-item {\n"
+         << "                grid-template-columns: 1fr;\n"
+         << "            }\n"
+         << "            .file-size {\n"
+         << "                display: none;\n"
+         << "            }\n"
+         << "        }\n"
+         << "        @media (prefers-color-scheme: light) {\n"
+         << "            :root {\n"
+         << "                --bg-color: #ffffff;\n"
+         << "                --text-color: #1d1d1f;\n"
+         << "                --secondary-text: #86868b;\n"
+         << "                --accent-color: #0071e3;\n"
+         << "                --hover-color: #f5f5f7;\n"
+         << "                --border-color: #d2d2d7;\n"
+         << "                --header-color: #f5f5f7;\n"
+         << "                --dir-color: #0071e3;\n"
+         << "            }\n"
+         << "        }\n"
          << "    </style>\n"
          << "</head>\n"
          << "<body>\n"
-         << "    <h1>Index of " << request_uri << "</h1>\n"
-         << "    <table>\n"
-         << "        <tr>\n"
-         << "            <th>Name</th>\n"
-         << "            <th>Type</th>\n"
-         << "            <th>Size</th>\n"
-         << "            <th>Last Modified</th>\n"
-         << "        </tr>\n";
+         << "    <div class=\"container\">\n"
+         << "        <div class=\"header\">\n"
+         << "            <h1>Index of " << request_uri << "</h1>\n"
+         << "        </div>\n"
+         << "        <div class=\"breadcrumb\">\n";
+    
+    // Générer le fil d'Ariane (breadcrumb)
+    std::string path = "/";
+    html << "            <a href=\"/\">Home</a>";
+    
+    if (request_uri != "/") {
+        std::string uri = request_uri;
+        if (uri[uri.size() - 1] == '/') {
+            uri = uri.substr(0, uri.size() - 1);
+        }
+        
+        std::vector<std::string> components;
+        size_t start = 0;
+        size_t end = 0;
+        
+        while ((end = uri.find('/', start)) != std::string::npos) {
+            if (end != start) {
+                components.push_back(uri.substr(start, end - start));
+            }
+            start = end + 1;
+        }
+        
+        if (start < uri.size()) {
+            components.push_back(uri.substr(start));
+        }
+        
+        std::string current_path = "";
+        for (size_t i = 0; i < components.size(); ++i) {
+            current_path += "/" + components[i];
+            html << "            <span class=\"breadcrumb-separator\">/</span>\n";
+            
+            if (i == components.size() - 1) {
+                html << "            <span>" << components[i] << "</span>\n";
+            } else {
+                html << "            <a href=\"" << current_path << "/\">" << components[i] << "</a>\n";
+            }
+        }
+    }
+    
+    html << "        </div>\n"
+         << "        <div class=\"listing\">\n"
+         << "            <div class=\"listing-header\">\n"
+         << "                <div>Name</div>\n"
+         << "                <div>Size</div>\n"
+         << "                <div>Last Modified</div>\n"
+         << "            </div>\n";
     
     // Ajouter le lien vers le répertoire parent
     if (request_uri != "/") {
@@ -154,12 +343,13 @@ std::string FileUtils::generateDirectoryListing(const std::string& dir_path, con
             parent_uri = parent_uri.substr(0, last_slash + 1);
         }
         
-        html << "        <tr>\n"
-             << "            <td><a href=\"" << parent_uri << "\">Parent Directory</a></td>\n"
-             << "            <td>Directory</td>\n"
-             << "            <td>-</td>\n"
-             << "            <td>-</td>\n"
-             << "        </tr>\n";
+        html << "            <div class=\"listing-item parent-dir directory\">\n"
+             << "                <div>\n"
+             << "                    <a href=\"" << parent_uri << "\">Parent Directory</a>\n"
+             << "                </div>\n"
+             << "                <div class=\"file-size\">-</div>\n"
+             << "                <div class=\"file-date\">-</div>\n"
+             << "            </div>\n";
     }
     
     // Ajouter les répertoires
@@ -185,12 +375,13 @@ std::string FileUtils::generateDirectoryListing(const std::string& dir_path, con
         struct tm* tm_info = localtime(&st.st_mtime);
         strftime(time_buf, sizeof(time_buf), "%Y-%m-%d %H:%M:%S", tm_info);
         
-        html << "        <tr>\n"
-             << "            <td><a href=\"" << uri << "\">" << dir_name << "/</a></td>\n"
-             << "            <td>Directory</td>\n"
-             << "            <td>-</td>\n"
-             << "            <td>" << time_buf << "</td>\n"
-             << "        </tr>\n";
+        html << "            <div class=\"listing-item directory\">\n"
+             << "                <div>\n"
+             << "                    <a href=\"" << uri << "\">" << dir_name << "</a>\n"
+             << "                </div>\n"
+             << "                <div class=\"file-size\">-</div>\n"
+             << "                <div class=\"file-date\">" << time_buf << "</div>\n"
+             << "            </div>\n";
     }
     
     // Ajouter les fichiers
@@ -224,21 +415,58 @@ std::string FileUtils::generateDirectoryListing(const std::string& dir_path, con
         struct tm* tm_info = localtime(&st.st_mtime);
         strftime(time_buf, sizeof(time_buf), "%Y-%m-%d %H:%M:%S", tm_info);
         
-        html << "        <tr>\n"
-             << "            <td><a href=\"" << uri << "\">" << file_name << "</a></td>\n"
-             << "            <td>File</td>\n"
-             << "            <td>" << size_stream.str() << "</td>\n"
-             << "            <td>" << time_buf << "</td>\n"
-             << "        </tr>\n";
+        // Détecter le type de fichier pour appliquer un style
+        std::string file_class = getFileClass(file_name);
+        
+        html << "            <div class=\"" << file_class << "\">\n"
+             << "                <div>\n"
+             << "                    <a href=\"" << uri << "\">" << file_name << "</a>\n"
+             << "                </div>\n"
+             << "                <div class=\"file-size\">" << size_stream.str() << "</div>\n"
+             << "                <div class=\"file-date\">" << time_buf << "</div>\n"
+             << "            </div>\n";
     }
     
-    html << "    </table>\n"
-         << "    <hr>\n"
-         << "    <p>webserv Server at " << request_uri << "</p>\n"
+    html << "        </div>\n"
+         << "        <div class=\"server-info\">\n"
+         << "            <p>webserv Server at " << request_uri << "</p>\n"
+         << "        </div>\n"
+         << "    </div>\n"
          << "</body>\n"
          << "</html>";
     
     return html.str();
+}
+
+// Fonction pour déterminer la classe CSS d'un fichier basé sur son extension
+std::string FileUtils::getFileClass(const std::string& file_name) {
+    std::string file_class = "listing-item";
+    std::string extension = "";
+    
+    size_t dot_pos = file_name.find_last_of('.');
+    if (dot_pos != std::string::npos) {
+        extension = file_name.substr(dot_pos);
+        std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+        
+        // Fichiers texte
+        if (extension == ".txt" || extension == ".md" || extension == ".csv" || 
+            extension == ".log" || extension == ".conf") {
+            file_class += " text-file";
+        } 
+        // Fichiers code
+        else if (extension == ".html" || extension == ".htm" || extension == ".css" || 
+                 extension == ".js" || extension == ".php" || extension == ".py" || 
+                 extension == ".json" || extension == ".xml") {
+            file_class += " code-file";
+        } 
+        // Images
+        else if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || 
+                 extension == ".gif" || extension == ".svg" || extension == ".webp") {
+            file_class += " image-file";
+        }
+    }
+    
+    return file_class;
 }
 
 // Assainir un nom de fichier pour l'upload

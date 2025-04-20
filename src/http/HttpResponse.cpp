@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <algorithm>
 #include <cctype>
+#include <iostream>
 
 /**
  * @brief Convertit une valeur numérique en chaîne de caractères
@@ -268,23 +269,36 @@ std::string getMimeType(const std::string& file_path) {
     
     // Initialisation si nécessaire (première fois seulement)
     if (mime_types.empty()) {
+        // Types texte - affichés dans le navigateur
         mime_types[".html"] = "text/html";
         mime_types[".htm"] = "text/html";
         mime_types[".css"] = "text/css";
-        mime_types[".js"] = "application/javascript";
+        mime_types[".txt"] = "text/plain";
+        mime_types[".md"] = "text/plain";
+        mime_types[".conf"] = "text/plain";
+        mime_types[".csv"] = "text/plain";
+        mime_types[".log"] = "text/plain";
+        
+        // Applications qui s'affichent dans le navigateur
         mime_types[".json"] = "application/json";
         mime_types[".xml"] = "application/xml";
-        mime_types[".txt"] = "text/plain";
+        mime_types[".js"] = "application/javascript";
+        
+        // Images - généralement affichées dans le navigateur
         mime_types[".jpg"] = "image/jpeg";
         mime_types[".jpeg"] = "image/jpeg";
         mime_types[".png"] = "image/png";
         mime_types[".gif"] = "image/gif";
         mime_types[".svg"] = "image/svg+xml";
         mime_types[".ico"] = "image/x-icon";
+        
+        // Applications généralement téléchargées
         mime_types[".pdf"] = "application/pdf";
         mime_types[".zip"] = "application/zip";
         mime_types[".gz"] = "application/gzip";
         mime_types[".tar"] = "application/x-tar";
+        
+        // Médias
         mime_types[".mp3"] = "audio/mpeg";
         mime_types[".mp4"] = "video/mp4";
         mime_types[".mpeg"] = "video/mpeg";
@@ -292,11 +306,15 @@ std::string getMimeType(const std::string& file_path) {
         mime_types[".webm"] = "video/webm";
         mime_types[".wav"] = "audio/wav";
         mime_types[".ogg"] = "audio/ogg";
+        
+        // Polices
         mime_types[".woff"] = "font/woff";
         mime_types[".woff2"] = "font/woff2";
         mime_types[".ttf"] = "font/ttf";
         mime_types[".otf"] = "font/otf";
         mime_types[".eot"] = "application/vnd.ms-fontobject";
+        
+        // CGI
         mime_types[".php"] = "text/html"; // PHP sera traité par CGI
     }
 
@@ -307,8 +325,10 @@ std::string getMimeType(const std::string& file_path) {
     }
 
     std::string extension = file_path.substr(dot_pos); // Extraire l'extension du fichier
-    std::map<std::string, std::string>::const_iterator it = mime_types.find(extension); // Parcourir map pour trouver le type MIM
-    return it != mime_types.end() ? it->second : "application/octet-stream"; // Retourner le type MIME correspondant
+    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower); // Convertir en minuscules
+    
+    std::map<std::string, std::string>::const_iterator it = mime_types.find(extension); // Chercher le type MIME
+    return it != mime_types.end() ? it->second : "application/octet-stream"; // Retourner le type MIME ou la valeur par défaut
 }
 
 /**

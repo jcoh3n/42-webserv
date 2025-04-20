@@ -233,17 +233,28 @@ bool RouteHandler::serveStaticFile(const std::string& file_path, HttpResponse& r
 
     // Ajouter Content-Disposition: attachment pour les fichiers à télécharger
     // Pour forcer le téléchargement au lieu de l'affichage dans le navigateur
-    bool is_upload_file = file_path.find("/uploads/") != std::string::npos;
-    bool is_binary_type = mime_type.find("image/") == 0 || 
-                          mime_type.find("application/") == 0 ||
-                          mime_type.find("video/") == 0 ||
-                          mime_type.find("audio/") == 0;
-
-    if (is_upload_file || is_binary_type) {
-        // Extraire le nom du fichier à partir du chemin
+    
+    // Approche simplifiée: les fichiers texte sont toujours affichés, les autres sont téléchargés
+    bool should_display = false;
+    
+    // Vérifier si c'est un type MIME qui doit être affiché dans le navigateur
+    if (mime_type.find("text/") == 0 || 
+        mime_type == "application/json" || 
+        mime_type == "application/xml" ||
+        mime_type == "application/javascript") {
+        should_display = true;
+    }
+    
+    // Les fichiers dans /uploads/ sont toujours téléchargés
+    if (file_path.find("/uploads/") != std::string::npos) {
+        should_display = false;
+    }
+    
+    // Si ce n'est pas un fichier à afficher, forcer le téléchargement
+    if (!should_display) {
         size_t last_slash = file_path.find_last_of('/');
         std::string filename = (last_slash != std::string::npos) ? 
-                               file_path.substr(last_slash + 1) : file_path;
+                             file_path.substr(last_slash + 1) : file_path;
         
         response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
     }

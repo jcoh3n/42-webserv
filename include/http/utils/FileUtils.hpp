@@ -37,6 +37,9 @@ public:
     
     // S'assurer qu'un répertoire existe, le créer si nécessaire
     static bool ensureDirectoryExists(const std::string& path);
+    
+    // Fonction pour déterminer la classe CSS d'un fichier basé sur son extension
+    static std::string getFileClass(const std::string& file_name);
 };
 
 #endif // FILE_UTILS_HPP 
