@@ -47,14 +47,18 @@
 # define COLOR_GET    "\033[38;2;0;186;188m"     // #00babc - couleur turquoise pour GET
 # define COLOR_POST   "\033[38;2;147;112;219m"   // Lavender - moins intense, plus visible
 # define COLOR_DELETE "\033[38;2;255;71;87m"     // #ff4757 - couleur rouge pour DELETE
+# define COLOR_REDIRECT "\033[38;2;255;107;129m" // #ff6b81 - couleur pour les redirections
+# define COLOR_ALIAS  "\033[38;2;165;94;234m"    // #a55eea - couleur pour les alias
 
 // Macros de logging (système) - simplifiées
 # define LOG_INFO(x)    std::cout << "[*] " << x << RESET << std::endl
 # define LOG_SUCCESS(x) std::cout << GREEN << "[+] " << x << RESET << std::endl
 # define LOG_WARNING(x) std::cerr << YELLOW << "[!] " << x << RESET << std::endl
 # define LOG_ERROR(x)   std::cerr << RED << "[-] " << x << RESET << std::endl
-# define LOG_DEBUG(x)   ((void)0) // Désactive les logs de debug
+# define LOG_DEBUG(x)   std::cerr << BLUE << "[D] " << x << RESET << std::endl  // Active les logs de debug
 # define LOG_UPLOAD(x)  std::cout << COLOR_POST << "[*] " << x << RESET << std::endl
+# define LOG_REDIRECT(from, to, code) std::cout << COLOR_REDIRECT << "[↪] " << from << " → " << to << " (" << code << ")" << RESET << std::endl
+# define LOG_ALIAS(from, to) std::cout << COLOR_ALIAS << "[⇄] " << from << " → " << to << RESET << std::endl
 
 // Macros de logging (réseau et HTTP) - simplifiées
 # define LOG_NETWORK(x) std::cout << BLUE << "→ " << x << RESET << std::endl
@@ -70,11 +74,11 @@
      code >= 500 ? RED : BLUE) \
     << "  ↳ " << code << RESET << std::endl
 
-# define LOG_RESPONSE(code, bytes) ((void)0) // Désactive les logs de réponse
-# define LOG_HTTP(x) ((void)0) // Désactive les logs HTTP détaillés
+# define LOG_RESPONSE(code, bytes) std::cout << ((code >= 200 && code < 300) ? GREEN : (code >= 400 && code < 500) ? YELLOW : RED) << "  ← " << code << " (" << bytes << " bytes)" << RESET << std::endl  // Active les logs de réponse
+# define LOG_HTTP(x) std::cout << CYAN << "[HTTP] " << x << RESET << std::endl  // Active les logs HTTP détaillés
 
 // Rétrocompatibilité
-# define DEBUG(x) ((void)0) // Désactive les logs de debug
+# define DEBUG(x) std::cerr << BLUE << "[DEBUG] " << x << RESET << std::endl  // Active les logs de debug
 
 // Macros d'aide
 # define UNUSED(x) (void)(x)

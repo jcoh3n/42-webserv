@@ -10,6 +10,9 @@
 #include <algorithm>
 #include <cctype>
 #include <iostream>
+#include "utils/Common.hpp"
+#include <iomanip>
+#include <cmath>
 
 /**
  * @brief Convertit une valeur numérique en chaîne de caractères

@@ -18,7 +18,16 @@
 #include "http/utils/HttpUtils.hpp"
 
 HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
-    std::string file_path = getFilePath(request.getUri());
+    // Vérifier d'abord si cette URI est configurée pour une redirection
+    const LocationConfig* location = findMatchingLocation(request.getUri());
+    if (location != NULL && location->redirect_code > 0) {
+        // Si une redirection est configurée, créer la réponse de redirection
+        HttpResponse response;
+        response.setRedirect(location->redirect_url, location->redirect_code);
+        return response;
+    }
+    
+    std::string file_path = getFilePath(request.getUri(), true);
     
     if (request.getMethod() == "GET") {
         return handleGetRequest(request);
@@ -35,7 +44,7 @@ HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
 
 HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
     HttpResponse response;
-    std::string file_path = getFilePath(request.getUri()); 
+    std::string file_path = getFilePath(request.getUri(), false);
     
     // Vérifier d'abord si le fichier existe | Cas: 404
     if (!FileUtils::fileExists(file_path)) {
@@ -148,13 +157,13 @@ HttpResponse RouteHandler::handleDeleteRequest(const HttpRequest& request) {
     
     // Vérifier si c'est une requête pour l'API des tâches
     if (uri.find("/api/tasks/") == 0) {
-        return handleCGIRequest(request, getFilePath("/cgi-bin/tasks.php"));
+        return handleCGIRequest(request, getFilePath("/cgi-bin/tasks.php", false));
     }
     
     // Pour les requêtes de suppression de fichier
     // Décoder l'URI avant de chercher le fichier
     std::string decoded_uri = HttpUtils::urlDecode(uri);
-    std::string file_path = getFilePath(decoded_uri);
+    std::string file_path = getFilePath(decoded_uri, true);
     
     // Vérifier si le fichier existe
     if (!FileUtils::fileExists(file_path)) {
@@ -176,12 +185,22 @@ HttpResponse RouteHandler::handleDeleteRequest(const HttpRequest& request) {
     return response;
 }
 
-std::string RouteHandler::getFilePath(const std::string& uri) const {
+std::string RouteHandler::getFilePath(const std::string& uri, bool log) const {
     // Supprimer les paramètres de l'URL s'il y en a
     std::string clean_uri = uri;
     size_t question_mark = clean_uri.find('?');
     if (question_mark != std::string::npos) {
         clean_uri = clean_uri.substr(0, question_mark);
+    }
+    
+    // Vérifier si l'URI correspond à un alias dans la configuration
+    const LocationConfig* location = findMatchingLocation(clean_uri);
+    if (location != NULL && !location->alias.empty()) {
+        // Si un alias est configuré, utiliser le chemin d'alias au lieu du chemin normal
+        if (log) {
+            LOG_ALIAS(clean_uri, location->alias);
+        }
+        return location->alias;
     }
     
     // Construire le chemin complet
@@ -190,9 +209,6 @@ std::string RouteHandler::getFilePath(const std::string& uri) const {
         path = path.substr(0, path.length() - 1);
     }
     path += clean_uri;
-    
-    // Suppression des logs de debug
-    // std::cerr << "[DEBUG] File Path: " << path << std::endl;
     
     return path;
 }

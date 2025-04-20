@@ -8,8 +8,13 @@
     <style>
         :root {
             --fraise-color: #e91e63;
-            --fraise-light: #ffcdd2;
-            --fraise-dark: #c2185b;
+            --cerise-color: #d32f2f;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
         }
         
         .alias-container {
@@ -17,81 +22,34 @@
             border-radius: var(--border-radius);
             padding: 30px;
             box-shadow: var(--box-shadow);
-            max-width: 800px;
             margin: 30px auto;
             border-top: 4px solid var(--fraise-color);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .alias-container::before {
-            content: '';
-            position: absolute;
-            top: -50px;
-            right: -50px;
-            width: 100px;
-            height: 100px;
-            background-color: var(--fraise-light);
-            opacity: 0.3;
-            border-radius: 50%;
-            z-index: 0;
-        }
-        
-        .alias-container::after {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            left: -20px;
-            width: 80px;
-            height: 80px;
-            background-color: var(--fraise-light);
-            opacity: 0.2;
-            border-radius: 50%;
-            z-index: 0;
         }
         
         .alias-container h1 {
             color: var(--fraise-color);
             margin-top: 0;
-            margin-bottom: 20px;
-            position: relative;
-            z-index: 1;
+            margin-bottom: 30px;
+            text-align: center;
         }
         
         .alias-container p {
             color: var(--secondary-text);
             line-height: 1.6;
             margin-bottom: 20px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .alias-container code {
-            background-color: rgba(0, 0, 0, 0.2);
-            padding: 3px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-            color: var(--primary-text);
+            font-size: 1.1em;
         }
         
         .button {
             display: inline-block;
-            padding: 10px 20px;
-            background-color: var(--fraise-color);
+            padding: 12px 25px;
             color: white;
             border-radius: var(--border-radius);
             text-decoration: none;
             transition: all 0.3s ease;
-            margin-top: 20px;
             font-weight: 500;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3);
-            background-color: var(--fraise-dark);
+            font-size: 1.1em;
+            margin: 5px;
         }
         
         .back-button {
@@ -122,23 +80,84 @@
             line-height: 1;
         }
         
-        .strawberry-icon {
-            display: inline-block;
-            margin-right: 10px;
-            vertical-align: middle;
+        .url-display {
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 12px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            font-family: monospace;
+            margin: 15px 0;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .fraise-btn {
+            background-color: var(--fraise-color);
+        }
+        
+        .fraise-btn:hover {
+            background-color: #c2185b;
+            transform: translateY(-2px);
+        }
+        
+        .cerise-btn {
+            background-color: var(--cerise-color);
+        }
+        
+        .cerise-btn:hover {
+            background-color: #b71c1c;
+            transform: translateY(-2px);
+        }
+        
+        .original-btn {
+            background-color: var(--box-bg);
+            color: var(--primary-text);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .original-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
         }
     </style>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            // Afficher l'URL courante
+            document.getElementById('current-url').textContent = window.location.pathname;
+        });
+    </script>
 </head>
 <body>
     <div class="container">
         <a href="/" class="back-button">Retour à l'accueil</a>
         
         <div class="alias-container">
-            <h1>🍓 Alias URL - Fraise</h1>
-            <p>L'alias est une fonctionnalité qui permet de rediriger des URLs spécifiques vers d'autres chemins sur le serveur.</p>
-            <p>Par exemple, l'URL <code>/fraise.html</code> est en réalité servie depuis <code>/pages/features/alias.html</code> grâce à une configuration d'alias.</p>
-            <p>Cela permet d'offrir des URLs plus simples ou personnalisées pour certaines ressources, sans avoir à modifier l'emplacement réel des fichiers.</p>
-            <a href="/fraise.html" class="button">🍓 Tester l'alias /fraise.html</a>
+            <h1>🍓 Système d'Alias URL 🍒</h1>
+            
+            <div id="current-url" class="url-display"></div>
+            
+            <p><strong>Qu'est-ce qu'un alias?</strong> Un alias permet d'accéder au même contenu via différentes URLs.</p>
+            
+            <p>Cette page est accessible via <strong>trois chemins différents</strong> :</p>
+            <ul>
+                <li>Le chemin original : <code>/pages/features/alias.html</code></li>
+                <li>L'alias fraise : <code>/fraise.html</code></li>
+                <li>L'alias cerise : <code>/cerise.html</code></li>
+            </ul>
+            
+            <p>Contrairement à une redirection qui change l'URL dans le navigateur, un alias est transparent pour l'utilisateur.</p>
+            
+            <div class="button-container">
+                <a href="/fraise.html" class="button fraise-btn">🍓 Voir via /fraise.html</a>
+                <a href="/cerise.html" class="button cerise-btn">🍒 Voir via /cerise.html</a>
+                <a href="/pages/features/alias.html" class="button original-btn">📄 Voir via chemin original</a>
+            </div>
         </div>
     </div>
 </body>

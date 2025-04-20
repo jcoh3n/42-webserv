@@ -49,7 +49,7 @@ private:
     
     // Méthodes utilitaires
     bool isCgiResource(const std::string& path) const;
-    std::string getFilePath(const std::string& uri) const;
+    std::string getFilePath(const std::string& uri, bool log = true) const;
     bool serveStaticFile(const std::string& file_path, HttpResponse& response);
     bool isCGIRequest(const std::string& path, const LocationConfig& location) const;
     std::string getFileExtension(const std::string& path) const;
