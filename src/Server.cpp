@@ -216,8 +216,9 @@ bool Server::handleClientData(int client_fd) {
         std::string error_body = "<html><body><h1>400 Bad Request</h1></body></html>";
         response.setBody(error_body);
         
-        // Journaliser la réponse d'erreur
-        LOG_REQUEST("ERROR", "Invalid Request", 400);
+        // Journaliser la réponse d'erreur avec un format uniforme
+        std::cout << YELLOW << "→ ERROR" << RESET << " Invalid Request" << RESET << std::endl;
+        std::cout << RED << "  ↳ 400 • Bad Request" << RESET << std::endl;
         
         // Envoyer la réponse d'erreur
         try {
@@ -243,8 +244,17 @@ void Server::sendHttpResponse(int client_fd, const HttpRequest& request) {
         // Traiter la requête avec le routeur
         HttpResponse response = route_handler.processRequest(request);
         
-        // Journaliser la requête et la réponse
-        LOG_REQUEST(request.getMethod(), request.getUri(), response.getStatus());
+        // Journaliser la requête et la réponse avec un format uniforme
+        std::cout << 
+        (std::string(request.getMethod()) == "GET" ? COLOR_GET : 
+         std::string(request.getMethod()) == "POST" ? COLOR_POST : 
+         std::string(request.getMethod()) == "DELETE" ? COLOR_DELETE : YELLOW) 
+        << "→ " << request.getMethod() << RESET << " " << request.getUri() << RESET << std::endl;
+        
+        std::cout << 
+        (response.getStatus() >= 200 && response.getStatus() < 300 ? GREEN : 
+         response.getStatus() >= 400 ? RED : BLUE) 
+        << "  ↳ " << response.getStatus() << " • " << response.getStatusMessage() << RESET << std::endl;
         
         // Convertir la réponse en chaîne et l'envoyer
         std::string http_response = response.build();
@@ -271,8 +281,13 @@ void Server::sendHttpResponse(int client_fd, const HttpRequest& request) {
         std::string error_body = "<html><body><h1>500 Internal Server Error</h1></body></html>";
         error_response.setBody(error_body);
         
-        // Journaliser la réponse d'erreur
-        LOG_REQUEST(request.getMethod(), request.getUri(), 500);
+        // Journaliser la réponse d'erreur avec le même format uniforme
+        std::cout << 
+        (std::string(request.getMethod()) == "GET" ? COLOR_GET : 
+         std::string(request.getMethod()) == "POST" ? COLOR_POST : 
+         std::string(request.getMethod()) == "DELETE" ? COLOR_DELETE : YELLOW) 
+        << "→ " << request.getMethod() << RESET << " " << request.getUri() << RESET << std::endl;
+        std::cout << RED << "  ↳ 500 • Internal Server Error" << RESET << std::endl;
         
         // Envoyer la réponse d'erreur
         std::string http_response = error_response.build();

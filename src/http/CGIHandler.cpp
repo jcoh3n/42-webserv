@@ -15,7 +15,7 @@
 #include <cerrno>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <poll.h>
+#include <signal.h>
 
 CGIHandler::CGIHandler(const HttpRequest& req, const std::string& script_path, const std::string& interpreter)
     : request_(req), script_path_(script_path), interpreter_(interpreter), root_directory_("") {
@@ -33,11 +33,9 @@ CGIHandler::~CGIHandler() {
 HttpResponse CGIHandler::executeCGI() {
     try {
         if (!isCGIScript()) {
-            LOG_CGI_ERROR("Script not found: " + script_path_);
             return serveErrorPage(404, "Script not found");
         }
     } catch (const std::runtime_error& e) {
-        LOG_CGI_ERROR("Script not executable: " + script_path_);
         return serveErrorPage(403, "Script not executable");
     }
 
@@ -45,7 +43,6 @@ HttpResponse CGIHandler::executeCGI() {
     int pipe_out[2];
 
     if (pipe(pipe_in) < 0 || pipe(pipe_out) < 0) {
-        LOG_CGI_ERROR("Failed to create pipes");
         return serveErrorPage(500, "Failed to create pipes");
     }
 
@@ -58,6 +55,7 @@ HttpResponse CGIHandler::executeCGI() {
     }
 
     if (pid == 0) {
+        // Child process
         alarm(CGI_TIMEOUT);
         if (!executeCGIScript(pipe_in, pipe_out)) {
             exit(1);
@@ -65,113 +63,114 @@ HttpResponse CGIHandler::executeCGI() {
         exit(0);
     }
 
+    // Parent process
     close(pipe_in[0]);
     close(pipe_out[1]);
 
+    // Send POST data if needed
     if (request_.getMethod() == "POST") {
         const std::string& body = request_.getBody();
         if (write(pipe_in[1], body.c_str(), body.length()) < 0) {
             LOG_CGI_ERROR("Failed to write to CGI script");
             close(pipe_in[1]);
             close(pipe_out[0]);
+            kill(pid, SIGTERM);
+            waitpid(pid, NULL, 0);
             return serveErrorPage(500, "Failed to write to CGI script");
         }
     }
-    close(pipe_in[1]);
+    close(pipe_in[1]); // Done with input pipe
 
-    // Make pipe_out non-blocking
+    // Set non-blocking mode for output pipe
     fcntl(pipe_out[0], F_SETFL, O_NONBLOCK);
 
-    // Setup poll to detect timeout more reliably
-    struct pollfd pfd;
-    pfd.fd = pipe_out[0];
-    pfd.events = POLLIN;
-
+    // Read output with timeout checking
     std::string output;
     char buffer[4096];
     ssize_t bytes_read;
-    int timeout_ms = CGI_TIMEOUT * 1000; // Convert to milliseconds
-    bool timed_out = false;
-
-    // Poll with timeout to read from the pipe
-    while (!timed_out) {
-        int poll_result = poll(&pfd, 1, timeout_ms);
+    time_t start_time = time(NULL);
+    int status = 0;
+    bool process_done = false;
+    
+    // Main loop for reading CGI output
+    while (!process_done) {
+        // Check for timeout
+        if (difftime(time(NULL), start_time) >= CGI_TIMEOUT) {
+            LOG_CGI_ERROR("Script execution timed out");
+            kill(pid, SIGTERM);
+            waitpid(pid, NULL, 0);
+            close(pipe_out[0]);
+            return serveErrorPage(504, "CGI script timed out");
+        }
         
-        if (poll_result == 0) {
-            // Timeout occurred
-            LOG_CGI_ERROR("Script timed out (poll timeout)");
-            timed_out = true;
-            break;
-        } else if (poll_result < 0) {
-            // Error in poll
-            if (errno == EINTR) {
-                continue; // Interrupted, try again
-            }
-            LOG_CGI_ERROR("Poll failed: " + std::string(strerror(errno)));
+        // Check if process has finished
+        pid_t wait_result = waitpid(pid, &status, WNOHANG);
+        if (wait_result == pid) {
+            process_done = true;
+        } else if (wait_result < 0) {
+            LOG_CGI_ERROR("Error checking CGI process status");
             close(pipe_out[0]);
             kill(pid, SIGTERM);
             waitpid(pid, NULL, 0);
-            return serveErrorPage(500, "Error in poll");
+            return serveErrorPage(500, "Error monitoring CGI process");
         }
-
-        // Data is available to read
+        
+        // Try to read available data
         bytes_read = read(pipe_out[0], buffer, sizeof(buffer) - 1);
         if (bytes_read > 0) {
             buffer[bytes_read] = '\0';
             output.append(buffer, bytes_read);
-        } else if (bytes_read == 0) {
-            // End of file
-            break;
-        } else {
-            // Error or would block
-            if (errno != EAGAIN && errno != EWOULDBLOCK) {
-                LOG_CGI_ERROR("Reading from pipe: " + std::string(strerror(errno)));
-                close(pipe_out[0]);
-                kill(pid, SIGTERM);
-                waitpid(pid, NULL, 0);
-                return serveErrorPage(500, "Error reading from pipe");
-            }
+        } else if (bytes_read < 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
+            LOG_CGI_ERROR("Error reading CGI output: " + std::string(strerror(errno)));
+            close(pipe_out[0]);
+            kill(pid, SIGTERM);
+            waitpid(pid, NULL, 0);
+            return serveErrorPage(500, "Error reading CGI output");
         }
+        
+        // If process is done and no more data, break
+        if (process_done && (bytes_read == 0 || (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)))) {
+            break;
+        }
+        
+        // Small sleep to avoid CPU spinning
+        usleep(1000);
     }
     
     close(pipe_out[0]);
 
-    // If timeout occurred, kill the process and return timeout error
-    if (timed_out) {
-        kill(pid, SIGTERM);
-        waitpid(pid, NULL, 0);
-        LOG_CGI_ERROR("Script timed out");
-        return serveErrorPage(504, "CGI script timed out");
-    }
-
-    // Get process exit status
-    int status;
-    waitpid(pid, &status, 0);
-
-    if (WIFEXITED(status)) {
-        int exit_status = WEXITSTATUS(status);
-        if (exit_status != 0) {
-            char status_msg[64];
-            sprintf(status_msg, "Script exited with status %d", exit_status);
-            LOG_CGI_ERROR(status_msg);
-            return serveErrorPage(500, "CGI script execution failed");
-        }
-    } 
-    else if (WIFSIGNALED(status)) {
-        int signal = WTERMSIG(status);
-        if (signal == SIGALRM) {
-            LOG_CGI_ERROR("Script timed out (SIGALRM)");
-            return serveErrorPage(504, "CGI script timed out");
-        } else {
-            char signal_msg[64];
-            sprintf(signal_msg, "Script terminated by signal %d", signal);
-            LOG_CGI_ERROR(signal_msg);
-            return serveErrorPage(500, "CGI script terminated by signal");
-        }
-    } 
-    else {
-        LOG_CGI_ERROR("Script terminated abnormally");
-        return serveErrorPage(500, "CGI script terminated abnormally");
+    // Check process termination status
+    HttpResponse error_response;
+    int exit_type = 0;
+    
+    if (WIFEXITED(status)) exit_type = 1;
+    else if (WIFSIGNALED(status)) exit_type = 2;
+    
+    switch (exit_type) {
+        case 1: // Normal exit
+            if (WEXITSTATUS(status) != 0) {
+                std::stringstream ss;
+                ss << "Script exited with status " << WEXITSTATUS(status);
+                LOG_CGI_ERROR(ss.str());
+                return serveErrorPage(500, "CGI script execution failed");
+            }
+            break;
+            
+        case 2: // Terminated by signal
+            if (WTERMSIG(status) == SIGALRM) {
+                LOG_CGI_ERROR("Script terminated by alarm signal");
+                return serveErrorPage(504, "CGI script timed out");
+            } else {
+                std::stringstream ss;
+                ss << "Script terminated by signal " << WTERMSIG(status);
+                LOG_CGI_ERROR(ss.str());
+                return serveErrorPage(500, "CGI script terminated by signal");
+            }
+            break;
+            
+        default: // Abnormal termination
+            LOG_CGI_ERROR("Script terminated abnormally");
+            return serveErrorPage(500, "CGI script terminated abnormally");
     }
 
     if (output.empty()) {
