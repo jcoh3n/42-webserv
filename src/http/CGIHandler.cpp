@@ -1,18 +1,30 @@
 #include "http/CGIHandler.hpp"
 #include "http/HttpRequest.hpp"
 #include "http/HttpResponse.hpp"
+#include "http/utils/FileUtils.hpp"
+#include "utils/Common.hpp"
 #include <unistd.h>
 #include <sys/wait.h>
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 #include <fcntl.h>
 #include <limits.h>  // Pour PATH_MAX
 #include <cerrno>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <poll.h>
 
 CGIHandler::CGIHandler(const HttpRequest& req, const std::string& script_path, const std::string& interpreter)
-    : request_(req), script_path_(script_path), interpreter_(interpreter) {
+    : request_(req), script_path_(script_path), interpreter_(interpreter), root_directory_("") {
+}
+
+CGIHandler::CGIHandler(const HttpRequest& req, const std::string& script_path, const std::string& interpreter,
+                       const std::string& root_dir, const std::map<int, std::string>& error_pages)
+    : request_(req), script_path_(script_path), interpreter_(interpreter), 
+      root_directory_(root_dir), error_pages_(error_pages) {
 }
 
 CGIHandler::~CGIHandler() {
@@ -21,28 +33,28 @@ CGIHandler::~CGIHandler() {
 HttpResponse CGIHandler::executeCGI() {
     try {
         if (!isCGIScript()) {
-            std::cerr << "[CGI] Error: Script not found: " << script_path_ << std::endl;
-            return HttpResponse::createError(404, "Script not found");
+            LOG_CGI_ERROR("Script not found: " + script_path_);
+            return serveErrorPage(404, "Script not found");
         }
     } catch (const std::runtime_error& e) {
-        std::cerr << "[CGI] Error: Script not executable: " << script_path_ << std::endl;
-        return HttpResponse::createError(403, "Script not executable");
+        LOG_CGI_ERROR("Script not executable: " + script_path_);
+        return serveErrorPage(403, "Script not executable");
     }
 
     int pipe_in[2];
     int pipe_out[2];
 
     if (pipe(pipe_in) < 0 || pipe(pipe_out) < 0) {
-        std::cerr << "[CGI] Error: Failed to create pipes" << std::endl;
-        return HttpResponse::createError(500, "Failed to create pipes");
+        LOG_CGI_ERROR("Failed to create pipes");
+        return serveErrorPage(500, "Failed to create pipes");
     }
 
     pid_t pid = fork();
     if (pid < 0) {
-        std::cerr << "[CGI] Error: Failed to fork process" << std::endl;
+        LOG_CGI_ERROR("Failed to fork process");
         close(pipe_in[0]); close(pipe_in[1]);
         close(pipe_out[0]); close(pipe_out[1]);
-        return HttpResponse::createError(500, "Failed to fork process");
+        return serveErrorPage(500, "Failed to fork process");
     }
 
     if (pid == 0) {
@@ -59,45 +71,112 @@ HttpResponse CGIHandler::executeCGI() {
     if (request_.getMethod() == "POST") {
         const std::string& body = request_.getBody();
         if (write(pipe_in[1], body.c_str(), body.length()) < 0) {
-            std::cerr << "[CGI] Error: Failed to write to CGI script" << std::endl;
+            LOG_CGI_ERROR("Failed to write to CGI script");
             close(pipe_in[1]);
             close(pipe_out[0]);
-            return HttpResponse::createError(500, "Failed to write to CGI script");
+            return serveErrorPage(500, "Failed to write to CGI script");
         }
     }
     close(pipe_in[1]);
 
+    // Make pipe_out non-blocking
+    fcntl(pipe_out[0], F_SETFL, O_NONBLOCK);
+
+    // Setup poll to detect timeout more reliably
+    struct pollfd pfd;
+    pfd.fd = pipe_out[0];
+    pfd.events = POLLIN;
+
     std::string output;
     char buffer[4096];
     ssize_t bytes_read;
-    while ((bytes_read = read(pipe_out[0], buffer, sizeof(buffer))) > 0) {
-        output.append(buffer, bytes_read);
+    int timeout_ms = CGI_TIMEOUT * 1000; // Convert to milliseconds
+    bool timed_out = false;
+
+    // Poll with timeout to read from the pipe
+    while (!timed_out) {
+        int poll_result = poll(&pfd, 1, timeout_ms);
+        
+        if (poll_result == 0) {
+            // Timeout occurred
+            LOG_CGI_ERROR("Script timed out (poll timeout)");
+            timed_out = true;
+            break;
+        } else if (poll_result < 0) {
+            // Error in poll
+            if (errno == EINTR) {
+                continue; // Interrupted, try again
+            }
+            LOG_CGI_ERROR("Poll failed: " + std::string(strerror(errno)));
+            close(pipe_out[0]);
+            kill(pid, SIGTERM);
+            waitpid(pid, NULL, 0);
+            return serveErrorPage(500, "Error in poll");
+        }
+
+        // Data is available to read
+        bytes_read = read(pipe_out[0], buffer, sizeof(buffer) - 1);
+        if (bytes_read > 0) {
+            buffer[bytes_read] = '\0';
+            output.append(buffer, bytes_read);
+        } else if (bytes_read == 0) {
+            // End of file
+            break;
+        } else {
+            // Error or would block
+            if (errno != EAGAIN && errno != EWOULDBLOCK) {
+                LOG_CGI_ERROR("Reading from pipe: " + std::string(strerror(errno)));
+                close(pipe_out[0]);
+                kill(pid, SIGTERM);
+                waitpid(pid, NULL, 0);
+                return serveErrorPage(500, "Error reading from pipe");
+            }
+        }
     }
+    
     close(pipe_out[0]);
 
+    // If timeout occurred, kill the process and return timeout error
+    if (timed_out) {
+        kill(pid, SIGTERM);
+        waitpid(pid, NULL, 0);
+        LOG_CGI_ERROR("Script timed out");
+        return serveErrorPage(504, "CGI script timed out");
+    }
+
+    // Get process exit status
     int status;
     waitpid(pid, &status, 0);
 
     if (WIFEXITED(status)) {
         int exit_status = WEXITSTATUS(status);
         if (exit_status != 0) {
-            std::cerr << "[CGI] Error: Script exited with status " << exit_status << std::endl;
-            return HttpResponse::createError(500, "CGI script execution failed");
+            char status_msg[64];
+            sprintf(status_msg, "Script exited with status %d", exit_status);
+            LOG_CGI_ERROR(status_msg);
+            return serveErrorPage(500, "CGI script execution failed");
         }
+    } 
     else if (WIFSIGNALED(status)) {
         int signal = WTERMSIG(status);
         if (signal == SIGALRM) {
-            return HttpResponse::createError(504, "CGI script timed out");
+            LOG_CGI_ERROR("Script timed out (SIGALRM)");
+            return serveErrorPage(504, "CGI script timed out");
+        } else {
+            char signal_msg[64];
+            sprintf(signal_msg, "Script terminated by signal %d", signal);
+            LOG_CGI_ERROR(signal_msg);
+            return serveErrorPage(500, "CGI script terminated by signal");
         }
-    }
-    } else {
-        std::cerr << "[CGI] Error: Script terminated abnormally" << std::endl;
-        return HttpResponse::createError(500, "CGI script terminated abnormally");
+    } 
+    else {
+        LOG_CGI_ERROR("Script terminated abnormally");
+        return serveErrorPage(500, "CGI script terminated abnormally");
     }
 
     if (output.empty()) {
-        std::cerr << "[CGI] Error: Script produced no output" << std::endl;
-        return HttpResponse::createError(500, "CGI script produced no output");
+        LOG_CGI_ERROR("Script produced no output");
+        return serveErrorPage(500, "CGI script produced no output");
     }
 
     return parseCGIOutput(output);
@@ -107,7 +186,7 @@ bool CGIHandler::executeCGIScript(int pipe_in[2], int pipe_out[2]) {
     // Redirige stdin vers le pipe d'entrée
     close(pipe_in[1]);
     if (dup2(pipe_in[0], STDIN_FILENO) < 0) {
-        std::cerr << "Failed to redirect stdin" << std::endl;
+        LOG_CGI_ERROR("Failed to redirect stdin");
         return false;
     }
     close(pipe_in[0]);
@@ -115,7 +194,7 @@ bool CGIHandler::executeCGIScript(int pipe_in[2], int pipe_out[2]) {
     // Redirige stdout vers le pipe de sortie
     close(pipe_out[0]);
     if (dup2(pipe_out[1], STDOUT_FILENO) < 0) {
-        std::cerr << "Failed to redirect stdout" << std::endl;
+        LOG_CGI_ERROR("Failed to redirect stdout");
         return false;
     }
     close(pipe_out[1]);
@@ -125,8 +204,11 @@ bool CGIHandler::executeCGIScript(int pipe_in[2], int pipe_out[2]) {
     char* envp[env.size() + 1];
     for (size_t i = 0; i < env.size(); ++i) {
         envp[i] = strdup(env[i].c_str());
-        if (envp[i] == NULL) {
-            std::cerr << "Failed to allocate environment variable" << std::endl;
+        if (!envp[i]) {
+            LOG_CGI_ERROR("Failed to allocate environment variable");
+            for (size_t j = 0; j < i; ++j) {
+                free(envp[j]);
+            }
             return false;
         }
     }
@@ -137,25 +219,15 @@ bool CGIHandler::executeCGIScript(int pipe_in[2], int pipe_out[2]) {
     args[0] = strdup(interpreter_.c_str());
     args[1] = strdup(script_path_.c_str());
     args[2] = NULL;
-
-    if (args[0] == NULL || args[1] == NULL) {
-        std::cerr << "Failed to allocate arguments" << std::endl;
+    if (!args[0] || !args[1]) {
+        LOG_CGI_ERROR("Failed to allocate arguments");
+        free(args[0]);
+        free(args[1]);
         return false;
     }
 
-    // Exécute le script sans changer de répertoire
     execve(interpreter_.c_str(), args, envp);
-
-    // Si on arrive ici, c'est que execve a échoué
-    std::cerr << "Failed to execute " << interpreter_ << ": " << strerror(errno) << std::endl;
-
-    // Libère la mémoire
-    for (size_t i = 0; envp[i] != NULL; ++i) {
-        free(envp[i]);
-    }
-    free(args[0]);
-    free(args[1]);
-
+    LOG_CGI_ERROR("Failed to execute " + interpreter_ + ": " + strerror(errno));
     return false;
 }
 
@@ -306,4 +378,54 @@ bool CGIHandler::isCGIScript() const {
     }
     
     return true;
+}
+
+HttpResponse CGIHandler::serveErrorPage(int error_code, const std::string& message) {
+    // Si nous avons un répertoire racine et des pages d'erreur configurées
+    if (!root_directory_.empty() && !error_pages_.empty()) {
+        // Chercher une page d'erreur personnalisée pour ce code
+        std::map<int, std::string>::const_iterator it = error_pages_.find(error_code);
+        if (it != error_pages_.end()) {
+            // Construire le chemin complet vers la page d'erreur
+            std::string error_page_path = root_directory_ + "/" + it->second;
+            
+            // Vérifier si le fichier existe
+            if (FileUtils::fileExists(error_page_path)) {
+                HttpResponse response;
+                response.setStatus(error_code);
+                
+                // Lire le contenu du fichier
+                std::ifstream file(error_page_path.c_str(), std::ios::binary);
+                if (file) {
+                    std::string content((std::istreambuf_iterator<char>(file)),
+                                         std::istreambuf_iterator<char>());
+                    file.close();
+                    
+                    // Détecter le type MIME en fonction de l'extension
+                    std::string mime_type = "text/html";
+                    if (error_page_path.find(".css") != std::string::npos) {
+                        mime_type = "text/css";
+                    } else if (error_page_path.find(".js") != std::string::npos) {
+                        mime_type = "application/javascript";
+                    } else if (error_page_path.find(".json") != std::string::npos) {
+                        mime_type = "application/json";
+                    }
+                    
+                    response.setHeader("Content-Type", mime_type);
+                    // Désactiver le cache pour les pages d'erreur
+                    response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+                    response.setHeader("Pragma", "no-cache");
+                    response.setBody(content);
+                    return response;
+                }
+            }
+        }
+    }
+    
+    // Page d'erreur par défaut si aucune page personnalisée n'est disponible
+    HttpResponse response = HttpResponse::createError(error_code, message);
+    // Désactiver le cache pour les pages d'erreur par défaut aussi
+    response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+    response.setHeader("Pragma", "no-cache");
+    return response;
 } 

@@ -60,6 +60,7 @@
 # define LOG_UPLOAD(x)  std::cout << COLOR_UPLOAD << "[↑] " << x << RESET << std::endl  // Upload en vert
 # define LOG_REDIRECT(from, to, code) std::cout << COLOR_REDIRECT << "[↪] " << from << " → " << to << " (" << code << ")" << RESET << std::endl
 # define LOG_ALIAS(from, to) std::cout << COLOR_ALIAS << "[⇄] " << from << " → " << to << RESET << std::endl
+# define LOG_CGI_ERROR(x) std::cerr << RED << "[CGI] Error: " << x << RESET << std::endl  // CGI errors in red
 
 // Macros de logging (réseau et HTTP) - simplifiées
 # define LOG_NETWORK(x) std::cout << BLUE << "→ " << x << RESET << std::endl
@@ -71,8 +72,8 @@
     << "→ " << method << RESET << " " << uri << RESET << std::endl; \
     std::cout << \
     (code >= 200 && code < 300 ? GREEN : \
-     code >= 400 && code < 500 ? YELLOW : \
-     code >= 500 ? RED : BLUE) \
+     code >= 400 ? RED : \
+     BLUE) \
     << "  ↳ " << code << RESET << std::endl
 
 # define LOG_HTTP(x) std::cout << CYAN << "[HTTP] " << x << RESET << std::endl  // Active les logs HTTP détaillés

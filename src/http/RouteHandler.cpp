@@ -335,6 +335,9 @@ HttpResponse RouteHandler::serveErrorPage(int error_code, const std::string& mes
             HttpResponse response;
             response.setStatus(error_code);
             if (serveStaticFile(error_page_path, response)) {
+                // Désactiver le cache pour les pages d'erreur
+                response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+                response.setHeader("Pragma", "no-cache");
                 return response;
             }
             // If failed to serve the custom error page, fall back to default
@@ -342,7 +345,11 @@ HttpResponse RouteHandler::serveErrorPage(int error_code, const std::string& mes
     }
     
     // Default error page generation if no custom page is available or failed to serve
-    return HttpResponse::createError(error_code, message);
+    HttpResponse response = HttpResponse::createError(error_code, message);
+    // Désactiver le cache pour les pages d'erreur par défaut aussi
+    response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+    response.setHeader("Pragma", "no-cache");
+    return response;
 }
 
 const LocationConfig* RouteHandler::findMatchingLocation(const std::string& uri) const {
@@ -398,12 +405,8 @@ HttpResponse RouteHandler::handleCGIRequest(const HttpRequest& request, const st
             absolutePath = root_directory + "/" + absolutePath;
         }
         
-        // Suppression des logs de debug
-        // std::cerr << "[DEBUG] Script Path (before): " << scriptPath << std::endl;
-        // std::cerr << "[DEBUG] Root Directory: " << root_directory << std::endl;
-        // std::cerr << "[DEBUG] Absolute Path: " << absolutePath << std::endl;
-        
-        CGIHandler handler(request, absolutePath, it->second);
+        // Créer le CGIHandler avec les informations de pages d'erreur
+        CGIHandler handler(request, absolutePath, it->second, root_directory, server_config.error_pages);
         return handler.executeCGI();
     }
     
