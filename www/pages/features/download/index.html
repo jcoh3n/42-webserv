@@ -361,7 +361,7 @@
                     <div class="loading-spinner"></div>
                     <p>Chargement des fichiers...</p>
                 </div>
-                    </div>
+            </div>
             
             <div id="test-result" class="test-result"></div>
 
@@ -448,37 +448,42 @@
                         const doc = parser.parseFromString(html, 'text/html');
                         
                         // Trouver les liens de fichiers dans le HTML retourné
-                        const fileTable = doc.querySelector('table');
+                        const fileLinks = doc.querySelectorAll('a');
                         
-                        // S'il n'y a pas de tableau de fichiers ou pas de fichiers
-                        if (!fileTable) {
-                            fileList.innerHTML = '<div class="no-files">Aucun fichier disponible dans le dossier uploads.</div>';
-                            return;
-                        }
-                        
-                        const fileRows = Array.from(fileTable.querySelectorAll('tr')).slice(1); // Ignorer l'en-tête
-                        
-                        if (fileRows.length <= 1) { // Généralement la première ligne après l'en-tête est "Parent Directory"
-                            fileList.innerHTML = '<div class="no-files">Aucun fichier disponible dans le dossier uploads.</div>';
-                            return;
-                        }
-                        
-                        // Filtrer et transformer les lignes en objets de fichier
-                        const files = fileRows
-                            .filter(row => {
-                                const link = row.querySelector('a');
-                                // On ignore "Parent Directory" et les dossiers
-                                return link && link.textContent !== 'Parent Directory' && !link.textContent.endsWith('/');
+                        // Filtrer les liens pour obtenir uniquement les fichiers (pas les dossiers)
+                        const files = Array.from(fileLinks)
+                            .filter(link => {
+                                const href = link.getAttribute('href');
+                                const text = link.textContent;
+                                // Ignorer les liens parent et les dossiers
+                                return text !== 'Parent Directory' && 
+                                       text !== '../' && 
+                                       !text.endsWith('/') && 
+                                       href && 
+                                       !href.endsWith('/');
                             })
-                            .map(row => {
-                                const columns = row.querySelectorAll('td');
-                                const link = columns[0]?.querySelector('a');
-                                const size = columns[2]?.textContent || '';
-                                const date = columns[3]?.textContent || '';
+                            .map(link => {
+                                // Extraire le nom du fichier depuis le lien
+                                const fileName = link.textContent.trim();
+                                const url = link.getAttribute('href');
+                                
+                                // Essayer d'extraire la taille et la date si elles sont disponibles
+                                let size = 'Taille inconnue';
+                                let date = '';
+                                
+                                // Rechercher l'élément parent (tr) pour trouver les colonnes associées
+                                const row = link.closest('tr');
+                                if (row) {
+                                    const columns = row.querySelectorAll('td');
+                                    if (columns.length > 2) {
+                                        size = columns[1]?.textContent?.trim() || 'Taille inconnue';
+                                        date = columns[2]?.textContent?.trim() || '';
+                                    }
+                                }
                                 
                                 return {
-                                    name: link ? link.textContent : '',
-                                    url: link ? link.getAttribute('href') : '',
+                                    name: fileName,
+                                    url: url,
                                     size: size,
                                     date: date
                                 };
@@ -494,7 +499,7 @@
                                         <div class="file-icon">${getFileIcon(file.name)}</div>
                                         <div class="file-details">
                                             <div class="file-name" title="${file.name}">${file.name}</div>
-                                            <div class="file-size">${file.size} | ${file.date}</div>
+                                            <div class="file-size">${file.size} ${file.date ? '| ' + file.date : ''}</div>
                                         </div>
                                     </div>
                                     <a href="${file.url}" class="download-btn" download>
@@ -510,11 +515,11 @@
                             
                             // Ajouter des écouteurs d'événements pour les boutons de téléchargement
                             document.querySelectorAll('.download-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
+                                btn.addEventListener('click', (e) => {
                                     const fileName = e.currentTarget.closest('.file-item').querySelector('.file-name').textContent;
                                     showMessage(`Téléchargement de "${fileName}" démarré`, "success");
-                });
-            });
+                                });
+                            });
                         }
                     })
                     .catch(error => {
