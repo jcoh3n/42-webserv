@@ -4,6 +4,13 @@
 #include "http/HttpResponse.hpp"
 #include "utils/Common.hpp"
 #include <cstring>
+#include <fcntl.h>
+#include <unistd.h>
+#include <vector>
+#include <sstream>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <errno.h>
 
 /**
  * @brief Constructeur de la classe Server
@@ -166,6 +173,27 @@ bool Server::handleClientData(int client_fd) {
     
     // Traiter la requête complète
     HttpRequest request;
+
+    // Extraire l'URI pour pouvoir déterminer la taille maximale du corps autorisée
+    std::string method, uri, version;
+    size_t first_line_end = raw_request.find("\r\n");
+    if (first_line_end != std::string::npos) {
+        std::string request_line = raw_request.substr(0, first_line_end);
+        std::istringstream iss(request_line);
+        iss >> method >> uri >> version;
+        
+        // Si on a pu extraire l'URI, chercher la configuration de location correspondante
+        if (!uri.empty()) {
+            const LocationConfig* location = route_handler.findMatchingLocation(uri);
+            if (location) {
+                // Définir la taille maximale du corps autorisée pour cette location
+                request.setMaxBodySize(location->client_max_body_size);
+                // LOG désactivé pour réduire le bruit
+                // LOG_INFO("Setting max body size for " << uri << " to " << location->client_max_body_size << " bytes");
+            }
+        }
+    }
+
     if (request.parse(raw_request)) {
         // Nettoyer la requête après traitement
         client_requests[client_fd] = "";
@@ -227,8 +255,6 @@ void Server::sendHttpResponse(int client_fd, const HttpRequest& request) {
         if (sent < 0) {
             LOG_ERROR("Failed to send response: " << strerror(errno));
         } else {
-            LOG_RESPONSE(response.getStatus(), sent);
-            
             // Si c'est une requête "Connection: close", fermer la connexion
             if (request.getHeader("connection") == "close" || response.getHeader("Connection") == "close") {
                 return;

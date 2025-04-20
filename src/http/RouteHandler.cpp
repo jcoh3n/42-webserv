@@ -273,6 +273,8 @@ bool RouteHandler::serveStaticFile(const std::string& file_path, HttpResponse& r
                              file_path.substr(last_slash + 1) : file_path;
         
         response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+        
+
     }
 
     return true;

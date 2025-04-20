@@ -1,10 +1,12 @@
 #include "http/ResponseHandler.hpp"
+#include "utils/Common.hpp"
 #include <sys/socket.h>
 #include <fstream>
 #include <cstring>
 #include <cerrno>
 #include <iostream>
 #include <sstream>
+#include <sys/stat.h>
 
 /**
  * @brief Convertit une valeur numérique en chaîne de caractères
@@ -145,7 +147,6 @@ void ResponseHandler::sendLargeFile(int client_fd, const std::string& file_path,
                 
                 // Envoyer le terminateur de chunk
                 send(client_fd, "\r\n", 2, 0);
-                std::cout << "MIMETYPE: " << getMimeType(file_path) << std::endl;
             }
         }
         
@@ -156,7 +157,6 @@ void ResponseHandler::sendLargeFile(int client_fd, const std::string& file_path,
         file.seekg(0, std::ios::beg);
         std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
         response.setBody(content, getMimeType(file_path));
-        std::cout << "MIMETYPE: " << getMimeType(file_path) << std::endl;
         sendResponse(client_fd, response, request);
     }
 }

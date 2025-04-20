@@ -5,7 +5,11 @@
 #include "http/upload/UploadConfig.hpp"
 #include "http/HttpResponse.hpp"
 #include <string>
+#include <unistd.h> // Pour access()
 
+/**
+ * @brief Classe pour gérer les uploads de fichiers
+ */
 class FileUploadHandler {
 public:
     FileUploadHandler(const UploadConfig& config = UploadConfig())
@@ -30,14 +34,14 @@ public:
 
 private:
     /**
-     * @brief Vérifie si la taille du fichier est acceptable
-     */
-    bool checkFileSize(const std::string& content) const;
-    
-    /**
      * @brief Sauvegarde le fichier sur le disque
      */
     bool saveFile(const std::string& filename, const std::string& content) const;
+    
+    /**
+     * @brief Sanitize le nom du fichier
+     */
+    std::string sanitizeFilename(const std::string& filename) const;
     
     UploadConfig config;
 };

@@ -5,7 +5,7 @@
 #include <sstream>
 #include <algorithm>
 
-HttpRequest::HttpRequest() {}
+HttpRequest::HttpRequest() : max_body_size(DEFAULT_MAX_BODY_SIZE) {}
 
 HttpRequest::~HttpRequest() {}
 
@@ -52,8 +52,8 @@ bool HttpRequest::parse(const std::string& raw_request) {
         body = raw_request.substr(body_start + 4);
         
         // Vérifier la taille du body
-        if (body.length() > MAX_BODY_SIZE) {
-            LOG_ERROR("Request body too large: " << body.length() << " bytes (max: " << MAX_BODY_SIZE << ")");
+        if (body.length() > max_body_size) {
+            LOG_ERROR("Request body too large: " << body.length() << " bytes (max: " << max_body_size << ")");
             return false;
         }
     }

@@ -12,7 +12,7 @@
 class HttpRequest {
 public:
     // Constantes
-    static const size_t MAX_BODY_SIZE = 10 * 1024 * 1024; // 10 Mo
+    static const size_t DEFAULT_MAX_BODY_SIZE = 10 * 1024 * 1024; // 10 Mo par défaut
     
     // Constructeur et destructeur
     HttpRequest();
@@ -21,6 +21,8 @@ public:
     // Méthodes principales
     void clear();
     bool parse(const std::string& raw_request);
+    void setMaxBodySize(size_t size) { max_body_size = size; }
+    size_t getMaxBodySize() const { return max_body_size; }
 
     // Getters pour les données de base
     const std::string& getMethod() const { return method; }
@@ -71,6 +73,7 @@ private:
     
     // Données membres - Formulaires et fichiers
     FormData form_data;
+    size_t max_body_size;  // Taille maximale du body, configurable
 };
 
 #endif // HTTP_REQUEST_HPP 

@@ -185,7 +185,6 @@ void FormParser::parseMultipartPart(const std::string& part, FormData& form_data
         
         if (saveUploadedFile(file, content)) {
             form_data.addUploadedFile(info.name, file);
-            LOG_UPLOAD("File saved: " << info.filename);
         }
     }
     else if (!info.name.empty()) {
