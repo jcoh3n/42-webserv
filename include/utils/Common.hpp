@@ -49,7 +49,8 @@
 # define COLOR_DELETE "\033[38;2;255;71;87m"     // #ff4757 - couleur rouge pour DELETE
 # define COLOR_REDIRECT "\033[38;2;255;107;129m" // #ff6b81 - couleur pour les redirections
 # define COLOR_ALIAS  "\033[38;2;165;94;234m"    // #a55eea - couleur pour les alias
-# define COLOR_UPLOAD "\033[38;2;46;204;113m"    // #2ecc71 - couleur verte pour les uploads/downloads
+# define COLOR_UPLOAD "\033[38;2;46;204;113m"    // #2ecc71 - couleur verte pour les uploads
+# define COLOR_DOWNLOAD "\033[38;2;33;150;243m"  // #2196F3 - couleur bleue pour les downloads
 
 // Macros de logging (système) - simplifiées
 # define LOG_INFO(x)    // Désactivé pour réduire le bruit
@@ -64,6 +65,7 @@
 
 // Macros de logging (réseau et HTTP) - simplifiées
 # define LOG_NETWORK(x) std::cout << BLUE << "→ " << x << RESET << std::endl
+# define LOG_DOWNLOAD(x) std::cout << COLOR_DOWNLOAD << "[↓] " << x << RESET << std::endl  // Download en bleu
 # define LOG_REQUEST(method, uri, code) \
     std::cout << \
     (std::string(method) == "GET" ? COLOR_GET : \

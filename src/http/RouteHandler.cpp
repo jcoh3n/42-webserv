@@ -193,6 +193,9 @@ std::string RouteHandler::getFilePath(const std::string& uri, bool log) const {
         clean_uri = clean_uri.substr(0, question_mark);
     }
     
+    // Décoder l'URI pour gérer les caractères spéciaux (%20, etc.)
+    clean_uri = HttpUtils::urlDecode(clean_uri);
+    
     // Vérifier si l'URI correspond à un alias dans la configuration
     const LocationConfig* location = findMatchingLocation(clean_uri);
     if (location != NULL && !location->alias.empty()) {
@@ -261,9 +264,25 @@ bool RouteHandler::serveStaticFile(const std::string& file_path, HttpResponse& r
         should_display = true;
     }
     
-    // Les fichiers dans /uploads/ sont toujours téléchargés
+        // Les fichiers dans /uploads/ sont toujours téléchargés, avec le bon type MIME
     if (file_path.find("/uploads/") != std::string::npos) {
         should_display = false;
+        
+        // S'assurer que le type MIME est correctement défini en fonction de l'extension
+        size_t dot_pos = file_path.find_last_of('.');
+        if (dot_pos != std::string::npos) {
+            std::string extension = file_path.substr(dot_pos);
+            std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+            
+            // S'assurer que le bon Content-Type est envoyé
+            response.setHeader("Content-Type", mime_type);
+        }
+        
+        // Ajouter un log bleu pour le téléchargement
+        size_t last_slash = file_path.find_last_of('/');
+        std::string filename = (last_slash != std::string::npos) ? 
+                             file_path.substr(last_slash + 1) : file_path;
+        LOG_DOWNLOAD("Téléchargement: " + filename);
     }
     
     // Si ce n'est pas un fichier à afficher, forcer le téléchargement
@@ -273,8 +292,6 @@ bool RouteHandler::serveStaticFile(const std::string& file_path, HttpResponse& r
                              file_path.substr(last_slash + 1) : file_path;
         
         response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
-        
-
     }
 
     return true;
