@@ -7,6 +7,9 @@
 #include <vector>
 #include <map>
 
+// Définition du timeout CGI en secondes
+#define CGI_TIMEOUT 3
+
 class CGIHandler {
 private:
     const HttpRequest& request_;

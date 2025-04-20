@@ -46,7 +46,7 @@ HttpResponse CGIHandler::executeCGI() {
     }
 
     if (pid == 0) {
-        alarm(10);
+        alarm(CGI_TIMEOUT);
         if (!executeCGIScript(pipe_in, pipe_out)) {
             exit(1);
         }
