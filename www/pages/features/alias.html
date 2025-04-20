@@ -6,6 +6,12 @@
     <title>Alias - Webserv 42</title>
     <link rel="stylesheet" href="/styles/webserv-modern.css">
     <style>
+        :root {
+            --fraise-color: #e91e63;
+            --fraise-light: #ffcdd2;
+            --fraise-dark: #c2185b;
+        }
+        
         .alias-container {
             background-color: var(--box-bg);
             border-radius: var(--border-radius);
@@ -13,19 +19,51 @@
             box-shadow: var(--box-shadow);
             max-width: 800px;
             margin: 30px auto;
-            border-top: 4px solid var(--alias-color);
+            border-top: 4px solid var(--fraise-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .alias-container::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 100px;
+            height: 100px;
+            background-color: var(--fraise-light);
+            opacity: 0.3;
+            border-radius: 50%;
+            z-index: 0;
+        }
+        
+        .alias-container::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: -20px;
+            width: 80px;
+            height: 80px;
+            background-color: var(--fraise-light);
+            opacity: 0.2;
+            border-radius: 50%;
+            z-index: 0;
         }
         
         .alias-container h1 {
-            color: var(--alias-color);
+            color: var(--fraise-color);
             margin-top: 0;
             margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
         }
         
         .alias-container p {
             color: var(--secondary-text);
             line-height: 1.6;
             margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
         }
         
         .alias-container code {
@@ -39,18 +77,21 @@
         .button {
             display: inline-block;
             padding: 10px 20px;
-            background-color: var(--alias-color);
+            background-color: var(--fraise-color);
             color: white;
             border-radius: var(--border-radius);
             text-decoration: none;
             transition: all 0.3s ease;
             margin-top: 20px;
             font-weight: 500;
+            position: relative;
+            z-index: 1;
         }
         
         .button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3);
+            background-color: var(--fraise-dark);
         }
         
         .back-button {
@@ -59,8 +100,8 @@
             gap: 8px;
             padding: 12px 24px;
             background: var(--box-bg);
-            color: var(--alias-color);
-            border: 2px solid rgba(156, 39, 176, 0.2);
+            color: var(--fraise-color);
+            border: 2px solid rgba(233, 30, 99, 0.2);
             border-radius: var(--border-radius);
             font-size: 1.1rem;
             text-decoration: none;
@@ -71,14 +112,20 @@
 
         .back-button:hover {
             transform: translateY(-2px);
-            border-color: var(--alias-color);
-            background: rgba(156, 39, 176, 0.05);
+            border-color: var(--fraise-color);
+            background: rgba(233, 30, 99, 0.05);
         }
 
         .back-button::before {
             content: '←';
             font-size: 1.2em;
             line-height: 1;
+        }
+        
+        .strawberry-icon {
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
         }
     </style>
 </head>
@@ -87,11 +134,11 @@
         <a href="/" class="back-button">Retour à l'accueil</a>
         
         <div class="alias-container">
-            <h1>Alias URL</h1>
+            <h1>🍓 Alias URL - Fraise</h1>
             <p>L'alias est une fonctionnalité qui permet de rediriger des URLs spécifiques vers d'autres chemins sur le serveur.</p>
-            <p>Par exemple, l'URL <code>/banana.html</code> est en réalité servie depuis <code>/pages/features/alias.html</code> grâce à une configuration d'alias.</p>
+            <p>Par exemple, l'URL <code>/fraise.html</code> est en réalité servie depuis <code>/pages/features/alias.html</code> grâce à une configuration d'alias.</p>
             <p>Cela permet d'offrir des URLs plus simples ou personnalisées pour certaines ressources, sans avoir à modifier l'emplacement réel des fichiers.</p>
-            <a href="/banana.html" class="button">Tester l'alias /banana.html</a>
+            <a href="/fraise.html" class="button">🍓 Tester l'alias /fraise.html</a>
         </div>
     </div>
 </body>
