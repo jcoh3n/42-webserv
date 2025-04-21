@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertisseur de Température - Webserv 42</title>
+    <link rel="stylesheet" href="/styles/webserv-modern.css">
+    <style>
+        .converter-container {
+            background-color: var(--box-bg);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--box-shadow);
+            max-width: 500px;
+            margin: 50px auto;
+            border-top: 4px solid #FFD600;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 25px;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        label {
+            color: var(--primary-text);
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        input[type="number"] {
+            flex: 1;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid rgba(255, 214, 0, 0.2);
+            border-radius: var(--border-radius);
+            background: rgba(255, 214, 0, 0.05);
+            color: var(--primary-text);
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #FFD600;
+            box-shadow: 0 0 0 3px rgba(255, 214, 0, 0.2);
+        }
+
+        .unit-indicator {
+            font-size: 1.2rem;
+            color: #FFD600;
+            font-weight: bold;
+            width: 40px;
+            text-align: center;
+        }
+
+        .convert-btn {
+            background-color: #FFD600;
+            color: #1a1a1a;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .convert-btn:hover {
+            background-color: #e6c200;
+            transform: translateY(-2px);
+        }
+
+        .convert-btn:active {
+            transform: translateY(1px);
+        }
+
+        .result-area {
+            background: rgba(255, 214, 0, 0.1);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-top: 25px;
+            text-align: center;
+            border: 2px solid rgba(255, 214, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .result-text {
+            color: var(--primary-text);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .formula {
+            color: rgba(255, 214, 0, 0.8);
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .toggle-container {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            border: 2px solid rgba(255, 214, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            background: rgba(255, 214, 0, 0.05);
+            color: var(--primary-text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.active {
+            background: #FFD600;
+            color: #1a1a1a;
+            font-weight: bold;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--box-bg);
+            color: #FFD600;
+            border: 2px solid rgba(255, 214, 0, 0.2);
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            border-color: #FFD600;
+            background: rgba(255, 214, 0, 0.05);
+        }
+
+        .back-button:active {
+            transform: translateY(1px);
+        }
+
+        .back-button::before {
+            content: '←';
+            font-size: 1.2em;
+            line-height: 1;
+            margin-right: 8px;
+        }
+
+        .error-message {
+            color: #f44336;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-button">Retour à l'accueil</a>
+
+        <div class="converter-container">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #FFD600;">Convertisseur de Température</h2>
+
+            <div class="toggle-container">
+                <button id="toCelsius" class="toggle-btn">Fahrenheit → Celsius</button>
+                <button id="toFahrenheit" class="toggle-btn active">Celsius → Fahrenheit</button>
+            </div>
+
+            <div class="input-group">
+                <label id="inputLabel" for="tempInput">Température en Celsius</label>
+                <div class="input-row">
+                    <input type="number" id="tempInput" placeholder="Entrez la température">
+                    <div class="unit-indicator" id="inputUnit">°C</div>
+                </div>
+                <div class="error-message" id="errorMessage">Veuillez entrer une valeur numérique valide</div>
+            </div>
+
+            <button id="convertBtn" class="convert-btn">Convertir</button>
+
+            <div class="result-area">
+                <div class="result-text" id="resultText">--</div>
+                <div class="formula" id="formulaText">°C × 9/5 + 32 = °F</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let conversionDirection = 'to_fahrenheit'; // to_fahrenheit or to_celsius
+        
+        const toCelsiusBtn = document.getElementById('toCelsius');
+        const toFahrenheitBtn = document.getElementById('toFahrenheit');
+        const inputLabel = document.getElementById('inputLabel');
+        const inputUnit = document.getElementById('inputUnit');
+        const tempInput = document.getElementById('tempInput');
+        const convertBtn = document.getElementById('convertBtn');
+        const resultText = document.getElementById('resultText');
+        const formulaText = document.getElementById('formulaText');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Toggle between Celsius to Fahrenheit and Fahrenheit to Celsius
+        toCelsiusBtn.addEventListener('click', () => {
+            conversionDirection = 'to_celsius';
+            toCelsiusBtn.classList.add('active');
+            toFahrenheitBtn.classList.remove('active');
+            inputLabel.textContent = 'Température en Fahrenheit';
+            inputUnit.textContent = '°F';
+            formulaText.textContent = '(°F - 32) × 5/9 = °C';
+            resultText.textContent = '--';
+            errorMessage.style.display = 'none';
+        });
+
+        toFahrenheitBtn.addEventListener('click', () => {
+            conversionDirection = 'to_fahrenheit';
+            toFahrenheitBtn.classList.add('active');
+            toCelsiusBtn.classList.remove('active');
+            inputLabel.textContent = 'Température en Celsius';
+            inputUnit.textContent = '°C';
+            formulaText.textContent = '°C × 9/5 + 32 = °F';
+            resultText.textContent = '--';
+            errorMessage.style.display = 'none';
+        });
+
+        // Handle the conversion
+        convertBtn.addEventListener('click', performConversion);
+        tempInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                performConversion();
+            }
+        });
+
+        function performConversion() {
+            const temperature = tempInput.value.trim();
+            
+            if (!temperature) {
+                showError();
+                return;
+            }
+
+            // Build the URL with parameters
+            const url = new URL('/cgi-bin/temperature_converter.py', window.location.origin);
+            url.searchParams.append('temperature', temperature);
+            url.searchParams.append('direction', conversionDirection);
+
+            // Add a loading state
+            convertBtn.disabled = true;
+            convertBtn.textContent = 'Conversion...';
+            resultText.textContent = 'Chargement...';
+
+            // Make the request to the CGI script
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success' && data.result !== null) {
+                        const inputTemp = parseFloat(data.original);
+                        const outputTemp = data.result;
+                        const unit = data.unit;
+
+                        resultText.textContent = `${outputTemp} ${unit}`;
+                        errorMessage.style.display = 'none';
+                    } else {
+                        showError();
+                    }
+                })
+                .catch(error => {
+                    showError();
+                    console.error('Error:', error);
+                })
+                .finally(() => {
+                    // Reset the button state
+                    convertBtn.disabled = false;
+                    convertBtn.textContent = 'Convertir';
+                });
+        }
+
+        function showError() {
+            errorMessage.style.display = 'block';
+            resultText.textContent = '--';
+        }
+    </script>
+</body>
+</html> 

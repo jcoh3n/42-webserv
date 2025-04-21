@@ -1,6 +1,2 @@
-check le temps des cgi 
-->> sinon return to 504 STATUS ERROR
-
-fundrion alarm() en C -> already setup to improve 
-page 504 error to do 
-
+error 403 on folder that i can access with autoindex=off 
+bonus : COOKIES/SESSION to do
