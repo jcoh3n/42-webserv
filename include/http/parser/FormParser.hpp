@@ -62,15 +62,6 @@ private:
      */
     static void parseMultipartPart(const std::string& part, FormData& form_data);
     
-    /**
-     * @brief Sauvegarde un fichier uploadé
-     *
-     * @param file Informations sur le fichier
-     * @param content Contenu du fichier
-     * @return bool Succès de la sauvegarde
-     */
-    static bool saveUploadedFile(const UploadedFile& file, const std::string& content);
-    
     // Constructeur privé pour empêcher l'instanciation
     FormParser() {}
 };

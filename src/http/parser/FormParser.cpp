@@ -183,36 +183,9 @@ void FormParser::parseMultipartPart(const std::string& part, FormData& form_data
         file.content_type = info.content_type;
         file.data = content;
         
-        if (saveUploadedFile(file, content)) {
-            form_data.addUploadedFile(info.name, file);
-        }
+        form_data.addUploadedFile(info.name, file);
     }
     else if (!info.name.empty()) {
         form_data.addFormValue(info.name, content);
     }
-}
-
-bool FormParser::saveUploadedFile(const UploadedFile& file, const std::string& content) {
-    std::string upload_dir = "./www/uploads/";
-    
-    struct stat info;
-    if (stat(upload_dir.c_str(), &info) != 0 || !(info.st_mode & S_IFDIR)) {
-        LOG_WARNING("Upload directory does not exist, creating: " << upload_dir);
-        if (mkdir(upload_dir.c_str(), 0755) != 0) {
-            LOG_ERROR("Failed to create upload directory: " << upload_dir);
-            return false;
-        }
-    }
-    
-    std::string file_path = upload_dir + file.filename;
-    std::ofstream file_out(file_path.c_str(), std::ios::binary);
-    if (!file_out) {
-        LOG_ERROR("Failed to save uploaded file: " << file_path);
-        return false;
-    }
-    
-    file_out.write(content.data(), content.size());
-    file_out.close();
-    
-    return true;
 } 
