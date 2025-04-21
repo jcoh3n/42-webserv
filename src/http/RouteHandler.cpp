@@ -169,7 +169,7 @@ HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request, const s
     }
     
     // Méthode POST non supportée pour cette ressource
-    return serveErrorPage(405, "Method Not Allowed");
+    return serveErrorPage(501, "Not Implemented - POST not supported for this resource");
 }
 
 HttpResponse RouteHandler::handleDeleteRequest(const HttpRequest& request) {
@@ -473,7 +473,7 @@ std::string RouteHandler::getFileExtension(const std::string& path) const {
 
 HttpResponse RouteHandler::handleTasksApiRequest(const HttpRequest& /* request */) {
     // Implémentation de l'API tasks
-    return HttpResponse::createError(501, "Not Implemented");
+    return serveErrorPage(501, "API Tasks not implemented yet");
 }
 
 bool RouteHandler::isCgiResource(const std::string& path) const {

@@ -5,7 +5,7 @@
 #include <sstream>
 #include <algorithm>
 
-HttpRequest::HttpRequest() : max_body_size(DEFAULT_MAX_BODY_SIZE) {}
+HttpRequest::HttpRequest() : max_body_size(DEFAULT_MAX_BODY_SIZE), error_code(0), error_message("") {}
 
 HttpRequest::~HttpRequest() {}
 
@@ -17,6 +17,8 @@ void HttpRequest::clear() {
     body.clear();
     query_string.clear();
     form_data.clear();
+    error_code = 0;
+    error_message = "";
 }
 
 bool HttpRequest::parse(const std::string& raw_request) {
@@ -54,6 +56,8 @@ bool HttpRequest::parse(const std::string& raw_request) {
         // Vérifier la taille du body
         if (body.length() > max_body_size) {
             LOG_ERROR("Request body too large: " << body.length() << " bytes (max: " << max_body_size << ")");
+            error_code = 413;  // Définir le code d'erreur payload too large
+            error_message = "Payload Too Large";
             return false;
         }
     }

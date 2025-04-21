@@ -312,3 +312,97 @@ int Server::getSocketFd() const {
 bool Server::matchesSocketFd(int fd) const {
     return server_socket.getFd() == fd;
 }
+
+// Traitement d'une requête complète
+void Server::processCompleteRequest(int client_fd, const std::string& raw_request) {
+    HttpRequest request;
+    if (!request.parse(raw_request)) {
+        // Requête invalide
+        HttpResponse response;
+        response.setStatus(400);
+        response.setHeader("Connection", "close");
+        
+        std::string error_body = "<html><body><h1>400 Bad Request</h1></body></html>";
+        response.setBody(error_body);
+        
+        // Journaliser la réponse d'erreur
+        LOG_INFO("Invalid Request");
+        LOG_ERROR("400 • Bad Request");
+        
+        // Envoyer la réponse d'erreur
+        try {
+            std::string http_response = response.build();
+            send(client_fd, http_response.c_str(), http_response.size(), 0);
+        } catch (const std::exception& e) {
+            LOG_ERROR("Error sending error response: " << e.what());
+        }
+        return;
+    }
+    
+    // Journaliser la requête
+    LOG_INFO("Received " << request.getMethod() << " request for " << request.getUri());
+    
+    // Vérifier si l'hôte est autorisé
+    std::string host = request.getHeader("host");
+    bool host_allowed = server_config.server_names.empty(); // Si pas de noms définis, accepter tout
+    
+    if (!host_allowed && !host.empty()) {
+        // Enlever le port s'il est présent dans l'en-tête Host
+        size_t colon_pos = host.find(':');
+        if (colon_pos != std::string::npos) {
+            host = host.substr(0, colon_pos);
+        }
+        
+        // Vérifier si l'hôte est dans la liste des noms de serveur autorisés
+        for (std::vector<std::string>::const_iterator it = server_config.server_names.begin();
+             it != server_config.server_names.end(); ++it) {
+            if (*it == host) {
+                host_allowed = true;
+                break;
+            }
+        }
+    }
+    
+    if (!host_allowed) {
+        // Créer une réponse 403 Forbidden
+        HttpResponse response;
+        response.setStatus(403);
+        response.setHeader("Connection", "close");
+        
+        std::string error_body = "<html><body><h1>403 Forbidden</h1></body></html>";
+        response.setBody(error_body);
+        
+        // Envoyer la réponse
+        try {
+            std::string http_response = response.build();
+            send(client_fd, http_response.c_str(), http_response.size(), 0);
+        } catch (const std::exception& e) {
+            LOG_ERROR("Error sending forbidden response: " << e.what());
+        }
+        return;
+    }
+    
+    // Traiter la requête et envoyer la réponse
+    try {
+        sendHttpResponse(client_fd, request);
+    } catch (const std::exception& e) {
+        LOG_ERROR("Error processing request: " << e.what());
+    }
+}
+
+// Gère un timeout de client
+void Server::handleClientTimeout(int client_fd) {
+    // Créer une réponse d'erreur 408 Request Timeout
+    HttpResponse error_response = route_handler.serveErrorPage(408, "Request Timeout");
+    
+    // Envoyer la réponse d'erreur
+    try {
+        std::string http_response = error_response.build();
+        send(client_fd, http_response.c_str(), http_response.size(), 0);
+    } catch (const std::exception& e) {
+        LOG_ERROR("Error sending timeout response: " << e.what());
+    }
+    
+    // Fermer la connexion
+    closeClientConnection(client_fd);
+}

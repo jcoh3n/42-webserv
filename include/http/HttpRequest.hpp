@@ -32,6 +32,10 @@ public:
     const std::string& getQueryString() const { return query_string; }
     const std::map<std::string, std::string>& getHeaders() const { return headers; }
     
+    // Getters pour les codes d'erreur
+    int getErrorCode() const { return error_code; }
+    const std::string& getErrorMessage() const { return error_message; }
+    
     // Récupérer une en-tête spécifique
     std::string getHeader(const std::string& name) const {
         std::string lowercase_name = name;
@@ -74,6 +78,8 @@ private:
     // Données membres - Formulaires et fichiers
     FormData form_data;
     size_t max_body_size;  // Taille maximale du body, configurable
+    int error_code;
+    std::string error_message;
 };
 
 #endif // HTTP_REQUEST_HPP 

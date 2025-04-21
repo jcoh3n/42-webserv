@@ -30,6 +30,7 @@ class Server
 
 	// Méthodes privées
 	void sendHttpResponse(int client_fd, const HttpRequest& request); // Envoi d'une réponse HTTP
+    void processCompleteRequest(int client_fd, const std::string& raw_request); // Traitement d'une requête complète
 
   public:
 	Server(int port, const ServerConfig& config);
@@ -43,6 +44,7 @@ class Server
 	int acceptNewConnection();  // Accepter une nouvelle connexion client, retourne le nouveau fd
 	bool handleClientData(int client_fd); // Traiter les données reçues d'un client, retourne false si la connexion doit être fermée
     void closeClientConnection(int client_fd); // Ferme une connexion client
+    void handleClientTimeout(int client_fd); // Gère un timeout de client
     
     // Accesseurs
     int getPort() const { return port; }

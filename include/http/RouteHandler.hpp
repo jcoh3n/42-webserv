@@ -26,6 +26,10 @@ public:
     // Méthode pour trouver la location correspondante à une URI
     const LocationConfig* findMatchingLocation(const std::string& uri) const;
 
+    // Méthodes de gestion du cache
+    bool checkNotModified(const HttpRequest& request, const std::string& file_path, HttpResponse& response);
+    HttpResponse serveErrorPage(int error_code, const std::string& message);
+
 private:
     // Répertoire racine pour les fichiers statiques
     std::string root_directory;
@@ -54,9 +58,6 @@ private:
     bool isCGIRequest(const std::string& path, const LocationConfig& location) const;
     std::string getFileExtension(const std::string& path) const;
     
-    // Méthodes de gestion du cache
-    bool checkNotModified(const HttpRequest& request, const std::string& file_path, HttpResponse& response);
-    HttpResponse serveErrorPage(int error_code, const std::string& message);
     static std::map<std::string, std::string> create_interpreter_map();
 };
 
