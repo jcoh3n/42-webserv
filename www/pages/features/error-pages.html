@@ -154,28 +154,40 @@
             </div>
             
             <div class="error-cards">
-                <a href="/page-qui-nexiste-pas-404" class="error-card" data-code="404">
-                    <p>Page non trouvée</p>
+                <a href="/cgi-bin/bad-request.py" class="error-card" data-code="400">
+                    <p>Requête incorrecte</p>
                 </a>
                 
                 <a href="/restricted-area" class="error-card" data-code="403">
                     <p>Accès interdit</p>
                 </a>
                 
-                <a href="/cgi-bin/crash.py" class="error-card" data-code="500">
-                    <p>Erreur interne</p>
-                </a>
-                
-                <a href="/cgi-bin/infinite-loop.cgi" class="error-card" data-code="504">
-                    <p>Gateway Timeout</p>
+                <a href="/page-qui-nexiste-pas-404" class="error-card" data-code="404">
+                    <p>Page non trouvée</p>
                 </a>
                 
                 <a href="/cgi-bin/method-not-allowed.py" class="error-card" data-code="405">
                     <p>Méthode non autorisée</p>
                 </a>
                 
-                <a href="/cgi-bin/bad-request.py" class="error-card" data-code="400">
-                    <p>Requête incorrecte</p>
+                <a href="/cgi-bin/request-timeout.py" class="error-card" data-code="408">
+                    <p>Délai d'attente dépassé</p>
+                </a>
+                
+                <a href="/cgi-bin/payload-too-large.py" class="error-card" data-code="413">
+                    <p>Contenu trop volumineux</p>
+                </a>
+                
+                <a href="/cgi-bin/crash.py" class="error-card" data-code="500">
+                    <p>Erreur interne</p>
+                </a>
+                
+                <a href="/cgi-bin/not-implemented.py" class="error-card" data-code="501">
+                    <p>Non implémenté</p>
+                </a>
+                
+                <a href="/cgi-bin/infinite-loop.cgi" class="error-card" data-code="504">
+                    <p>Gateway Timeout</p>
                 </a>
             </div>
             

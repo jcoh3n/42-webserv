@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>408 Request Timeout</title>
+    <link rel="stylesheet" href="/styles/webserv-modern.css">
+    <style>
+        :root {
+            --background: #121212;
+            --box-bg: #1e1e1e;
+            --primary-text: #ffffff;
+            --secondary-text: #b3b3b3;
+            --accent: #00BABC;
+            --accent-color: #00babc;
+            --accent-hover: #008f91;
+            --error-color: #ff6348;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--primary-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .error-container {
+            background-color: var(--box-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+            border-top: 4px solid var(--error-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .error-code {
+            font-size: 8rem;
+            font-weight: 800;
+            margin: 0;
+            color: var(--error-color);
+            opacity: 0.8;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .error-message {
+            font-size: 1.8rem;
+            margin: 20px 0 30px;
+            color: var(--primary-text);
+        }
+        
+        .error-description {
+            color: var(--secondary-text);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--error-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background-color: #e04d32;
+            transform: translateY(-2px);
+        }
+        
+        .bg-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.05;
+            pointer-events: none;
+        }
+        
+        .error-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .timer {
+            font-size: 2.5rem;
+            color: var(--error-color);
+            margin: 1rem 0;
+            font-weight: bold;
+            opacity: 0.7;
+        }
+        
+        /* Animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .shake {
+            animation: shake 0.8s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-container" id="error-container">
+            <div class="bg-pattern">
+                <!-- Pattern de fond avec des X -->
+                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                    <pattern id="pattern-x" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M0,0 L10,10 M10,0 L0,10" stroke="currentColor" stroke-width="2"/>
+                    </pattern>
+                    <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern-x)" />
+                </svg>
+            </div>
+            
+            <div class="error-content">
+                <h1 class="error-code">408</h1>
+                <h2 class="error-message">Délai d'attente dépassé</h2>
+                <p class="error-description">
+                    Le serveur a dépassé le délai d'attente en attendant la requête complète.<br>
+                    Votre connexion était peut-être lente ou la requête trop volumineuse.
+                </p>
+                <a href="/" class="back-btn">Retour à l'accueil</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Ajouter une animation de tremblement à l'apparition de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.classList.add('shake');
+            
+            // Retirer la classe après l'animation pour permettre de la réappliquer
+            setTimeout(() => {
+                errorContainer.classList.remove('shake');
+            }, 800);
+            
+            // Ajouter l'animation de tremblement quand on clique sur le code d'erreur
+            const errorCode = document.querySelector('.error-code');
+            errorCode.addEventListener('click', () => {
+                errorContainer.classList.add('shake');
+                setTimeout(() => {
+                    errorContainer.classList.remove('shake');
+                }, 800);
+            });
+            
+            // Animation du chronomètre
+            const timerEl = document.getElementById('timer');
+            let dots = 0;
+            
+            setInterval(() => {
+                dots = (dots + 1) % 4;
+                let dotString = '.'.repeat(dots);
+                timerEl.textContent = dotString;
+            }, 500);
+        });
+    </script>
+</body>
+</html> 
