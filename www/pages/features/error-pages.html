@@ -162,17 +162,30 @@
                     <p>Accès interdit</p>
                 </a>
                 
-                <a href="/cgi-bin/error500.cgi" class="error-card" data-code="500">
+                <a href="/cgi-bin/crash.py" class="error-card" data-code="500">
                     <p>Erreur interne</p>
                 </a>
                 
                 <a href="/cgi-bin/infinite-loop.cgi" class="error-card" data-code="504">
                     <p>Gateway Timeout</p>
                 </a>
+                
+                <a href="/cgi-bin/method-not-allowed.py" class="error-card" data-code="405">
+                    <p>Méthode non autorisée</p>
+                </a>
+                
+                <a href="/cgi-bin/bad-request.py" class="error-card" data-code="400">
+                    <p>Requête incorrecte</p>
+                </a>
             </div>
             
             <div class="footer">
                 <a href="/" class="back-button">Retour à l'accueil</a>
+                <p style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                    Note: Toutes ces erreurs sont simulées intentionnellement. Dans un environnement de production, 
+                    les pages d'erreur personnalisées offrent aux utilisateurs une expérience plus conviviale 
+                    lorsque des problèmes surviennent.
+                </p>
             </div>
         </div>
     </div>
