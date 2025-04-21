@@ -232,7 +232,8 @@ Accept: text/html,application/xhtml+xml,application/xml</div>
             
             // Test GET button
             testGetBtn.addEventListener('click', () => {
-                fetch('/pages/methods/get.html')
+                // Using a random URL parameter to ensure it's a new request each time
+                fetch('/?test-get=' + Math.random())
                     .then(response => {
                         if(response.ok) {
                             showSuccessPopup(`Requête GET réussie! Statut: <code>${response.status} ${response.statusText}</code>`);
