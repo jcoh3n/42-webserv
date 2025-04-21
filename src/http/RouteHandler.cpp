@@ -38,7 +38,7 @@ HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
         }
         
         if (!method_allowed) {
-            return HttpResponse::createError(405, "Method Not Allowed");
+            return serveErrorPage(405, "Method Not Allowed");
         }
     }
     
@@ -54,7 +54,7 @@ HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
         return handleDeleteRequest(request);
     }
     
-    return HttpResponse::createError(405, "Method Not Allowed");
+    return serveErrorPage(405, "Method Not Allowed");
 }
 
 HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
@@ -131,12 +131,12 @@ HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request, const s
     if (request.getUri() == "/upload") {
         const std::string& content_type = request.getHeader("content-type");
         if (content_type.find("multipart/form-data") == std::string::npos) {
-            return HttpResponse::createError(400, "Invalid Content-Type for file upload");
+            return serveErrorPage(400, "Invalid Content-Type for file upload");
         }
         
         const std::map<std::string, UploadedFile>& uploaded_files = request.getFormData().getUploadedFiles();
         if (uploaded_files.empty()) {
-            return HttpResponse::createError(400, "No files uploaded");
+            return serveErrorPage(400, "No files uploaded");
         }
         
         // Utiliser le chemin d'upload configuré
@@ -145,7 +145,7 @@ HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request, const s
         // Trouver la configuration de location correspondante
         std::map<std::string, LocationConfig>::const_iterator it = server_config.locations.find("/upload");
         if (it == server_config.locations.end()) {
-            return HttpResponse::createError(500, "Upload location not configured");
+            return serveErrorPage(500, "Upload location not configured");
         }
         
         UploadConfig upload_config(upload_dir, it->second.client_max_body_size);
@@ -169,7 +169,7 @@ HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request, const s
     }
     
     // Méthode POST non supportée pour cette ressource
-    return HttpResponse::createError(405, "Method Not Allowed");
+    return serveErrorPage(405, "Method Not Allowed");
 }
 
 HttpResponse RouteHandler::handleDeleteRequest(const HttpRequest& request) {

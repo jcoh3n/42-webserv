@@ -11,7 +11,7 @@ Socket::~Socket() {
 }
 
 void Socket::create() {
-    fd = socket(AF_INET, SOCK_STREAM, 0);
+    fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
     if (fd < 0) {
         throw std::runtime_error("Socket creation failed: " + std::string(strerror(errno)));
     }
@@ -22,7 +22,7 @@ void Socket::bind(int port) {
     struct sockaddr_in address;
     memset(&address, 0, sizeof(address));
     address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_addr.s_addr = htonl(INADDR_ANY);
     address.sin_port = htons(port);
 
     if (::bind(fd, (struct sockaddr*)&address, sizeof(address)) < 0) {

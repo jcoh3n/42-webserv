@@ -172,12 +172,25 @@ bool MultiServerManager::handleEvent(int index) {
     
     // Vérifier si c'est un socket serveur ou client
     if (server->matchesSocketFd(fd)) {
-        // C'est un socket serveur, accepter la nouvelle connexion
-        int client_fd = server->acceptNewConnection();
-        if (client_fd >= 0) {
+        // C'est un socket serveur, accepter plusieurs connexions d'un coup
+        int max_accepts = 10; // Limiter pour éviter la famine des autres événements
+        int accepted = 0;
+        
+        while (accepted < max_accepts) {
+            int client_fd = server->acceptNewConnection();
+            if (client_fd < 0) {
+                if (errno != EAGAIN && errno != EWOULDBLOCK) {
+                    LOG_ERROR("Error accepting connection: " << strerror(errno));
+                }
+                break; // Plus de connexions à accepter pour le moment
+            }
+            
             // Ajouter le nouveau client au poll
             addFdToPoll(client_fd, server);
+            accepted++;
         }
+        
+        return true;
     } else {
         // C'est un socket client, traiter les données
         bool keep_connection = server->handleClientData(fd);
