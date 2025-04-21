@@ -44,12 +44,20 @@
             background: rgba(255, 214, 0, 0.05);
             color: var(--primary-text);
             transition: all 0.3s ease;
+            -moz-appearance: textfield;
         }
 
         input[type="number"]:focus {
             outline: none;
             border-color: #FFD600;
             box-shadow: 0 0 0 3px rgba(255, 214, 0, 0.2);
+        }
+
+        /* Remove arrow buttons in Chrome, Safari, Edge, Opera */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         .unit-indicator {
