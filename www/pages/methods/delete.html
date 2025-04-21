@@ -335,34 +335,59 @@
             });
         }
 
-        function loadFiles() {
-            updateCommandLine();
-            fetch('/uploads/')
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const links = Array.from(doc.querySelectorAll('a'))
-                        .filter(a => a.href.includes('/uploads/'))
-                        .map(a => a.textContent.trim())
-                        .filter(name => name !== '..' && name !== '.');
-
-                    if (links.length === 0) {
-                        fileList.innerHTML = '<div class="no-files">Aucun fichier trouvé dans le dossier uploads</div>';
-                        return;
-                    }
-
-                    fileList.innerHTML = links.map(filename => `
-                        <div class="file-item">
-                            <span class="file-name">${filename}</span>
-                            <button class="delete-btn" onclick="deleteFile('${filename}', this.parentElement)">Supprimer</button>
-                        </div>
-                    `).join('');
-                })
-                .catch(error => {
-                    fileList.innerHTML = '<div class="no-files">Erreur lors du chargement des fichiers</div>';
-                    console.error('Erreur:', error);
+        async function loadFiles() {
+            try {
+                const response = await fetch('/uploads/');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Vérifier si c'est une page d'erreur
+                if (doc.title && doc.title.includes('Error')) {
+                    throw new Error('Received error page');
+                }
+                
+                const fileList = document.getElementById('fileList');
+                fileList.innerHTML = '';
+                
+                // Récupérer tous les liens dans le listing
+                const links = Array.from(doc.querySelectorAll('.listing-item:not(.directory):not(.parent-dir) a')).filter(link => {
+                    const text = link.textContent.trim();
+                    return text && text !== 'Parent Directory' && text !== 'Name';
                 });
+                
+                if (links.length === 0) {
+                    fileList.innerHTML = '<div class="no-files">No files found in uploads directory</div>';
+                    return;
+                }
+                
+                links.forEach(link => {
+                    const fileName = link.textContent.trim();
+                    const listItem = document.createElement('div');
+                    listItem.className = 'file-item';
+                    
+                    const fileNameSpan = document.createElement('span');
+                    fileNameSpan.className = 'file-name';
+                    fileNameSpan.textContent = fileName;
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.onclick = () => deleteFile(fileName, listItem);
+                    
+                    listItem.appendChild(fileNameSpan);
+                    listItem.appendChild(deleteBtn);
+                    fileList.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error('Error loading files:', error);
+                document.getElementById('fileList').innerHTML = 
+                    `<div class="error">Error loading files: ${error.message}</div>`;
+            }
         }
 
         // Charge la liste des fichiers au chargement de la page
