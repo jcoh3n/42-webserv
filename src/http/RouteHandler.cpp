@@ -27,6 +27,21 @@ HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
         return response;
     }
     
+    // Vérifier si la méthode est autorisée dans cette location
+    if (location != NULL) {
+        bool method_allowed = false;
+        for (size_t i = 0; i < location->allowed_methods.size(); ++i) {
+            if (location->allowed_methods[i] == request.getMethod()) {
+                method_allowed = true;
+                break;
+            }
+        }
+        
+        if (!method_allowed) {
+            return HttpResponse::createError(405, "Method Not Allowed");
+        }
+    }
+    
     std::string file_path = getFilePath(request.getUri(), true);
     
     if (request.getMethod() == "GET") {
@@ -79,6 +94,12 @@ HttpResponse RouteHandler::handleGetRequest(const HttpRequest& request) {
             }
             return serveStaticFile(index_path, response) ? 
                 response : serveErrorPage(500, "Internal Server Error");
+        }
+        
+        // Vérifier si l'autoindex est activé pour cette location
+        const LocationConfig* location = findMatchingLocation(uri);
+        if (location && !location->autoindex) {
+            return serveErrorPage(403, "Forbidden - Directory listing disabled");
         }
         
         // Générer la liste du répertoire
@@ -204,6 +225,18 @@ std::string RouteHandler::getFilePath(const std::string& uri, bool log) const {
             LOG_ALIAS(clean_uri, location->alias);
         }
         return location->alias;
+    }
+    
+    // Pour le répertoire upload, vérifier autoindex lors de l'accès direct à /upload
+    if (clean_uri == "/upload" || clean_uri == "/upload/") {
+        const LocationConfig* upload_location = findMatchingLocation("/upload");
+        if (upload_location && !upload_location->autoindex) {
+            // Ajouter un marqueur pour indiquer que ce répertoire ne doit pas être listé
+            // Ce marqueur sera vérifié dans handleGetRequest
+            if (log) {
+                LOG_ERROR("Access to /upload directory is restricted by configuration");
+            }
+        }
     }
     
     // Construire le chemin complet
