@@ -300,6 +300,7 @@ HttpResponse CGIHandler::parseCGIOutput(const std::string& output) {
     bool headers_done = false;
     bool has_status = false;
     bool has_content_type = false;
+    int status_code = 200;
 
     while (std::getline(iss, line)) {
         if (!line.empty() && line[line.length() - 1] == '\r') {
@@ -320,7 +321,8 @@ HttpResponse CGIHandler::parseCGIOutput(const std::string& output) {
                 value.erase(value.find_last_not_of(" \t") + 1);
 
                 if (key == "Status") {
-                    response.setStatus(atoi(value.c_str()));
+                    status_code = atoi(value.c_str());
+                    response.setStatus(status_code);
                     has_status = true;
                 } else if (key == "Content-Type") {
                     response.setHeader(key, value);
@@ -361,6 +363,20 @@ HttpResponse CGIHandler::parseCGIOutput(const std::string& output) {
     }
     while (!body.empty() && (body[body.length() - 1] == '\n' || body[body.length() - 1] == '\r')) {
         body.erase(body.length() - 1);
+    }
+
+    // Si le code de statut est un code d'erreur, utiliser les pages d'erreur personnalisées
+    if (has_status && (status_code >= 400)) {
+        // Extraire juste le message d'erreur de la sortie CGI s'il est disponible
+        std::string error_message = "Error";
+        size_t title_start = body.find("<h1>");
+        if (title_start != std::string::npos) {
+            size_t title_end = body.find("</h1>", title_start);
+            if (title_end != std::string::npos) {
+                error_message = body.substr(title_start + 4, title_end - title_start - 4);
+            }
+        }
+        return serveErrorPage(status_code, error_message);
     }
 
     response.setBody(body);
