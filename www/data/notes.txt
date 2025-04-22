@@ -1,0 +1,17 @@
+Notes sur le projet WebServ
+
+Ce fichier est un exemple de fichier texte pour tester le listing et le téléchargement.
+
+Fonctionnalités implémentées:
+- Serveur HTTP conforme aux spécifications
+- Gestion des méthodes GET, POST, DELETE
+- Support des CGI
+- Pages d'erreur personnalisées
+- Autoindex
+- Téléchargement de fichiers
+- Configuration flexible
+
+TODO:
+- Améliorer les performances pour les gros fichiers
+- Ajouter plus de tests unitaires
+- Compléter la documentation 

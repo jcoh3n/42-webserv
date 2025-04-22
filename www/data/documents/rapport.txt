@@ -1,0 +1,35 @@
+RAPPORT DE PROJET : WEBSERV
+
+Date : 6 juin 2024
+Auteurs : Équipe WebServ
+
+INTRODUCTION
+-----------
+Ce rapport présente le développement et l'implémentation du projet WebServ, un serveur HTTP écrit en C++ conforme aux standards de la RFC.
+
+OBJECTIFS DU PROJET
+-----------------
+1. Créer un serveur HTTP capable de traiter les requêtes GET, POST et DELETE
+2. Implémenter un système de configuration similaire à Nginx
+3. Gérer les scripts CGI pour un contenu dynamique
+4. Supporter l'autoindex pour le listing des répertoires
+5. Développer un système de gestion des erreurs robuste
+
+IMPLÉMENTATION
+--------------
+Le serveur a été implémenté avec une architecture modulaire permettant:
+- La gestion des connexions concurrentes via un multiplexeur d'E/S
+- Un système de parsing des requêtes HTTP robuste
+- Une gestion des routes configurables
+- L'exécution de scripts CGI dans un environnement sécurisé
+- La gestion des uploads et téléchargements de fichiers
+
+DIFFICULTÉS RENCONTRÉES
+----------------------
+- Gestion des timeout pour les scripts CGI
+- Implémentation correcte du protocole HTTP selon la RFC
+- Optimisation des performances pour les transferts de gros fichiers
+
+CONCLUSION
+---------
+Le projet WebServ est fonctionnel et répond à l'ensemble des exigences initiales. Des améliorations sont encore possibles, notamment au niveau de la performance et de la sécurité. 

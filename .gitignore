@@ -22,8 +22,6 @@ objs/
 
 # Dossiers de données générés
 uploads/
-data/
-logs/
 
 # Fichiers Core dump
 core.*

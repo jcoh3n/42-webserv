@@ -1,0 +1,10 @@
+gstion de multi server sur meme port, et meme host
+
+multiple file upload option
+
+cookies secrret acess, choper cookie dans une page et revenri sur la page lock
+setup les cookies simplements (HEADER)
+
+
+fix possibilite de creer uen location sans methodes dessus
+et donc, si il n y a pas de location sur un dossier/fichiers, --> retourn error 403 car actuellemetn accessible 
