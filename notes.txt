@@ -1,2 +1,4 @@
-error 403 on folder that i can access with autoindex=off 
-bonus : COOKIES/SESSION to do
+error status 301 on redirect dont appear on server logs
+
+verify cas d'erreur pour les autres errors except : 500/504 -> crash.py/infinity-loop.cgi
+fait en sorte alors que les cgi d errerus, fassent reelement les cas d'erreurs. 
