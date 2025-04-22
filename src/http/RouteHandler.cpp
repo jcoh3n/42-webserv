@@ -24,6 +24,7 @@ HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
         // Si une redirection est configurée, créer la réponse de redirection
         HttpResponse response;
         response.setRedirect(location->redirect_url, location->redirect_code);
+        LOG_REDIRECT(request.getUri(), location->redirect_url, location->redirect_code);
         return response;
     }
     

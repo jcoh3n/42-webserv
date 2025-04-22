@@ -1,4 +1,0 @@
-error status 301 on redirect dont appear on server logs
-
-verify cas d'erreur pour les autres errors except : 500/504 -> crash.py/infinity-loop.cgi
-fait en sorte alors que les cgi d errerus, fassent reelement les cas d'erreurs. 
