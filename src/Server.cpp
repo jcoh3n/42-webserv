@@ -125,7 +125,7 @@ bool Server::handleClientData(int client_fd) {
                 usleep(1000); // Attendre 1ms avant de réessayer
                 continue;
             }
-            LOG_ERROR("Error reading from client: " << strerror(errno));
+            LOG_NETWORK("Client disconnected: " << strerror(errno));
             return false;
         } else if (nbytes == 0) {
             // Client a fermé la connexion
