@@ -1,13 +1,6 @@
 cookies secret acess, choper cookie dans une page et revenri sur la page lock
 setup les cookies simplements (HEADER)
 
-[-] Error reading from client: Connection reset by peer
-[-] Error reading from client: Connection reset by peer
-[-] Error reading from client: Connection reset by peer
-[-] Error reading from client: Connection reset by peer
-[-] Error reading from client: Connection reset by peer
-
-
 fix restricted-area error 403 sans metttre chmod 000, vu que la location n est pas definis, on ne peut pas aller dessus donc erreur 403 meme si cela existe
 revoir errro 403 orga
 

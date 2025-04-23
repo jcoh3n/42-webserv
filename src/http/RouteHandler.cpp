@@ -18,17 +18,30 @@
 #include "http/utils/HttpUtils.hpp"
 
 HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
+    const std::string& uri = request.getUri();
     // Vérifier d'abord si cette URI est configurée pour une redirection
-    const LocationConfig* location = findMatchingLocation(request.getUri());
+    const LocationConfig* location = findMatchingLocation(uri);
     if (location != NULL && location->redirect_code > 0) {
         // Si une redirection est configurée, créer la réponse de redirection
         HttpResponse response;
         response.setRedirect(location->redirect_url, location->redirect_code);
-        LOG_REDIRECT(request.getUri(), location->redirect_url, location->redirect_code);
+        LOG_REDIRECT(uri, location->redirect_url, location->redirect_code);
         return response;
     }
+
+    // Si aucune location n'est trouvée pour l'URI, vérifier si la ressource existe
+    // Si elle existe mais n'a pas de location définie, retourner 403 Forbidden
+    if (location == NULL) {
+        std::string file_path_check = getFilePath(uri, false); // Ne pas logger ici
+        if (FileUtils::fileExists(file_path_check)) {
+            // Ressource existe mais pas de location définie -> Forbidden
+            LOG_WARNING("Access to existing resource without defined location: " << uri);
+            return serveErrorPage(403, "Forbidden - No defined location for this resource");
+        }
+        // Si la ressource n'existe pas, la gestion du 404 sera faite plus tard dans handleGetRequest ou autre
+    }
     
-    // Vérifier si la méthode est autorisée dans cette location
+    // Vérifier si la méthode est autorisée dans cette location (si une location a été trouvée)
     if (location != NULL) {
         bool method_allowed = false;
         for (size_t i = 0; i < location->allowed_methods.size(); ++i) {
@@ -43,7 +56,7 @@ HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
         }
     }
     
-    std::string file_path = getFilePath(request.getUri(), true);
+    std::string file_path = getFilePath(uri, true);
     
     if (request.getMethod() == "GET") {
         return handleGetRequest(request);
