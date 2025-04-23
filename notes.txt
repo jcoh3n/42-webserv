@@ -1,10 +1,14 @@
-gstion de multi server sur meme port, et meme host
-
-multiple file upload option
-
-cookies secrret acess, choper cookie dans une page et revenri sur la page lock
+cookies secret acess, choper cookie dans une page et revenri sur la page lock
 setup les cookies simplements (HEADER)
 
+[-] Error reading from client: Connection reset by peer
+[-] Error reading from client: Connection reset by peer
+[-] Error reading from client: Connection reset by peer
+[-] Error reading from client: Connection reset by peer
+[-] Error reading from client: Connection reset by peer
 
-fix possibilite de creer uen location sans methodes dessus
+
+fix restricted-area error 403 sans metttre chmod 000, vu que la location n est pas definis, on ne peut pas aller dessus donc erreur 403 meme si cela existe
+revoir errro 403 orga
+
 et donc, si il n y a pas de location sur un dossier/fichiers, --> retourn error 403 car actuellemetn accessible 
