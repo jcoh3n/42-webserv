@@ -6,6 +6,7 @@
 #include "utils/Common.hpp"
 #include "http/CGIHandler.hpp"
 #include "http/parser/FormParser.hpp"
+#include "http/CookieSessionManager.hpp" // Inclure le nouveau fichier
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -17,11 +18,6 @@
 #include <iomanip>  // For std::setprecision
 #include "http/utils/HttpUtils.hpp"
 
-std::string generateSessionId() {
-    // Implémentation simple pour la démo
-    return "websrv_session_id_12345";
-}
-
 HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
     const std::string& uri = request.getUri();
 
@@ -32,14 +28,8 @@ HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
         if (FileUtils::fileExists(secret_file_path)) {
             if (serveStaticFile(secret_file_path, response)) {
                 // Definir le cookie de session apres avoir servi le fichier
-                std::string session_id = generateSessionId();
-                // Cookie expire apres 1 heure (3600 secondes)
-                {
-                    std::stringstream ss;
-                    ss << COOKIE_SESSION_MAX_AGE;
-                    response.setHeader("Set-Cookie", std::string(COOKIE_SESSION_NAME) + "=" + session_id + "; Path=/; Max-Age=" + ss.str() + "; HttpOnly"); // Cookie expire apres " << COOKIE_SESSION_MAX_AGE << " secondes
-                }
-LOG_INFO("Cookie défini → session_id=" << session_id);
+                std::string session_id = CookieSessionManager::generateSessionId();
+                CookieSessionManager::setSessionCookie(response, session_id);
                 return response;
             } else {
                 return serveErrorPage(500, "Internal Server Error");
@@ -51,9 +41,8 @@ LOG_INFO("Cookie défini → session_id=" << session_id);
 
     // Logique pour la page restreinte
     if (uri == "/restricted") {
-        std::string session_cookie = request.getHeader("Cookie");
-        // Verifier si le cookie de session est present
-        if (session_cookie.find("session_id=") != std::string::npos) {
+        // Verifier si le cookie de session est present et valide
+        if (CookieSessionManager::hasValidSessionCookie(request)) {
             // Pour cette demo, on considere que la presence du cookie suffit
             // Dans une vraie application, il faudrait valider l'ID de session
             
@@ -70,7 +59,7 @@ LOG_INFO("Cookie défini → session_id=" << session_id);
                 return serveErrorPage(404, "Restricted page not found on server");
             }
         } else {
-            // Cookie de session absent, servir la page avec la barriere
+            // Cookie de session absent ou invalide, servir la page avec la barriere
             HttpResponse response;
             response.setStatus(200, "OK");
             std::string html_content = "<!DOCTYPE html>\n"
