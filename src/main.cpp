@@ -6,10 +6,15 @@
 #include <cstdlib>
 
 int main(int argc, char *argv[]) {
-	std::string config_file = "config.conf";
+	if (argc != 2) {
+		std::cerr << "Usage: " << argv[0] << " <config_file.conf>" << std::endl;
+		return 1;
+	}
 
-	if (argc > 1) {
-		config_file = argv[1];
+	std::string config_file = argv[1];
+	if (config_file.length() < 5 || config_file.substr(config_file.length() - 5) != ".conf") {
+		std::cerr << "Error: Configuration file must have a .conf extension." << std::endl;
+		return 1;
 	}
 	
 	// Charger la configuration
@@ -21,10 +26,7 @@ int main(int argc, char *argv[]) {
 	} catch (const std::exception& e) {
 		LOG_ERROR("Configuration error: " << e.what());
 		return 1;
-	}
-	
-	// No need for detailed log about number of servers
-	
+	}	
 	// Initialiser et gérer les serveurs
 	MultiServerManager server_manager;
 	
