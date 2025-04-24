@@ -17,8 +17,124 @@
 #include <iomanip>  // For std::setprecision
 #include "http/utils/HttpUtils.hpp"
 
+std::string generateSessionId() {
+    // Implémentation simple pour la démo
+    return "websrv_session_id_12345";
+}
+
 HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
     const std::string& uri = request.getUri();
+
+    // Logique pour la page secrète et la gestion des sessions
+    if (uri == "/secret") {
+        HttpResponse response;
+        std::string secret_file_path = root_directory + "/secret/index.html";
+        if (FileUtils::fileExists(secret_file_path)) {
+            if (serveStaticFile(secret_file_path, response)) {
+                // Definir le cookie de session apres avoir servi le fichier
+                std::string session_id = generateSessionId();
+                // Cookie expire apres 1 heure (3600 secondes)
+                {
+                    std::stringstream ss;
+                    ss << COOKIE_SESSION_MAX_AGE;
+                    response.setHeader("Set-Cookie", std::string(COOKIE_SESSION_NAME) + "=" + session_id + "; Path=/; Max-Age=" + ss.str() + "; HttpOnly"); // Cookie expire apres " << COOKIE_SESSION_MAX_AGE << " secondes
+                }
+LOG_INFO("Cookie défini → session_id=" << session_id);
+                return response;
+            } else {
+                return serveErrorPage(500, "Internal Server Error");
+            }
+        } else {
+            return serveErrorPage(404, "Secret page not found on server");
+        }
+    }
+
+    // Logique pour la page restreinte
+    if (uri == "/restricted") {
+        std::string session_cookie = request.getHeader("Cookie");
+        // Verifier si le cookie de session est present
+        if (session_cookie.find("session_id=") != std::string::npos) {
+            // Pour cette demo, on considere que la presence du cookie suffit
+            // Dans une vraie application, il faudrait valider l'ID de session
+            
+            // Servir le contenu complet de la page restreinte
+            HttpResponse response;
+            std::string restricted_file_path = root_directory + "/restricted-area/index.html";
+            if (FileUtils::fileExists(restricted_file_path)) {
+                if (serveStaticFile(restricted_file_path, response)) {
+                    return response;
+                } else {
+                    return serveErrorPage(500, "Internal Server Error");
+                }
+            } else {
+                return serveErrorPage(404, "Restricted page not found on server");
+            }
+        } else {
+            // Cookie de session absent, servir la page avec la barriere
+            HttpResponse response;
+            response.setStatus(200, "OK");
+            std::string html_content = "<!DOCTYPE html>\n"
+                                       "<html>\n"
+                                       "<head>\n"
+                                       "    <meta charset=\"UTF-8\">\n"
+                                       "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+                                       "    <title>Page Restreinte</title>\n"
+                                       "    <link rel=\"stylesheet\" href=\"/styles/webserv-modern.css\">\n"
+                                       "    <style>\n"
+                                       "        .barrier {\n"
+                                       "            text-align: center;\n"
+                                       "            padding: 50px;\n"
+                                       "            border: 2px dashed var(--error-color);\n"
+                                       "            color: var(--error-color);\n"
+                                       "            margin-top: 50px;\n"
+                                       "        }\n"
+                                       "        .full-content {\n"
+                                       "            display: none; /* Cache le contenu complet initiallement */\n"
+                                       "        }\n"
+                                       "    </style>\n"
+                                       "</head>\n"
+                                       "<body>\n"
+                                       "    <div class=\"container\">\n"
+                                       "        <div class=\"barrier\">\n"
+                                       "            <h1>Acces Restreint</h1>\n"
+                                       "            <p>Vous devez visiter la <a href=\"/secret\">page secrete</a> pour obtenir l'acces.</p>\n"
+                                       "        </div>\n"
+                                       "        <div class=\"full-content\">\n"
+                                       "            <!-- Le contenu complet sera charge ici par JavaScript ou servi directement si le cookie est present -->\n"
+                                       "        </div>\n"
+                                       "    </div>\n"
+                                       "    <script>\n"
+                                       "        document.addEventListener('DOMContentLoaded', function() {\n"
+                                       "            const cookies = document.cookie.split(';');\n"
+                                       "            let hasSessionCookie = false;\n"
+                                       "            for (let i = 0; i < cookies.length; i++) {\n"
+                                       "                let cookie = cookies[i].trim();\n"
+                                       "                // Does this cookie string begin with the name we want?\n"
+                                       "                if (cookie.startsWith('session_id=')) {\n"
+                                       "                    hasSessionCookie = true;\n"
+                                       "                    break;\n"
+                                       "                }\n"
+                                       "            }\n"
+                                       "\n"
+                                       "            const barrier = document.querySelector('.barrier');\n"
+                                       "            const fullContent = document.querySelector('.full-content');\n"
+                                       "\n"
+                                       "            if (hasSessionCookie) {\n"
+                                       "                if (barrier) barrier.style.display = 'none';\n"
+                                       "                if (fullContent) fullContent.style.display = 'block';\n"
+                                       "            } else {\n"
+                                       "                 if (barrier) barrier.style.display = 'block';\n"
+                                       "                 if (fullContent) fullContent.style.display = 'none';\n"
+                                       "            }\n"
+                                       "        });\n"
+                                       "    </script>\n"
+                                       "</body>\n"
+                                       "</html>";
+            response.setBody(html_content, "text/html");
+            return response;
+        }
+    }
+
     // Vérifier d'abord si cette URI est configurée pour une redirection
     const LocationConfig* location = findMatchingLocation(uri);
     if (location != NULL && location->redirect_code > 0) {

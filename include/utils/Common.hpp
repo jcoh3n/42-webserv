@@ -51,9 +51,12 @@
 # define COLOR_ALIAS  "\033[38;2;165;94;234m"    // #a55eea - couleur pour les alias
 # define COLOR_UPLOAD "\033[38;2;46;204;113m"    // #2ecc71 - couleur verte pour les uploads
 # define COLOR_DOWNLOAD "\033[38;2;33;150;243m"  // #2196F3 - couleur bleue pour les downloads
+# define COLOR_COOKIE "\033[38;2;160;82;45m" // Sienna - couleur marron pour les cookies
+# define COOKIE_SESSION_NAME "session_id"
+# define COOKIE_SESSION_MAX_AGE 30 // 30 secondes
 
 // Macros de logging (système) - simplifiées
-# define LOG_INFO(x)    // Désactivé pour réduire le bruit
+# define LOG_INFO(x) std::cout << COLOR_COOKIE << "[🍪] " << x << RESET << std::endl
 # define LOG_SUCCESS(x) std::cout << GREEN << "[+] " << x << RESET << std::endl
 # define LOG_WARNING(x) std::cerr << YELLOW << "[!] " << x << RESET << std::endl
 # define LOG_ERROR(x)   std::cerr << RED << "[-] " << x << RESET << std::endl
