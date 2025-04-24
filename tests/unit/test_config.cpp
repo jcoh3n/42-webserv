@@ -43,7 +43,7 @@ void test_basic_config() {
          << "        client_max_body_size=20M\n"
          << "    }\n"
          << "\n"
-         << "    location /upload {\n"
+         << "    location /file-upload {\n"
          << "        allowed_methods=POST\n"
          << "        client_max_body_size=50M\n"
          << "    }\n"
@@ -79,7 +79,7 @@ void test_basic_config() {
     assert(root_location.client_max_body_size == 20 * 1024 * 1024); // 20M
 
     // Vérifier la location /upload
-    LocationConfig upload_location = server.locations["/upload"];
+    LocationConfig upload_location = server.locations["/file-upload"];
     assert(upload_location.allowed_methods.size() == 1);
     assert(upload_location.allowed_methods[0] == "POST");
     assert(upload_location.client_max_body_size == 50 * 1024 * 1024); // 50M

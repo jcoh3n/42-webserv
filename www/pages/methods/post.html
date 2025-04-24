@@ -152,7 +152,7 @@
         <div class="form-container">
             <h1>Créer un fichier</h1>
             
-            <form id="createFileForm" action="/upload" method="post" enctype="multipart/form-data">
+            <form id="createFileForm" action="/file-upload" method="post" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="filename">Nom du fichier :</label>
                     <input type="text" id="filename" name="filename" class="form-control" placeholder="Entrez le nom du fichier (ex: test.txt)" required>
@@ -190,7 +190,7 @@
                 const formData = new FormData();
                 formData.append('file', file, filename);
                 
-                fetch('/upload', {
+                fetch('/file-upload', {
                     method: 'POST',
                     body: formData
                 })

@@ -38,7 +38,7 @@ public:
         upload_location.upload_directory = "./www/uploads";
         upload_location.root_override = "./www/uploads";
         
-        server_config.locations["/upload"] = upload_location;
+        server_config.locations["/file-upload"] = upload_location;
     }
 
     void testFileUpload() {
@@ -48,7 +48,7 @@ public:
         std::string content = "Hello, this is a test file content!";
         std::string body = createMultipartFormData("test.txt", content);
         
-        std::string request = "POST /upload HTTP/1.1\r\n"
+        std::string request = "POST /file-upload HTTP/1.1\r\n"
                              "Host: localhost:8080\r\n"
                              "Content-Type: multipart/form-data; boundary=" + BOUNDARY + "\r\n"
                              "Content-Length: ";

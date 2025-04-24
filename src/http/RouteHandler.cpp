@@ -142,7 +142,7 @@ HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request, const s
     }
     
     // Si c'est un upload de fichier
-    if (request.getUri() == "/upload") {
+    if (request.getUri() == "/file-upload") {
         const std::string& content_type = request.getHeader("content-type");
         if (content_type.find("multipart/form-data") == std::string::npos) {
             return serveErrorPage(400, "Invalid Content-Type for file upload");
@@ -157,7 +157,7 @@ HttpResponse RouteHandler::handlePostRequest(const HttpRequest& request, const s
         std::string upload_dir = server_config.root_directory + "/uploads/";
         
         // Trouver la configuration de location correspondante
-        std::map<std::string, LocationConfig>::const_iterator it = server_config.locations.find("/upload");
+        std::map<std::string, LocationConfig>::const_iterator it = server_config.locations.find("/file-upload");
         if (it == server_config.locations.end()) {
             return serveErrorPage(500, "Upload location not configured");
         }

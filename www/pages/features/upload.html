@@ -275,12 +275,12 @@
             
             <div class="upload-path-container">
                 <span class="upload-path">
-                    <code>/upload</code> <span class="path-arrow">→</span> <code>www/uploads/</code>
+                    <code>/file-upload</code> <span class="path-arrow">→</span> <code>www/uploads/</code>
                 </span>
                 <span class="path-description">Les fichiers uploadés seront stockés dans le dossier <code>uploads</code> du serveur et accessibles depuis <code>/uploads/nom-du-fichier</code></span>
             </div>
 
-            <form class="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
+            <form class="upload-form" action="/file-upload" method="POST" enctype="multipart/form-data">
                 <div class="upload-zone" id="upload-zone">
                     <svg class="upload-icon" viewBox="0 0 24 24">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5-5 5 5M12 15V5"></path>
@@ -389,7 +389,7 @@
             uploadButton.textContent = "Envoi en cours...";
             
             try {
-                const response = await fetch('/upload', {
+                const response = await fetch('/file-upload', {
                     method: 'POST',
                     body: formData
                 });
