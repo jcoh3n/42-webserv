@@ -77,17 +77,25 @@ bool FileUploadHandler::saveFile(const std::string& filename, const std::string&
     std::string final_filename = filename;
     
     // Gérer les doublons simplement
+    // Gérer les doublons avec numérotation séquentielle
     if (access(file_path.c_str(), F_OK) != -1) {
         // Extraire le nom et l'extension
         size_t dot_pos = filename.find_last_of('.');
         std::string name = (dot_pos != std::string::npos) ? filename.substr(0, dot_pos) : filename;
         std::string ext = (dot_pos != std::string::npos) ? filename.substr(dot_pos) : "";
         
-        // Ajouter un timestamp
-        std::ostringstream oss;
-        oss << name << "_" << time(NULL) << ext;
-        final_filename = oss.str();
-        file_path = config.getUploadDirectory() + final_filename;
+        // Tester les noms séquentiels
+        int counter = 1;
+        std::string new_path;
+        do {
+            std::ostringstream oss;
+            oss << name << " (" << counter << ")" << ext;
+            final_filename = oss.str();
+            new_path = config.getUploadDirectory() + final_filename;
+            counter++;
+        } while (access(new_path.c_str(), F_OK) != -1);
+        
+        file_path = new_path;
     }
     
     // Écrire le fichier
