@@ -44,6 +44,7 @@
 # define UNDERLINE "\033[4m"
 
 // Couleurs personnalisées pour les méthodes HTTP (correspondant aux couleurs du site)
+# define COLOR_INFO  "\033[38;2;162;156;155m"      // #373F51 - couleur grise pour les logs d'info
 # define COLOR_GET    "\033[38;2;0;186;188m"     // #00babc - couleur turquoise pour GET
 # define COLOR_POST   "\033[38;2;147;112;219m"   // Lavender - moins intense, plus visible
 # define COLOR_DELETE "\033[38;2;255;71;87m"     // #ff4757 - couleur rouge pour DELETE
@@ -55,7 +56,7 @@
 # define COOKIE_SESSION_NAME "session_id"
 
 // Macros de logging (système) - simplifiées
-# define LOG_INFO(x) std::cout << "[INFO] " << x << RESET << std::endl
+# define LOG_INFO(x) std::cout << COLOR_INFO << "[INFO] " << x << RESET << std::endl
 # define LOG_COOKIE(x) std::cout << COLOR_COOKIE << "[🍪 COOKIE] " << x << RESET << std::endl
 # define LOG_SUCCESS(x) std::cout << GREEN << "[+] " << x << RESET << std::endl
 # define LOG_WARNING(x) std::cerr << YELLOW << "[!] " << x << RESET << std::endl
