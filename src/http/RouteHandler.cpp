@@ -92,7 +92,7 @@ HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
                                         "        <div class=\"access-barrier\">\n"
                                         "            <div class=\"lock-icon\">🔒</div>\n"
                                         "            <h2 class=\"access-title\">Zone Protégée</h2>\n"
-                                        "            <p class=\"access-message\">Vous devez d'abord visiter la <a href=\"/secret\" class=\"secret-link\">page secrète</a> pour obtenir un cookie de session et accéder à ce contenu.</p>\n"
+                                        "            <p class=\"access-message\">Vous devez d'abord visiter la page secrète pour obtenir un cookie de session et accéder à ce contenu.</p>\n"
                                         "            <a href=\"/\" class=\"home-link\">Retour à l'accueil</a>\n"
                                         "        </div>\n"
                                         "    </div>\n"
