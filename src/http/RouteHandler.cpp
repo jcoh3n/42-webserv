@@ -65,42 +65,15 @@ HttpResponse RouteHandler::processRequest(const HttpRequest& request) {
                 HttpResponse response;
                 response.setStatus(200, "OK");
                 
-                // Remplacer votre HTML actuel par cette version améliorée
-                std::string html_content = "<!DOCTYPE html>\n"
-                                        "<html>\n"
-                                        "<head>\n"
-                                        "    <meta charset=\"UTF-8\">\n"
-                                        "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                                        "    <title>Accès Restreint</title>\n"
-                                        "    <link rel=\"stylesheet\" href=\"/styles/webserv-modern.css\">\n"
-                                        "    <style>\n"
-                                        "        body { background-color: #1a1a1a; color: #e0e0e0; font-family: 'Arial', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }\n"
-                                        "        .restricted-container { background-color: #2a2a2a; border-radius: 10px; padding: 40px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); max-width: 500px; text-align: center; border: 2px solid #FF4336; }\n"
-                                        "        .access-barrier { padding: 30px; border: 2px dashed #FF4336; border-radius: 8px; background-color: rgba(255, 67, 54, 0.1); margin: 20px 0; animation: pulse 2s infinite; }\n"
-                                        "        .lock-icon { font-size: 3rem; margin-bottom: 20px; color: #FFC107; }\n"
-                                        "        .access-title { color: #FF4336; font-size: 1.8rem; margin-bottom: 15px; }\n"
-                                        "        .access-message { color: #b0b0b0; margin-bottom: 20px; line-height: 1.5; }\n"
-                                        "        .secret-link { color: #00BCD4; text-decoration: none; font-weight: 500; transition: color 0.3s ease; }\n"
-                                        "        .secret-link:hover { text-decoration: underline; color: #00E5FF; }\n"
-                                        "        .home-link { display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #3a3a3a; color: #e0e0e0; border: 2px solid #e0e0e0; border-radius: 5px; text-decoration: none; transition: all 0.3s ease; }\n"
-                                        "        .home-link:hover { background-color: #e0e0e0; color: #1a1a1a; }\n"
-                                        "        @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }\n"
-                                        "    </style>\n"
-                                        "</head>\n"
-                                        "<body>\n"
-                                        "    <div class=\"restricted-container\">\n"
-                                        "        <div class=\"access-barrier\">\n"
-                                        "            <div class=\"lock-icon\">🔒</div>\n"
-                                        "            <h2 class=\"access-title\">Zone Protégée</h2>\n"
-                                        "            <p class=\"access-message\">Vous devez d'abord visiter la page secrète pour obtenir un cookie de session et accéder à ce contenu.</p>\n"
-                                        "            <a href=\"/\" class=\"home-link\">Retour à l'accueil</a>\n"
-                                        "        </div>\n"
-                                        "    </div>\n"
-                                        "</body>\n"
-                                        "</html>";
+                // Cookie de session absent ou invalide, servir la page d'accès refusé
+                std::string access_denied_path = root_directory + "/restricted-area/access_denied.html";
+                if (serveStaticFile(access_denied_path, response)) {
+                    return response;
+                } else {
+                    // Si la page d'accès refusé n'est pas trouvée, servir une page d'erreur par défaut
+                    return serveErrorPage(500, "Internal Server Error - Could not read access denied page");
+                }
                 
-            response.setBody(html_content, "text/html");
-            return response;
         }
     }
 
