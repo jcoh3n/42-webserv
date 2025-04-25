@@ -5,30 +5,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zone Restreinte</title>
     <link rel="stylesheet" href="/styles/webserv-modern.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Styles spécifiques pour la page restricted */
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #6200EA;
+            --primary-light: #9d46ff;
+            --primary-dark: #4a00b0;
+            --accent-color: #00E5FF;
+            --bg-dark: #0f1116;
+            --box-bg: #1a1d25;
+            --border-color: #2c3038;
+            --text-color: #f0f0f0;
+            --secondary-text: #a0a8b8;
+            --success-color: #00E676;
+            --error-color: #FF3D00;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-color);
+            font-family: 'Roboto', sans-serif;
+            min-height: 100vh;
+            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(98, 0, 234, 0.03) 0%, transparent 200px),
+                radial-gradient(circle at 90% 80%, rgba(98, 0, 234, 0.03) 0%, transparent 200px);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        /* Grille hexagonale en arrière-plan */
+        .hexa-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(98, 0, 234, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(98, 0, 234, 0.03) 1px, transparent 1px);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Container principal avec effet de verre */
         .restricted-container {
-            background-color: var(--box-bg);
-            border-radius: var(--border-radius);
+            background-color: rgba(26, 29, 37, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
             padding: 40px;
-            box-shadow: var(--box-shadow);
-            max-width: 800px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
             margin: 50px auto;
             position: relative;
             overflow: hidden;
+            border: 1px solid rgba(98, 0, 234, 0.2);
+            animation: reveal 1s ease-out forwards;
         }
         
+        @keyframes reveal {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Header amélioré */
         .restricted-header {
             text-align: center;
             margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 25px;
+            border-bottom: 1px solid rgba(98, 0, 234, 0.3);
+            position: relative;
+        }
+        
+        .restricted-header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, var(--primary-color), transparent);
+            border-radius: 3px;
         }
         
         .restricted-header h1 {
-            color: var(--post-color);
+            color: var(--primary-color);
+            font-family: 'Orbitron', sans-serif;
             font-size: 2.2rem;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 900;
         }
         
         .restricted-header p {
@@ -36,63 +125,68 @@
             font-size: 1.1rem;
         }
         
-        /* Styles pour le contenu restreint */
+        /* Animation de contenu */
         .restricted-content {
-            animation: fadeIn 1s ease-out;
-        }
-
-        /* Styles pour le pop-up de l'image */
-        .image-popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9); /* Fond semi-transparent sombre */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000; /* Au-dessus de tout */
-            opacity: 0; /* Caché par défaut */
-            visibility: hidden; /* Caché par défaut */
-            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
-        }
-
-        .image-popup.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .image-popup img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain; /* Assure que l'image est contenue sans déformation */
-        }
-
-
-        /* New keyframes for animations */
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); } /* Tremblement plus prononcé */
-            20%, 40%, 60%, 80% { transform: translateX(8px); }
-        }
-
-        @keyframes move-stripes {
-            0% { background-position: 0 0; }
-            100% { background-position: 40px 40px; }
-        }
-
-        @keyframes fadeIn {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
+            animation: fadeIn 1.2s ease-out;
+            position: relative;
+            z-index: 5;
         }
         
-        .section-title {
-            color: var(--post-color);
-            margin: 30px 0 15px;
-            font-size: 1.5rem;
+        /* Badges et icônes */
+        .unlock-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background: rgba(98, 0, 234, 0.1);
+            border-radius: 50%;
+            margin: 0 auto 30px;
             position: relative;
-            padding-left: 20px;
+            border: 2px solid rgba(98, 0, 234, 0.2);
+            overflow: hidden;
+        }
+        
+        .unlock-badge::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: conic-gradient(
+                var(--primary-color) 0%, 
+                transparent 30%, 
+                transparent 60%, 
+                var(--primary-color) 100%
+            );
+            animation: rotate 3s linear infinite;
+            opacity: 0.5;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .unlock-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            position: relative;
+            z-index: 1;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        /* Titres de section améliorés */
+        .section-title {
+            color: var(--primary-color);
+            margin: 35px 0 20px;
+            font-size: 1.6rem;
+            position: relative;
+            padding-left: 22px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
         }
         
         .section-title::before {
@@ -103,73 +197,140 @@
             transform: translateY(-50%);
             width: 8px;
             height: 25px;
-            background-color: var(--post-color);
+            background-color: var(--primary-color);
             border-radius: 4px;
+            box-shadow: 0 0 10px rgba(98, 0, 234, 0.5);
         }
         
+        /* Liste d'infos améliorée */
         .info-list {
             list-style: none;
             padding: 0;
-            margin: 20px 0;
+            margin: 25px 0;
         }
         
         .info-list li {
-            padding: 15px;
+            padding: 18px 20px;
             background-color: rgba(98, 0, 234, 0.05);
-            margin-bottom: 10px;
-            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            border-radius: 8px;
             transition: all 0.3s ease;
-            border-left: 4px solid var(--post-color);
+            border-left: 4px solid var(--primary-color);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info-list li::before {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--primary-color), var(--primary-light));
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
         .info-list li:hover {
-            transform: translateX(5px);
+            transform: translateX(5px) translateY(-3px);
             background-color: rgba(98, 0, 234, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
         }
         
+        .info-list li:hover::before {
+            opacity: 1;
+        }
+        
+        /* Mise en forme des paragraphes */
+        p {
+            color: var(--secondary-text);
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+        
+        /* Liste numérotée améliorée */
+        ol {
+            padding-left: 20px;
+            margin: 20px 0;
+            counter-reset: item;
+        }
+        
+        ol li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 15px;
+            list-style-type: none;
+            counter-increment: item;
+        }
+        
+        ol li::before {
+            content: counter(item);
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 22px;
+            height: 22px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        /* Boutons améliorés */
         .button-container {
             text-align: center;
-            margin-top: 30px;
+            margin-top: 40px;
         }
         
         .button {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: var(--post-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 30px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
             color: white;
             border: none;
-            border-radius: var(--border-radius);
+            border-radius: 8px;
             text-decoration: none;
             font-weight: 500;
             transition: all 0.3s ease;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+        
+        .button:hover::before {
+            left: 100%;
         }
         
         .button:hover {
-            background-color: #4a00c2;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(98, 0, 234, 0.3);
+            box-shadow: 0 5px 15px rgba(98, 0, 234, 0.4);
         }
         
-        /* Animations */
-        @keyframes pulse {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; }
-            100% { opacity: 0.8; }
-        }
-        
-        .lock-icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            color: var(--error-color);
-        }
-        
-        .unlock-icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            color: var(--post-color);
-        }
-        
-        /* Particules de fond */
+        /* Particules avec effet avancé */
         .particles {
             position: absolute;
             top: 0;
@@ -177,30 +338,272 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            z-index: 0;
-            opacity: 0.3;
+            z-index: 1;
         }
         
         .particle {
             position: absolute;
-            background-color: var(--post-color);
             border-radius: 50%;
-            opacity: 0.2;
+            background: radial-gradient(circle, rgba(98, 0, 234, 0.6) 0%, rgba(98, 0, 234, 0) 70%);
+            opacity: 0;
+            animation: particleAnimation 4s ease-in-out infinite;
+        }
+        
+        @keyframes particleAnimation {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.2);
+            }
+        }
+        
+        /* Effet de glitch pour la popup */
+        .glitch-effect {
+            animation: glitch 0.3s infinite;
+            position: relative;
+            transform: skewX(0deg);
+        }
+        
+        @keyframes glitch {
+            0% {
+                transform: skewX(0deg);
+                filter: none;
+            }
+            20% {
+                transform: skewX(-3deg);
+                filter: drop-shadow(2px 0 rgba(255, 0, 0, 0.5)) drop-shadow(-2px 0 rgba(0, 255, 255, 0.5));
+            }
+            40% {
+                transform: skewX(0deg);
+                filter: none;
+            }
+            60% {
+                transform: skewX(3deg);
+                filter: drop-shadow(-2px 0 rgba(255, 0, 0, 0.5)) drop-shadow(2px 0 rgba(0, 255, 255, 0.5));
+            }
+            80% {
+                transform: skewX(0deg);
+                filter: none;
+            }
+        }
+        
+        /* Popup d'image améliorée */
+        .image-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+            backdrop-filter: blur(5px);
+        }
+        
+        .image-popup.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .image-container {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            transform: scale(0.8);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 0 30px rgba(98, 0, 234, 0.5);
+            overflow: hidden;
+        }
+        
+        .image-popup.visible .image-container {
+            transform: scale(1);
+        }
+        
+        .image-container img {
+            display: block;
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+        }
+        
+        .image-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(15, 17, 22, 0.8);
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--primary-color);
+        }
+        
+        .image-title {
+            color: var(--text-color);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .image-title i {
+            color: var(--primary-color);
+            margin-right: 8px;
+        }
+        
+        .close-button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close-button:hover {
+            color: var(--primary-color);
+        }
+        
+        /* Effet de scan sur l'image */
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--primary-color), transparent);
+            box-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color);
+            opacity: 0.8;
+            animation: scanAnimation 3s linear infinite;
+            z-index: 2;
+        }
+        
+        @keyframes scanAnimation {
+            0%, 100% { top: 0; }
+            50% { top: calc(100% - 2px); }
+        }
+        
+        /* Overlay pour effet de matrix */
+        .matrix-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(
+                rgba(0, 255, 70, 0.03) 1px, 
+                transparent 1px
+            ),
+            linear-gradient(
+                90deg, 
+                rgba(0, 255, 70, 0.03) 1px, 
+                transparent 1px
+            );
+            background-size: 20px 20px;
+            pointer-events: none;
+            opacity: 0.5;
+            z-index: 1;
+        }
+        
+        /* Corners pour effet de cadre high-tech */
+        .corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary-color);
+            z-index: 3;
+        }
+        
+        .corner-tl {
+            top: 0;
+            left: 0;
+            border-right: none;
+            border-bottom: none;
+        }
+        
+        .corner-tr {
+            top: 0;
+            right: 0;
+            border-left: none;
+            border-bottom: none;
+        }
+        
+        .corner-bl {
+            bottom: 0;
+            left: 0;
+            border-right: none;
+            border-top: none;
+        }
+        
+        .corner-br {
+            bottom: 0;
+            right: 0;
+            border-left: none;
+            border-top: none;
+        }
+        
+        /* Effet de pulsation autour de l'image */
+        .pulse-border {
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border: 3px solid var(--primary-color);
+            opacity: 0;
+            animation: pulseBorder 2s infinite;
+            z-index: 0;
+        }
+        
+        @keyframes pulseBorder {
+            0% {
+                opacity: 0.7;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.1);
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Grille hexagonale en arrière-plan -->
+    <div class="hexa-grid"></div>
+    
     <div class="container">
         <div class="restricted-container">
             <div class="particles" id="particles-container"></div>
             
-            <!-- Contenu restreint (visible seulement avec cookie) -->
+            <!-- En-tête -->
+            <div class="restricted-header">
+                <div class="unlock-badge">
+                    <i class="fas fa-lock-open unlock-icon"></i>
+                </div>
+                <h1>Zone Restreinte</h1>
+                <p>Bienvenue dans l'espace sécurisé accessible uniquement avec un cookie valide</p>
+            </div>
+            
+            <!-- Contenu restreint -->
             <div class="restricted-content" id="restrictedContent">
-                <div class="unlock-icon">🔓</div>
-                <h2 class="section-title">Contenu Exclusif</h2>
+                <h2 class="section-title"><i class="fas fa-shield-alt" style="margin-right: 10px; font-size: 0.9em;"></i>Contenu Exclusif</h2>
                 <p>Bienvenue dans la zone restreinte ! Vous avez maintenant accès à tout le contenu exclusif grâce au cookie de session obtenu.</p>
                 
-                <h3 class="section-title">Informations Confidentielles</h3>
+                <h3 class="section-title"><i class="fas fa-server" style="margin-right: 10px; font-size: 0.9em;"></i>Informations Confidentielles</h3>
                 <ul class="info-list">
                     <li>La configuration du serveur permet une gestion sophistiquée des sessions via cookies</li>
                     <li>Les réponses HTTP incluent des en-têtes personnalisés pour la gestion du cache</li>
@@ -208,7 +611,7 @@
                     <li>Le serveur utilise un système de polling centralisé pour gérer efficacement les connexions</li>
                 </ul>
                 
-                <h3 class="section-title">Sécurité & Configuration</h3>
+                <h3 class="section-title"><i class="fas fa-key" style="margin-right: 10px; font-size: 0.9em;"></i>Sécurité & Configuration</h3>
                 <p>Le mécanisme de cookies de ce serveur fonctionne comme suit :</p>
                 <ol>
                     <li>L'utilisateur visite la page secrète</li>
@@ -218,23 +621,46 @@
                 </ol>
                 
                 <div class="button-container">
-                    <a href="/" class="button">Retour à l'accueil</a>
+                    <a href="/" class="button">
+                        <i class="fas fa-home"></i> Retour à l'accueil
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Pop-up de l'image -->
+    <!-- Popup d'image améliorée -->
     <div class="image-popup" id="imagePopup">
-        <img src="/restricted-area/IMG_9495.jpg" alt="Image restreinte">
+        <div class="image-container">
+            <div class="image-header">
+                <div class="image-title">
+                    <i class="fas fa-eye"></i> DOCUMENT CLASSIFIÉ
+                </div>
+                <button class="close-button" id="closePopup">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="scan-line"></div>
+            <div class="matrix-overlay"></div>
+            
+            <div class="corner corner-tl"></div>
+            <div class="corner corner-tr"></div>
+            <div class="corner corner-bl"></div>
+            <div class="corner corner-br"></div>
+            
+            <div class="pulse-border"></div>
+            
+            <img src="/restricted-area/IMG_9495.jpg" alt="Image restreinte" class="glitch-effect" id="restrictedImage">
+        </div>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Créer les particules
+            // Création des particules
             function createParticles() {
                 const container = document.getElementById('particles-container');
-                const particleCount = 20;
+                const particleCount = 25;
                 
                 for (let i = 0; i < particleCount; i++) {
                     const particle = document.createElement('div');
@@ -245,50 +671,79 @@
                     const posY = Math.random() * 100;
                     
                     // Taille aléatoire
-                    const size = Math.random() * 10 + 5;
+                    const size = Math.random() * 60 + 40;
+                    
+                    // Délai aléatoire
+                    const delay = Math.random() * 4;
                     
                     // Style
                     particle.style.left = `${posX}%`;
                     particle.style.top = `${posY}%`;
                     particle.style.width = `${size}px`;
                     particle.style.height = `${size}px`;
-                    
-                    // Animation
-                    const duration = Math.random() * 10 + 10;
-                    const xMovement = Math.random() * 50 - 25;
-                    const yMovement = Math.random() * 50 - 25;
-                    
-                    particle.style.transition = `transform ${duration}s linear`;
-                    setTimeout(() => {
-                        particle.style.transform = `translate(${xMovement}px, ${yMovement}px)`;
-                    }, 100);
+                    particle.style.animationDelay = `${delay}s`;
                     
                     container.appendChild(particle);
                 }
             }
 
-            // Gérer l'affichage du pop-up de l'image
-            function startImagePopup() {
+            // Gestion améliorée du popup d'image
+            function setupImagePopup() {
                 const popup = document.getElementById('imagePopup');
+                const closeButton = document.getElementById('closePopup');
+                const image = document.getElementById('restrictedImage');
                 
-                function showPopup() {
-                    popup.classList.add('visible');
-                }
-                
-                function hidePopup() {
+                // Fermer le popup en cliquant sur le bouton
+                closeButton.addEventListener('click', () => {
                     popup.classList.remove('visible');
+                });
+                
+                // Fermer le popup en cliquant en dehors de l'image
+                popup.addEventListener('click', (e) => {
+                    if (e.target === popup) {
+                        popup.classList.remove('visible');
+                    }
+                });
+                
+                // Fonction pour afficher le popup avec effets
+                function showPopupWithEffects() {
+                    popup.classList.add('visible');
+                    
+                    // Ajouter un effet de distorsion à l'image
+                    setTimeout(() => {
+                        image.classList.add('glitch-effect');
+                    }, 300);
+                    
+                    // Planifier la fermeture automatique
+                    setTimeout(() => {
+                        image.classList.remove('glitch-effect');
+                        setTimeout(() => {
+                            popup.classList.remove('visible');
+                        }, 300);
+                    }, 3000);
                 }
                 
-                // Afficher le pop-up toutes les 10 secondes
-                setInterval(() => {
-                    showPopup();
-                    setTimeout(hidePopup, 2000); // Afficher pendant 2 secondes
-                }, 3000); // Répéter toutes les 3 secondes
+                // Afficher le popup avec un délai initial plus long
+                setTimeout(() => {
+                    showPopupWithEffects();
+                    
+                    // Configurer l'affichage périodique
+                    const randomInterval = () => Math.random() * 30000 + 15000; // Entre 15 et 45 secondes
+                    
+                    function scheduleNextPopup() {
+                        setTimeout(() => {
+                            showPopupWithEffects();
+                            scheduleNextPopup();
+                        }, randomInterval());
+                    }
+                    
+                    scheduleNextPopup();
+                }, 5000); // Première apparition après 5 secondes
             }
             
             // Exécuter les fonctions
             createParticles();
-            startImagePopup(); // Appeler le pop-up indépendamment du cookie
+            setupImagePopup();
         });
     </script>
 </body>
