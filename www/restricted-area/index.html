@@ -14,6 +14,8 @@
             --primary-light: #9d46ff;
             --primary-dark: #4a00b0;
             --accent-color: #00E5FF;
+            --danger-color: #FF0F50;
+            --warning-color: #FFD600;
             --bg-dark: #0f1116;
             --box-bg: #1a1d25;
             --border-color: #2c3038;
@@ -175,162 +177,755 @@
             animation: pulse 2s infinite ease-in-out;
         }
         
-        /* Titres de section améliorés */
+        /* =========== POPUP D'IMAGE AMÉLIORÉ =========== */
+        
+        /* Overlay de transition pour le popup */
+        .transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            z-index: 999;
+            pointer-events: none;
+            transition: background-color 0.5s ease;
+        }
+        
+        .transition-overlay.active {
+            background-color: rgba(15, 17, 22, 0.4);
+            backdrop-filter: blur(3px);
+        }
+        
+        /* Effet de glitch pour l'image */
+        @keyframes glitch-effect {
+            0% {
+                transform: translate(0);
+                filter: none;
+            }
+            2% {
+                transform: translate(-3px, 2px);
+                filter: hue-rotate(-20deg) saturate(150%);
+            }
+            4% {
+                transform: translate(3px, -2px);
+                filter: hue-rotate(20deg) saturate(150%);
+            }
+            6% {
+                transform: translate(0);
+                filter: none;
+            }
+            8% {
+                transform: translate(2px, 2px);
+                filter: brightness(1.2) contrast(1.2);
+            }
+            10% {
+                transform: translate(-2px, -2px);
+                filter: brightness(0.8) contrast(1.2);
+            }
+            12%, 100% {
+                transform: translate(0);
+                filter: none;
+            }
+        }
+        
+        /* Popup d'image avec design futuriste */
+        .image-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .image-popup.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .image-container {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            transform: perspective(1200px) rotateX(5deg) scale(0.9);
+            transform-origin: center;
+            transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background-color: rgba(10, 10, 15, 0.7);
+            box-shadow: 
+                0 0 0 2px var(--primary-color),
+                0 0 20px rgba(98, 0, 234, 0.7),
+                0 0 40px rgba(0, 0, 0, 0.4);
+            overflow: visible;
+            border-radius: 4px;
+        }
+        
+        .image-popup.visible .image-container {
+            transform: perspective(1200px) rotateX(0deg) scale(1);
+        }
+        
+        /* Conteneur principal de l'image avec effet de bordures */
+        .image-frame {
+            position: relative;
+            border: 1px solid rgba(98, 0, 234, 0.4);
+            padding: 2px;
+            overflow: hidden;
+        }
+
+        /* Amélioration du conteneur principal */
+        .restricted-container {
+            background: linear-gradient(135deg, rgba(26, 29, 37, 0.9), rgba(20, 22, 30, 0.95));
+            backdrop-filter: blur(12px);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(128, 86, 255, 0.2);
+            max-width: 900px;
+            margin: 50px auto;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(128, 86, 255, 0.3);
+            animation: reveal 1.2s ease-out forwards;
+        }
+
+        /* Effet lumineux de contour */
+        .restricted-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+
+        /* Titre principal avec effet cybertech */
+        .restricted-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            background: linear-gradient(90deg, #8056ff, #6c27ff, #8056ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-weight: 900;
+            text-shadow: 0 0 10px rgba(128, 86, 255, 0.5);
+            position: relative;
+            text-align: center;
+        }
+
+        /* Améliorations des sections */
         .section-title {
             color: var(--primary-color);
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
             margin: 35px 0 20px;
-            font-size: 1.6rem;
-            position: relative;
-            padding-left: 22px;
+            font-size: 1.8rem;
+            padding-left: 25px;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
             letter-spacing: 1px;
             display: flex;
             align-items: center;
+            text-transform: uppercase;
         }
-        
-        .section-title::before {
-            content: '';
+
+        /* Animation d'éléments lumineux flottants */
+        .floating-lights {
             position: absolute;
+            top: 0;
             left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 8px;
-            height: 25px;
-            background-color: var(--primary-color);
-            border-radius: 4px;
-            box-shadow: 0 0 10px rgba(98, 0, 234, 0.5);
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
         }
-        
-        /* Liste d'infos améliorée */
-        .info-list {
-            list-style: none;
-            padding: 0;
-            margin: 25px 0;
+
+        .light {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(128, 86, 255, 0.3) 0%, rgba(128, 86, 255, 0) 70%);
+            filter: blur(5px);
+            opacity: 0;
+            animation: lightFloat 10s ease-in-out infinite;
         }
-        
+
+        @keyframes lightFloat {
+            0% { opacity: 0; transform: translate(0, 0) scale(0.8); }
+            25% { opacity: 0.5; }
+            50% { opacity: 0.3; transform: translate(30px, -30px) scale(1.2); }
+            75% { opacity: 0.5; }
+            100% { opacity: 0; transform: translate(0, 0) scale(0.8); }
+        }
+
+        /* Liste d'informations améliorée */
         .info-list li {
-            padding: 18px 20px;
-            background-color: rgba(98, 0, 234, 0.05);
+            padding: 20px;
+            background: rgba(30, 35, 45, 0.5);
             margin-bottom: 15px;
-            border-radius: 8px;
+            border-radius: 10px;
             transition: all 0.3s ease;
             border-left: 4px solid var(--primary-color);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateX(0);
         }
-        
-        .info-list li::before {
+
+        .info-list li:hover {
+            transform: translateX(10px) translateY(-5px);
+            background: rgba(40, 45, 60, 0.6);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(128, 86, 255, 0.3);
+        }
+
+        .info-list li::after {
             content: '';
             position: absolute;
-            left: -4px;
             top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(128, 86, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+
+        .info-list li:hover::after {
+            transform: translateX(100%);
+        }
+        
+        /* L'image elle-même */
+        .image-frame img {
+            display: block;
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            filter: contrast(1.1) brightness(1.1);
+            transform-origin: center;
+            transition: filter 0.3s ease;
+        }
+        
+        .image-glitch {
+            animation: glitch-effect 8s infinite;
+        }
+        
+        /* En-tête du popup avec style cybernétique */
+        .image-header {
+            position: relative;
+            background: linear-gradient(90deg, rgba(15, 17, 22, 0.9), rgba(98, 0, 234, 0.1), rgba(15, 17, 22, 0.9));
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--primary-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Animation d'apparition de l'en-tête */
+        @keyframes header-reveal {
+            0% { transform: translateY(-100%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        
+        .image-popup.visible .image-header {
+            animation: header-reveal 0.5s forwards 0.2s;
+        }
+        
+        /* Titre du document avec icône d'alerte */
+        .image-title {
+            color: var(--text-color);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+        }
+        
+        .image-title::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+        }
+        
+        /* Icône de sécurité avec animation clignotante */
+        .security-icon {
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+            position: relative;
+        }
+        
+        .security-icon i {
+            color: var(--danger-color);
+            margin-right: 8px;
+            animation: blink 2s infinite;
+        }
+        
+        .security-badge {
+            background-color: var(--danger-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 10px rgba(255, 15, 80, 0.5);
+            animation: pulse-badge 2s infinite;
+        }
+        
+        @keyframes pulse-badge {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            40% { opacity: 1; }
+            50% { opacity: 0.3; }
+            60% { opacity: 1; }
+        }
+        
+        /* Bouton de fermeture avec effet hover */
+        .close-button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            z-index: 10;
+        }
+        
+        .close-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+        
+        .close-button:hover {
+            color: var(--danger-color);
+        }
+        
+        .close-button:hover::before {
+            transform: scale(1);
+        }
+        
+        /* Ligne de scan avec animation avancée */
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                var(--primary-light) 20%, 
+                var(--primary-color) 50%,
+                var(--primary-light) 80%,
+                transparent 100%);
+            box-shadow: 
+                0 0 10px var(--primary-color), 
+                0 0 20px var(--primary-color);
+            opacity: 0.8;
+            animation: scan-animation 3s ease-in-out infinite;
+            z-index: 20;
+            pointer-events: none;
+        }
+        
+        @keyframes scan-animation {
+            0%, 100% { 
+                top: 0; 
+                box-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color);
+            }
+            50% { 
+                top: calc(100% - 4px); 
+                box-shadow: 0 0 15px var(--primary-color), 0 0 30px var(--primary-color);
+            }
+        }
+        
+        /* Overlay de matrice digital */
+        .matrix-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(0deg, rgba(0, 255, 70, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 70, 0.05) 1px, transparent 1px);
+            background-size: 6px 6px;
+            pointer-events: none;
+            opacity: 0.6;
+            z-index: 10;
+            mix-blend-mode: overlay;
+        }
+        
+        /* Coins technologiques avec animation */
+        .corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--primary-color);
+            z-index: 25;
+            box-shadow: 0 0 10px rgba(98, 0, 234, 0.7);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+        
+        .image-popup.visible .corner {
+            opacity: 1;
+        }
+        
+        .corner-tl {
+            top: -3px;
+            left: -3px;
+            border-right: none;
+            border-bottom: none;
+            transform: translate(-10px, -10px);
+            transition-delay: 0.2s;
+        }
+        
+        .corner-tr {
+            top: -3px;
+            right: -3px;
+            border-left: none;
+            border-bottom: none;
+            transform: translate(10px, -10px);
+            transition-delay: 0.3s;
+        }
+        
+        .corner-bl {
+            bottom: -3px;
+            left: -3px;
+            border-right: none;
+            border-top: none;
+            transform: translate(-10px, 10px);
+            transition-delay: 0.4s;
+        }
+        
+        .corner-br {
+            bottom: -3px;
+            right: -3px;
+            border-left: none;
+            border-top: none;
+            transform: translate(10px, 10px);
+            transition-delay: 0.5s;
+        }
+        
+        .image-popup.visible .corner-tl { transform: translate(0, 0); }
+        .image-popup.visible .corner-tr { transform: translate(0, 0); }
+        .image-popup.visible .corner-bl { transform: translate(0, 0); }
+        .image-popup.visible .corner-br { transform: translate(0, 0); }
+        
+        /* Effet de pulsation de la bordure */
+        .pulse-border {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 3px solid var(--primary-color);
+            opacity: 0;
+            z-index: 5;
+            box-shadow: 0 0 15px rgba(98, 0, 234, 0.5);
+            animation: pulse-border-animation 3s infinite ease-out;
+        }
+        
+        @keyframes pulse-border-animation {
+            0% {
+                opacity: 0.7;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.1);
+            }
+        }
+        
+        /* Détails d'information du document */
+        .document-details {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(15, 17, 22, 0.8);
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: var(--secondary-text);
+            border-top: 1px solid rgba(98, 0, 234, 0.3);
+            transform: translateY(100%);
+            transition: transform 0.4s ease;
+        }
+        
+        .image-popup.visible .document-details {
+            transform: translateY(0);
+            transition-delay: 0.6s;
+        }
+        
+        .document-id {
+            display: flex;
+            align-items: center;
+        }
+        
+        .document-id i {
+            color: var(--accent-color);
+            margin-right: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .document-level {
+            display: flex;
+            align-items: center;
+        }
+        
+        .document-level i {
+            color: var(--warning-color);
+            margin-right: 8px;
+            font-size: 0.9rem;
+        }
+        
+        /* Superposition de bruit pour un effet numérique */
+        .digital-noise {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.05;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            z-index: 15;
+        }
+        
+        /* Points de connexion technologique */
+        .tech-dots {
+            position: absolute;
+            pointer-events: none;
+            z-index: 6;
+        }
+        
+        .tech-dot {
+            position: absolute;
             width: 4px;
-            background: linear-gradient(to bottom, var(--primary-color), var(--primary-light));
+            height: 4px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            box-shadow: 0 0 5px var(--primary-color);
+        }
+        
+        .dot-tl {
+            top: -2px;
+            left: -2px;
+        }
+        
+        .dot-tr {
+            top: -2px;
+            right: -2px;
+        }
+        
+        .dot-bl {
+            bottom: -2px;
+            left: -2px;
+        }
+        
+        .dot-br {
+            bottom: -2px;
+            right: -2px;
+        }
+        
+        /* Lignes de connexion technologique */
+        .tech-line {
+            position: absolute;
+            background-color: var(--primary-color);
+            opacity: 0.4;
+            box-shadow: 0 0 5px var(--primary-color);
+            transform-origin: 0 0;
+            z-index: 5;
+        }
+        
+        /* Overlay d'alerte et d'interruption */
+        .alert-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 0, 0, 0.1);
+            opacity: 0;
+            z-index: 30;
+            pointer-events: none;
+            mix-blend-mode: overlay;
+        }
+        
+        @keyframes alert-flash {
+            0%, 100% { opacity: 0; }
+            25%, 75% { opacity: 0.3; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Indicateurs d'état sur les coins */
+        .status-indicator {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+            box-shadow: 0 0 5px var(--success-color);
+            animation: blink 3s infinite;
+            z-index: 20;
+        }
+        
+        .status-top-right {
+            top: 10px;
+            right: 10px;
+            animation-delay: 0.5s;
+        }
+        
+        .status-bottom-left {
+            bottom: 10px;
+            left: 10px;
+            animation-delay: 1s;
+            background-color: var(--warning-color);
+            box-shadow: 0 0 5px var(--warning-color);
+        }
+        
+        /* Effet de tremblements lors de l'apparition */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+            20%, 40%, 60%, 80% { transform: translateX(2px); }
+        }
+        
+        /* Animation du texte de scanneur */
+        @keyframes text-scan {
+            0% { background-position: -100% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        /* Affichage de texte style terminal */
+        .terminal-text {
+            position: absolute;
+            bottom: 40px;
+            left: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            color: var(--accent-color);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .image-popup.visible .terminal-text {
+            opacity: 1;
+            transition-delay: 0.7s;
+        }
+        
+        .terminal-text::after {
+            content: '|';
+            animation: blink 1s step-end infinite;
+        }
+        
+        /* Effet de lignes sur le popup */
+        .line-effect {
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--primary-color), transparent);
+            opacity: 0.3;
+            z-index: 7;
+        }
+        
+        .line-top {
+            top: 15%;
+        }
+        
+        .line-middle {
+            top: 50%;
+        }
+        
+        .line-bottom {
+            top: 85%;
+        }
+        
+        /* Animation de chargement des données */
+        .loading-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            width: 0%;
+            z-index: 20;
+            box-shadow: 0 0 8px var(--accent-color);
+            opacity: 0;
+            transition: width 1.5s ease-in-out, opacity 0.3s ease;
+        }
+        
+        .image-popup.visible .loading-progress {
+            opacity: 1;
+            width: 100%;
+        }
+        
+        /* Effet de synchronisation */
+        @keyframes sync-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .sync-icon {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 0.9rem;
+            color: var(--accent-color);
+            animation: sync-rotate 2s linear infinite;
             opacity: 0;
             transition: opacity 0.3s ease;
         }
         
-        .info-list li:hover {
-            transform: translateX(5px) translateY(-3px);
-            background-color: rgba(98, 0, 234, 0.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-        }
-        
-        .info-list li:hover::before {
+        .image-popup.visible .sync-icon {
             opacity: 1;
         }
         
-        /* Mise en forme des paragraphes */
-        p {
-            color: var(--secondary-text);
-            margin-bottom: 15px;
-            font-size: 1.05rem;
-        }
-        
-        /* Liste numérotée améliorée */
-        ol {
-            padding-left: 20px;
-            margin: 20px 0;
-            counter-reset: item;
-        }
-        
-        ol li {
-            position: relative;
-            padding-left: 30px;
-            margin-bottom: 15px;
-            list-style-type: none;
-            counter-increment: item;
-        }
-        
-        ol li::before {
-            content: counter(item);
-            position: absolute;
-            left: 0;
-            top: 2px;
-            width: 22px;
-            height: 22px;
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-        
-        /* Boutons améliorés */
-        .button-container {
-            text-align: center;
-            margin-top: 40px;
-        }
-        
-        .button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 14px 30px;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            color: white;
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 1px;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-        }
-        
-        .button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: 0.5s;
-            z-index: -1;
-        }
-        
-        .button:hover::before {
-            left: 100%;
-        }
-        
-        .button:hover {
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(98, 0, 234, 0.4);
-        }
-        
-        /* Particules avec effet avancé */
+        /* Style pour les particules */
         .particles {
             position: absolute;
             top: 0;
@@ -362,222 +957,62 @@
                 transform: scale(1.2);
             }
         }
-        
-        /* Effet de glitch pour la popup */
-        .glitch-effect {
-            animation: glitch 0.3s infinite;
-            position: relative;
-            transform: skewX(0deg);
+        .button-container {
+    text-align: center;
+    margin-top: 40px;
         }
-        
-        @keyframes glitch {
-            0% {
-                transform: skewX(0deg);
-                filter: none;
-            }
-            20% {
-                transform: skewX(-3deg);
-                filter: drop-shadow(2px 0 rgba(255, 0, 0, 0.5)) drop-shadow(-2px 0 rgba(0, 255, 255, 0.5));
-            }
-            40% {
-                transform: skewX(0deg);
-                filter: none;
-            }
-            60% {
-                transform: skewX(3deg);
-                filter: drop-shadow(-2px 0 rgba(255, 0, 0, 0.5)) drop-shadow(2px 0 rgba(0, 255, 255, 0.5));
-            }
-            80% {
-                transform: skewX(0deg);
-                filter: none;
-            }
-        }
-        
-        /* Popup d'image améliorée */
-        .image-popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
-            display: flex;
+
+        .button {
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-            backdrop-filter: blur(5px);
-        }
-        
-        .image-popup.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .image-container {
-            position: relative;
-            max-width: 90%;
-            max-height: 90%;
-            transform: scale(0.8);
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 3px solid var(--primary-color);
-            box-shadow: 0 0 30px rgba(98, 0, 234, 0.5);
-            overflow: hidden;
-        }
-        
-        .image-popup.visible .image-container {
-            transform: scale(1);
-        }
-        
-        .image-container img {
-            display: block;
-            max-width: 100%;
-            max-height: 80vh;
-            object-fit: contain;
-        }
-        
-        .image-header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(15, 17, 22, 0.8);
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--primary-color);
-        }
-        
-        .image-title {
-            color: var(--text-color);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-        }
-        
-        .image-title i {
-            color: var(--primary-color);
-            margin-right: 8px;
-        }
-        
-        .close-button {
-            background: none;
+            gap: 10px;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
             border: none;
-            color: var(--text-color);
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: color 0.3s ease;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 5px 15px rgba(98, 0, 234, 0.3);
         }
-        
-        .close-button:hover {
-            color: var(--primary-color);
-        }
-        
-        /* Effet de scan sur l'image */
-        .scan-line {
+
+        .button::before {
+            content: '';
             position: absolute;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(to right, transparent, var(--primary-color), transparent);
-            box-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color);
-            opacity: 0.8;
-            animation: scanAnimation 3s linear infinite;
-            z-index: 2;
-        }
-        
-        @keyframes scanAnimation {
-            0%, 100% { top: 0; }
-            50% { top: calc(100% - 2px); }
-        }
-        
-        /* Overlay pour effet de matrix */
-        .matrix-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
+            left: -100%;
             width: 100%;
             height: 100%;
-            background-image: linear-gradient(
-                rgba(0, 255, 70, 0.03) 1px, 
-                transparent 1px
-            ),
-            linear-gradient(
-                90deg, 
-                rgba(0, 255, 70, 0.03) 1px, 
-                transparent 1px
-            );
-            background-size: 20px 20px;
-            pointer-events: none;
-            opacity: 0.5;
-            z-index: 1;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
+            z-index: -1;
         }
-        
-        /* Corners pour effet de cadre high-tech */
-        .corner {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--primary-color);
-            z-index: 3;
+
+        .button:hover::before {
+            left: 100%;
         }
-        
-        .corner-tl {
-            top: 0;
-            left: 0;
-            border-right: none;
-            border-bottom: none;
+
+        .button:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(98, 0, 234, 0.5);
         }
-        
-        .corner-tr {
-            top: 0;
-            right: 0;
-            border-left: none;
-            border-bottom: none;
+
+        .button:active {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(98, 0, 234, 0.4);
         }
-        
-        .corner-bl {
-            bottom: 0;
-            left: 0;
-            border-right: none;
-            border-top: none;
-        }
-        
-        .corner-br {
-            bottom: 0;
-            right: 0;
-            border-left: none;
-            border-top: none;
-        }
-        
-        /* Effet de pulsation autour de l'image */
-        .pulse-border {
-            position: absolute;
-            top: -3px;
-            left: -3px;
-            right: -3px;
-            bottom: -3px;
-            border: 3px solid var(--primary-color);
-            opacity: 0;
-            animation: pulseBorder 2s infinite;
-            z-index: 0;
-        }
-        
-        @keyframes pulseBorder {
-            0% {
-                opacity: 0.7;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(1.1);
-            }
+
+        .button i {
+            font-size: 1.2rem;
         }
     </style>
 </head>
@@ -611,15 +1046,6 @@
                     <li>Le serveur utilise un système de polling centralisé pour gérer efficacement les connexions</li>
                 </ul>
                 
-                <h3 class="section-title"><i class="fas fa-key" style="margin-right: 10px; font-size: 0.9em;"></i>Sécurité & Configuration</h3>
-                <p>Le mécanisme de cookies de ce serveur fonctionne comme suit :</p>
-                <ol>
-                    <li>L'utilisateur visite la page secrète</li>
-                    <li>Le serveur génère un cookie avec un identifiant de session unique</li>
-                    <li>Le navigateur stocke ce cookie et l'envoie automatiquement lors des requêtes futures</li>
-                    <li>Le serveur vérifie la présence du cookie avant d'autoriser l'accès aux ressources protégées</li>
-                </ol>
-                
                 <div class="button-container">
                     <a href="/" class="button">
                         <i class="fas fa-home"></i> Retour à l'accueil
@@ -628,36 +1054,93 @@
             </div>
         </div>
     </div>
+    
+    <!-- Overlay de transition pour l'effet de flou -->
+    <div class="transition-overlay" id="transitionOverlay"></div>
 
-    <!-- Popup d'image améliorée -->
+    <!-- Popup d'image amélioré -->
     <div class="image-popup" id="imagePopup">
         <div class="image-container">
+            <!-- En-tête avec titre et bouton fermer -->
             <div class="image-header">
                 <div class="image-title">
-                    <i class="fas fa-eye"></i> DOCUMENT CLASSIFIÉ
+                    <div class="security-icon">
+                        <i class="fas fa-eye"></i>
+                        DOCUMENT CLASSIFIÉ
+                        <span class="security-badge">TOP SECRET</span>
+                    </div>
                 </div>
                 <button class="close-button" id="closePopup">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             
-            <div class="scan-line"></div>
-            <div class="matrix-overlay"></div>
+            <!-- Conteneur de l'image avec effets -->
+            <div class="image-frame">
+                <div class="scan-line"></div>
+                <div class="matrix-overlay"></div>
+                <div class="digital-noise"></div>
+                
+                <!-- Indicateurs d'état -->
+                <div class="status-indicator status-top-right"></div>
+                <div class="status-indicator status-bottom-left"></div>
+                
+                <!-- Coins technologiques -->
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+                
+                <!-- Points de connexion tech -->
+                <div class="tech-dots">
+                    <div class="tech-dot dot-tl"></div>
+                    <div class="tech-dot dot-tr"></div>
+                    <div class="tech-dot dot-bl"></div>
+                    <div class="tech-dot dot-br"></div>
+                </div>
+                
+                <!-- Effets de ligne -->
+                <div class="line-effect line-top"></div>
+                <div class="line-effect line-middle"></div>
+                <div class="line-effect line-bottom"></div>
+                
+                <!-- Effet de bordure pulsante -->
+                <div class="pulse-border"></div>
+                
+                <!-- Icône de synchronisation -->
+                <div class="sync-icon">
+                    <i class="fas fa-sync-alt"></i>
+                </div>
+                
+                <!-- Barre de progression -->
+                <div class="loading-progress"></div>
+                
+                <!-- Terminal texte -->
+                <div class="terminal-text">
+                    système::analyse_document > identification réussie
+                </div>
+                
+                <!-- L'image avec effet de glitch -->
+                <img src="/restricted-area/IMG_9495.jpg" alt="Image restreinte" id="restrictedImage">
+            </div>
             
-            <div class="corner corner-tl"></div>
-            <div class="corner corner-tr"></div>
-            <div class="corner corner-bl"></div>
-            <div class="corner corner-br"></div>
-            
-            <div class="pulse-border"></div>
-            
-            <img src="/restricted-area/IMG_9495.jpg" alt="Image restreinte" class="glitch-effect" id="restrictedImage">
+            <!-- Détails du document -->
+            <div class="document-details">
+                <div class="document-id">
+                    <i class="fas fa-fingerprint"></i>
+                    ID: DOC-94753-XF2
+                </div>
+                <div class="document-level">
+                    <i class="fas fa-shield-alt"></i>
+                    NIVEAU D'ACCÈS: RESTREINT
+                </div>
+            </div>
         </div>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Création des particules
+            // Création des particules d'arrière-plan
             function createParticles() {
                 const container = document.getElementById('particles-container');
                 const particleCount = 25;
@@ -690,61 +1173,145 @@
             // Gestion améliorée du popup d'image
             function setupImagePopup() {
                 const popup = document.getElementById('imagePopup');
+                const overlay = document.getElementById('transitionOverlay');
                 const closeButton = document.getElementById('closePopup');
                 const image = document.getElementById('restrictedImage');
+                const container = document.querySelector('.image-container');
+                const alertOverlay = document.createElement('div');
+                alertOverlay.className = 'alert-overlay';
+                
+                // Ajouter à l'image-frame
+                document.querySelector('.image-frame').appendChild(alertOverlay);
+                
+                // Fonction pour ajouter des effets de glitch à l'image
+                function addGlitchEffect() {
+                    image.classList.add('image-glitch');
+                    
+                    // Ajouter/supprimer de façon aléatoire l'effet de glitch
+                    setInterval(() => {
+                        if (Math.random() > 0.7) {
+                            // Flash rouge
+                            alertOverlay.style.animation = 'alert-flash 0.3s';
+                            setTimeout(() => {
+                                alertOverlay.style.animation = '';
+                            }, 300);
+                            
+                            // Petit tremblement
+                            container.style.animation = 'shake 0.3s';
+                            setTimeout(() => {
+                                container.style.animation = '';
+                            }, 300);
+                        }
+                    }, 3000);
+                }
                 
                 // Fermer le popup en cliquant sur le bouton
                 closeButton.addEventListener('click', () => {
+                    // Activer l'animation de fermeture
+                    overlay.classList.remove('active');
                     popup.classList.remove('visible');
                 });
                 
                 // Fermer le popup en cliquant en dehors de l'image
                 popup.addEventListener('click', (e) => {
                     if (e.target === popup) {
+                        overlay.classList.remove('active');
                         popup.classList.remove('visible');
                     }
                 });
                 
-                // Fonction pour afficher le popup avec effets
+                // Fonction pour afficher le popup avec effets avancés
                 function showPopupWithEffects() {
-                    popup.classList.add('visible');
+                    // Activer l'overlay de transition
+                    overlay.classList.add('active');
                     
-                    // Ajouter un effet de distorsion à l'image
+                    // Afficher le popup avec un délai pour permettre à l'overlay de s'animer
                     setTimeout(() => {
-                        image.classList.add('glitch-effect');
-                    }, 300);
+                        popup.classList.add('visible');
+                        addGlitchEffect();
+                    }, 200);
                     
                     // Planifier la fermeture automatique
                     setTimeout(() => {
-                        image.classList.remove('glitch-effect');
-                        setTimeout(() => {
-                            popup.classList.remove('visible');
-                        }, 300);
-                    }, 3000);
+                        overlay.classList.remove('active');
+                        popup.classList.remove('visible');
+                    }, 5000); // Afficher pendant 5 secondes
                 }
                 
-                // Afficher le popup avec un délai initial plus long
-                setTimeout(() => {
-                    showPopupWithEffects();
-                    
-                    // Configurer l'affichage périodique
-                    const randomInterval = () => Math.random() * 30000 + 15000; // Entre 15 et 45 secondes
-                    
-                    function scheduleNextPopup() {
-                        setTimeout(() => {
-                            showPopupWithEffects();
-                            scheduleNextPopup();
-                        }, randomInterval());
-                    }
-                    
-                    scheduleNextPopup();
-                }, 5000); // Première apparition après 5 secondes
+                // Actualiser la date pour le texte terminal
+                function updateTerminalText() {
+                    const terminalText = document.querySelector('.terminal-text');
+                    const date = new Date();
+                    const formattedDate = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+                    terminalText.textContent = `système::analyse_document > identification réussie [${formattedDate}]`;
+                }
+                
+                // Configuration de l'apparition du popup
+                function configurePopupTiming() {
+                    // Première apparition après un délai initial
+                    setTimeout(() => {
+                        showPopupWithEffects();
+                        updateTerminalText();
+                        
+                        // Configurer les apparitions aléatoires suivantes
+                        function scheduleNextPopup() {
+                            // Délai aléatoire entre 15 et 45 secondes
+                            const randomDelay = Math.random() * 30000 + 15000;
+                            
+                            setTimeout(() => {
+                                showPopupWithEffects();
+                                updateTerminalText();
+                                scheduleNextPopup();
+                            }, randomDelay);
+                        }
+                        
+                        scheduleNextPopup();
+                    }, 4000); // Premier popup après 4 secondes
+                }
+                
+                // Lancer la configuration du timing des popups
+                configurePopupTiming();
             }
             
-            // Exécuter les fonctions
+            // Exécuter les fonctions d'initialisation
             createParticles();
             setupImagePopup();
         });
+
+        // Création d'éléments lumineux flottants
+        function createFloatingLights() {
+            const container = document.getElementById('floatingLights');
+            const lightCount = 8;
+            
+            for (let i = 0; i < lightCount; i++) {
+                const light = document.createElement('div');
+                light.className = 'light';
+                
+                // Position aléatoire
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                
+                // Taille aléatoire
+                const size = Math.random() * 100 + 50;
+                
+                // Délai et durée aléatoires
+                const delay = Math.random() * 5;
+                const duration = Math.random() * 5 + 8;
+                
+                // Style
+                light.style.left = `${posX}%`;
+                light.style.top = `${posY}%`;
+                light.style.width = `${size}px`;
+                light.style.height = `${size}px`;
+                light.style.animationDelay = `${delay}s`;
+                light.style.animationDuration = `${duration}s`;
+                
+                container.appendChild(light);
+            }
+        }
+
+        // Exécuter la création des lumières
+        createFloatingLights();
     </script>
 </body>
 </html>
