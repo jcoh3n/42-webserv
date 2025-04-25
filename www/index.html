@@ -114,6 +114,46 @@
             opacity: 0.9;
         }
         
+        /* Styles pour les boîtes Cookies/Session avec fond */
+        .cookie-session-secret-box {
+            position: relative;
+            z-index: 1;
+            border-top: none;
+        }
+        .cookie-session-secret-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            background-color: #2196F3; /* Bleu */
+            border-radius: var(--border-radius);
+        }
+
+        .cookie-session-restricted-box {
+            position: relative;
+            z-index: 1;
+            border-top: none;
+        }
+        .cookie-session-restricted-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            background-color: #E91E63; /* Rose */
+            border-radius: var(--border-radius);
+        }
+
+        .cookie-session-secret-box h2 { color: #2196F3; }
+        .cookie-session-restricted-box h2 { color: #E91E63; }
+
         .particles {
             position: absolute;
             top: 0;
@@ -202,17 +242,7 @@
                 <p>Utilisez des alias pour accéder à des ressources via des chemins alternatifs, comme fraise.html.</p>
             </a>
 
-            <!-- Secret Page -->
-            <a href="/secret" class="test-box get-box">
-                <h2>Page Secrete</h2>
-                <p>Visitez cette page pour obtenir un cookie de session.</p>
-            </a>
-
-            <!-- Restricted Page -->
-            <a href="/restricted-area" class="test-box post-box">
-                <h2>Page Restreinte</h2>
-                <p>Accedez a cette page apres avoir visite la page secrete.</p>
-            </a>
+            
         </div>
 
         <h2 style="text-align: center; margin: 50px 0 30px; color: var(--primary-text);">Tests CGI</h2>
@@ -235,7 +265,20 @@
                 <p>Un convertisseur de température (Celsius/Fahrenheit) interactif développé en Python-CGI.</p>
             </a>
         </div>
-
+        
+        <h2 style="text-align: center; margin: 50px 0 30px; color: var(--primary-text);">Cookies/Session</h2>
+        <div class="test-grid">
+            <!-- Restricted Page -->
+            <a href="/restricted-area" class="test-box cookie-session-restricted-box">
+                <h2>Page Restreinte</h2>
+                <p>Accedez a cette page apres avoir visite la page secrete.</p>
+            </a>
+            <!-- Secret Page -->
+            <a href="/secret" class="test-box cookie-session-secret-box">
+                <h2>Page Secrete</h2>
+                <p>Visitez cette page pour obtenir un cookie de session.</p>
+            </a>
+        </div>
         <footer>
             <p>Webserv 42 © 2025</p>
         </footer>

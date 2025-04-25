@@ -22,22 +22,22 @@ std::string CookieSessionManager::generateSessionId() {
 
 void CookieSessionManager::setSessionCookie(HttpResponse& response, const std::string& session_id) {
     std::stringstream ss;
-    ss << COOKIE_SESSION_MAX_AGE;
-    response.setHeader("Set-Cookie", std::string(COOKIE_SESSION_NAME) + "=" + session_id + "; Path=/; Max-Age=" + ss.str() + "; HttpOnly");
-    LOG_INFO("Cookie défini → " << COOKIE_SESSION_NAME << "=" << session_id);
+    ss << SECRET_CODE_MAX_AGE;
+    response.setHeader("Set-Cookie", std::string(SECRET_CODE_NAME) + "=" + session_id + "; Path=/restricted-area; Max-Age=" + ss.str() + "; HttpOnly");
+    LOG_COOKIE("Cookie défini → " << SECRET_CODE_NAME << "=" << session_id);
 }
 
 bool CookieSessionManager::hasValidSessionCookie(const HttpRequest& request) {
     std::string session_cookie = request.getHeader("Cookie");
     // Pour cette demo, on considere que la presence du cookie suffit
     // Dans une vraie application, il faudrait valider l'ID de session (e.g., dans une map de sessions actives)
-    return session_cookie.find(std::string(COOKIE_SESSION_NAME) + "=") != std::string::npos;
+    return session_cookie.find(std::string(SECRET_CODE_NAME) + "=") != std::string::npos;
 }
 
 std::string CookieSessionManager::getSessionId(const HttpRequest& request) {
     std::string session_cookie = request.getHeader("Cookie");
     std::string session_id = "";
-    std::string search_str = std::string(COOKIE_SESSION_NAME) + "=";
+    std::string search_str = std::string(SECRET_CODE_NAME) + "=";
     size_t start_pos = session_cookie.find(search_str);
     if (start_pos != std::string::npos) {
         start_pos += search_str.length();

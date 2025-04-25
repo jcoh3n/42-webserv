@@ -55,7 +55,8 @@
 # define COOKIE_SESSION_NAME "session_id"
 
 // Macros de logging (système) - simplifiées
-# define LOG_INFO(x) std::cout << COLOR_COOKIE << "[🍪] " << x << RESET << std::endl
+# define LOG_INFO(x) std::cout << "[INFO] " << x << RESET << std::endl
+# define LOG_COOKIE(x) std::cout << COLOR_COOKIE << "[🍪 COOKIE] " << x << RESET << std::endl
 # define LOG_SUCCESS(x) std::cout << GREEN << "[+] " << x << RESET << std::endl
 # define LOG_WARNING(x) std::cerr << YELLOW << "[!] " << x << RESET << std::endl
 # define LOG_ERROR(x)   std::cerr << RED << "[-] " << x << RESET << std::endl

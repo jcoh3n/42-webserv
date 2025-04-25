@@ -7,8 +7,8 @@
 #include <map>
 
 // Définitions pour les cookies et sessions
-#define COOKIE_SESSION_NAME "session_id"
-#define COOKIE_SESSION_MAX_AGE 10 // en secondes
+#define SECRET_CODE_NAME "secret_code"
+#define SECRET_CODE_MAX_AGE 60 // en secondes
 
 class CookieSessionManager {
 public:
