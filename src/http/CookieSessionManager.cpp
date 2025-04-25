@@ -16,7 +16,7 @@ std::string CookieSessionManager::generateSessionId() {
     }
     // Implémentation simple pour la démo: un nombre aléatoire
     std::stringstream ss;
-    ss << "websrv_session_" << rand();
+    ss << "messi>ronaldo_" << rand();
     return ss.str();
 }
 
