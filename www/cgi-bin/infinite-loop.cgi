@@ -16,8 +16,8 @@ echo "</body></html>"
 # Make sure the output is flushed
 exec >&-
 
-# Sleep for longer than the timeout value (30s)
-sleep 30
+# Sleep for longer than the timeout value 
+sleep infinity
 
 # This should never be reached
 exit 0 
